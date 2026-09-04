@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "@/components/icons";
 import { Markdown } from "@/lib/content/Markdown";
 import { formatDate } from "@/lib/utils/date";
 import type { Entry } from "../types";
@@ -40,15 +40,12 @@ export function PostArticle({
   prev?: Entry | null;
   next?: Entry | null;
 }) {
-  const backHref = entry.type === "post" ? "/posts" : "/journal";
-  const backLabel = entry.type === "post" ? "이야기" : "기록";
-
   return (
     <article className="mx-auto max-w-3xl px-5 py-12">
       {/* 뒤로가기 — 상세에선 텍스트 없이 큰 화살표만 */}
       <Link
-        href={backHref}
-        aria-label={`${backLabel}으로 돌아가기`}
+        href="/posts"
+        aria-label="글 목록으로 돌아가기"
         className="-ml-2 inline-flex size-10 items-center justify-center rounded-full text-muted transition hover:bg-surface hover:text-accent"
       >
         <ArrowLeft className="size-6" aria-hidden />
@@ -63,7 +60,7 @@ export function PostArticle({
         <DinoAvatar size={40} />
         <div className="text-sm">
           <div className="font-semibold text-foreground">박찬빈</div>
-          <div className="mt-0.5 font-title text-[13px] text-muted">{formatDate(entry.date)}</div>
+          <div className="mt-0.5 font-display text-[13px] text-muted">{formatDate(entry.date)}</div>
         </div>
       </div>
 
@@ -101,7 +98,7 @@ export function PostArticle({
               href={entryHref(prev)}
               className="frost-rise group flex flex-col rounded-xl border border-border p-4 transition"
             >
-              <span className="inline-flex items-center gap-1.5 font-title text-xs text-muted">
+              <span className="inline-flex items-center gap-1.5 font-display text-xs text-muted">
                 <ArrowLeft
                   className="size-3.5 transition group-hover:-translate-x-0.5"
                   aria-hidden
@@ -120,7 +117,7 @@ export function PostArticle({
               href={entryHref(next)}
               className="frost-rise group flex flex-col rounded-xl border border-border p-4 transition"
             >
-              <span className="inline-flex items-center gap-1.5 font-title text-xs text-muted">
+              <span className="inline-flex items-center gap-1.5 font-display text-xs text-muted">
                 다음 글
                 <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" aria-hidden />
               </span>
@@ -137,11 +134,11 @@ export function PostArticle({
       {/* 다 읽고 나서 목록으로 */}
       <div className="mt-10 border-t border-hairline pt-8">
         <Link
-          href={backHref}
+          href="/posts"
           className="group inline-flex items-center gap-2 text-base font-semibold text-foreground transition hover:text-accent"
         >
           <ArrowLeft className="size-5 transition group-hover:-translate-x-0.5" aria-hidden />
-          {backLabel}으로
+          글 목록으로
         </Link>
       </div>
     </article>

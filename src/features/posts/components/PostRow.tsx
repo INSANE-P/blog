@@ -28,7 +28,7 @@ export function PostRow({ entry }: { entry: Entry }) {
         </h3>
         <p className="mt-2.5 line-clamp-2 text-[15px] leading-relaxed text-muted">{entry.excerpt}</p>
         {hasMeta && (
-          <div className="mt-3.5 flex flex-wrap items-center gap-1.5 font-title">
+          <div className="mt-3.5 flex flex-wrap items-center gap-1.5 font-display">
             {entry.tags?.map((t) => (
               <span
                 key={t}

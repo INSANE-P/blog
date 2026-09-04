@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Mail } from "lucide-react";
-import { DinoMascot } from "@/components/brand/DinoMascot";
+import { ArrowUpRight, Mail } from "@/components/icons";
 import { GithubIcon } from "@/components/ui/GithubIcon";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { AWARDS, PROJECTS, STACK } from "./data";
@@ -18,7 +17,7 @@ const chipStyle = {
 function Tag({ children }: { children: React.ReactNode }) {
   return (
     <span
-      className="rounded-md border px-2 py-0.5 font-title text-[11px] font-medium"
+      className="rounded-md border px-2 py-0.5 font-display text-[11px] font-medium"
       style={chipStyle}
     >
       {children}
@@ -33,7 +32,7 @@ function LinkChip({ label, href }: { label: string; href: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group inline-flex items-center gap-0.5 font-title text-[13px] font-medium text-muted transition hover:text-accent"
+      className="group inline-flex items-center gap-0.5 font-display text-[13px] font-medium text-muted transition hover:text-accent"
     >
       {label}
       <ArrowUpRight
@@ -53,7 +52,7 @@ export default function AboutPage() {
           <h1 className="text-[30px] font-bold tracking-tight text-foreground">
             안녕하세요, <span className="text-accent">박찬빈</span>이에요
           </h1>
-          <p className="mt-2 font-title text-sm text-muted">
+          <p className="mt-2 font-display text-sm text-muted">
             프론트엔드 개발자 · 세종대학교 컴퓨터공학과
           </p>
           <p className="mt-5 break-keep text-[15px] leading-relaxed text-foreground/90">
@@ -64,7 +63,6 @@ export default function AboutPage() {
         </div>
 
         {/* 설화를 안은 공룡 — 다른 화면과 같은 캐릭터로 톤을 맞춘다 */}
-        <DinoMascot size={188} className="shrink-0 self-center" />
       </section>
 
       {/* 기술 */}
@@ -73,7 +71,7 @@ export default function AboutPage() {
         <dl className="mt-6 flex flex-col gap-4">
           {STACK.map(({ label, items }) => (
             <div key={label} className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:gap-5">
-              <dt className="w-24 shrink-0 font-title text-[13px] font-medium text-muted">
+              <dt className="w-24 shrink-0 font-display text-[13px] font-medium text-muted">
                 {label}
               </dt>
               <dd className="flex flex-wrap gap-1.5">
@@ -95,14 +93,14 @@ export default function AboutPage() {
               <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
                 <h3 className="text-[20px] font-bold tracking-tight text-foreground">{p.name}</h3>
                 {p.status && (
-                  <span className="inline-flex items-center gap-1.5 font-title text-[12px] text-muted">
+                  <span className="inline-flex items-center gap-1.5 font-display text-[12px] text-muted">
                     <span className="size-1.5 rounded-full bg-accent" aria-hidden />
                     {p.status}
                   </span>
                 )}
               </div>
               <p className="mt-1.5 text-[14px] text-muted">{p.tagline}</p>
-              <p className="mt-1 font-title text-[12px] text-muted">
+              <p className="mt-1 font-display text-[12px] text-muted">
                 {p.period} · {p.role}
               </p>
 
@@ -144,7 +142,7 @@ export default function AboutPage() {
         <article className="mt-7">
           <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
             <h3 className="text-[20px] font-bold tracking-tight text-foreground">그리디 (Greedy)</h3>
-            <span className="font-title text-[12px] text-muted">2025.03 ~ 현재</span>
+            <span className="font-display text-[12px] text-muted">2025.03 ~ 현재</span>
           </div>
           <p className="mt-1.5 text-[14px] text-muted">
             세종대학교 SW 학술 동아리 · 2기 멘티 → 3기 스터디 리드 → 4기 메인테이너
@@ -180,7 +178,7 @@ export default function AboutPage() {
           {AWARDS.map((a) => (
             <li key={a.title}>
               <div className="text-[15px] font-semibold text-foreground">{a.title}</div>
-              <div className="mt-1 font-title text-[12px] text-muted">{a.by}</div>
+              <div className="mt-1 font-display text-[12px] text-muted">{a.by}</div>
               <div className="mt-0.5 text-[13px] text-muted">{a.note}</div>
             </li>
           ))}
@@ -195,24 +193,24 @@ export default function AboutPage() {
             href="https://github.com/INSANE-P"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 font-title text-[13px] font-medium text-foreground transition hover:border-accent hover:text-accent"
+            className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 font-display text-[13px] font-medium text-foreground transition hover:border-accent hover:text-accent"
           >
             <GithubIcon className="size-[17px]" />
             GitHub
           </a>
           <a
             href="mailto:chanbin0626@gmail.com"
-            className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 font-title text-[13px] font-medium text-foreground transition hover:border-accent hover:text-accent"
+            className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 font-display text-[13px] font-medium text-foreground transition hover:border-accent hover:text-accent"
           >
             <Mail className="size-[17px]" />
             메일
           </a>
           <Link
             href="/resume"
-            className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 font-title text-[13px] font-medium text-muted transition hover:border-accent hover:text-accent"
+            className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 font-display text-[13px] font-medium text-muted transition hover:border-accent hover:text-accent"
           >
             이력서
-            <span className="font-title text-[11px] text-accent">준비중</span>
+            <span className="font-display text-[11px] text-accent">준비중</span>
           </Link>
         </div>
       </section>

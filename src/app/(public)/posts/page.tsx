@@ -13,7 +13,7 @@ export default async function PostsPage({
   searchParams: Promise<{ tag?: string }>;
 }) {
   const { tag } = await searchParams;
-  const [posts, tags] = await Promise.all([getList("post", tag), getTags("post")]);
+  const [posts, tags] = await Promise.all([getList(tag), getTags()]);
 
   const chips = [{ label: "전체", value: undefined }, ...tags.map((t) => ({ label: t, value: t }))];
 
@@ -32,8 +32,8 @@ export default async function PostsPage({
               href={c.value ? `/posts?tag=${encodeURIComponent(c.value)}` : "/posts"}
               className={
                 active
-                  ? "rounded-full px-3.5 py-1.5 font-title text-[13px] font-medium text-white"
-                  : "frost-rise rounded-full border border-border px-3.5 py-1.5 font-title text-[13px] text-muted hover:text-foreground"
+                  ? "rounded-full px-3.5 py-1.5 font-display text-[13px] font-medium text-white"
+                  : "frost-rise rounded-full border border-border px-3.5 py-1.5 font-display text-[13px] text-muted hover:text-foreground"
               }
               style={active ? { background: "var(--accent)" } : undefined}
             >

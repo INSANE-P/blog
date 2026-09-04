@@ -1,10 +1,11 @@
 /**
  * 사이트 내비게이션 단일 출처 — 헤더·푸터가 함께 참조한다.
  * 컴포넌트가 아닌 순수 데이터라 서버/클라 어디서든 import. 라우트는 영문(URL/SEO), 라벨은 한글.
+ *
+ * 항목을 둘로 줄였다(ADR-0025). 선택지가 많을수록 인지 부하가 커지고,
+ * 이 사이트가 하는 일은 "글을 읽는 것"과 "누가 썼는지 아는 것" 둘뿐이다.
  */
 export const NAV = [
-  { href: "/", label: "홈" },
-  { href: "/journal", label: "기록" },
-  { href: "/posts", label: "이야기" },
+  { href: "/posts", label: "글" },
   { href: "/about", label: "소개" },
 ] as const;

@@ -8,6 +8,6 @@ export const contentType = "image/png";
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const entry = await getBySlug("post", slug);
+  const entry = await getBySlug(slug);
   return renderOg({ eyebrow: "이야기 · 설화", title: entry?.title ?? "이야기" });
 }

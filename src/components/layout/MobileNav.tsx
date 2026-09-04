@@ -3,20 +3,22 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Snowflake, X } from "lucide-react";
-import { FlameLogo } from "@/components/brand/FlameLogo";
+import { Menu, X } from "@/components/icons";
 import { NAV } from "./nav";
 import { ThemeToggle } from "./ThemeToggle";
 
 const SOCIAL = [
-  { label: "github", href: "https://github.com/INSANE-P" },
-  { label: "이력서", href: "/resume" },
+  { label: "GitHub", href: "https://github.com/INSANE-P" },
+  { label: "포트폴리오", href: "https://portfolio.chanbin.dev" },
   { label: "메일", href: "mailto:chanbin0626@gmail.com" },
 ];
 
 /**
- * 모바일 내비 — 햄버거를 누르면 화면 가운데서 얼음판이 퍼지듯(clip-path 원형 확장) 풀스크린 메뉴가 열린다.
- * 상단 로고바 / 큰 좌측 정렬 메뉴(아래에서 stagger) / 하단 링크·토글 / 눈송이 장식.
+ * 모바일 내비 (ADR-0024·0025).
+ *
+ * 얼음판이 퍼지는 연출과 눈송이 장식을 걷어냈다. 브랜드가 활자로 바뀌면서
+ * 장식을 얹을 자리가 없어졌고, 메뉴는 목적지로 빨리 데려다주면 되는 화면이다.
+ * 터치 대상은 44px 이상으로 잡는다(피츠의 법칙).
  */
 export function MobileNav({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
@@ -35,9 +37,6 @@ export function MobileNav({ className }: { className?: string }) {
     };
   }, [open]);
 
-  // 홈은 상단 로고가 대신하므로 제외(데스크탑 헤더와 일관)
-  const items = NAV.filter((i) => i.href !== "/");
-
   return (
     <div className={className}>
       <button
@@ -45,85 +44,67 @@ export function MobileNav({ className }: { className?: string }) {
         onClick={() => setOpen(true)}
         aria-label="메뉴 열기"
         aria-expanded={open}
-        className="inline-flex size-9 items-center justify-center rounded-lg text-foreground transition hover:text-accent"
+        className="inline-flex size-11 items-center justify-center text-foreground transition hover:text-accent"
       >
-        <Menu className="size-6" aria-hidden />
+        <Menu size={24} />
       </button>
 
-      <div className={`ice-overlay fixed inset-0 z-50 ${open ? "open" : ""}`} aria-hidden={!open}>
-        <Snowflake
-          aria-hidden
-          strokeWidth={1.25}
-          className="ice-overlay-fade pointer-events-none absolute -right-12 bottom-10 size-52"
-          style={{ color: "color-mix(in srgb, var(--accent) 9%, transparent)" }}
-        />
+      {open && (
+        <div className="fixed inset-0 z-50 bg-background">
+          <div className="mx-auto flex h-full max-w-md flex-col px-5 py-3.5">
+            <div className="flex items-center justify-between">
+              <span className="font-display text-[17px] font-extrabold uppercase tracking-tight">
+                <span className="stroke-text">CHANBIN</span>
+                <span className="text-accent">.</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="메뉴 닫기"
+                className="inline-flex size-11 items-center justify-center text-foreground transition hover:text-accent"
+              >
+                <X size={22} />
+              </button>
+            </div>
 
-        <div className="mx-auto flex h-full max-w-md flex-col px-6 py-3.5">
-          <div className="ice-overlay-fade flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <FlameLogo size={26} name="menu" animated={false} className="-translate-y-[2px]" />
-              <span className="font-title text-lg font-bold text-foreground">설화</span>
-            </span>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="메뉴 닫기"
-              className="inline-flex size-10 items-center justify-center rounded-full border border-hairline text-foreground transition hover:border-accent hover:text-accent"
-            >
-              <X className="size-5" aria-hidden />
-            </button>
-          </div>
-
-          {/* 큰 라벨 + 눈송이 불릿, 세로 중앙, 아래에서 하나씩(stagger) */}
-          <nav className="flex flex-1 flex-col justify-center gap-4">
-            {items.map((item, i) => {
-              const active = pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  aria-current={active ? "page" : undefined}
-                  className="menu-item group flex items-center gap-3.5"
-                  style={{ transitionDelay: open ? `${0.16 + i * 0.07}s` : "0s" }}
-                >
-                  <Snowflake
-                    aria-hidden
-                    strokeWidth={active ? 2.75 : 1.75}
-                    className={`size-6 shrink-0 transition-colors ${
-                      active ? "text-accent" : "text-muted group-hover:text-accent"
-                    }`}
-                  />
-                  <span
-                    className={`font-title text-[40px] font-bold leading-none tracking-tight transition-colors ${
-                      active ? "text-accent" : "text-foreground group-hover:text-accent"
+            <nav className="flex flex-1 flex-col justify-center gap-2">
+              {NAV.map((item) => {
+                const active = pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    aria-current={active ? "page" : undefined}
+                    className={`py-3 font-display text-[40px] font-extrabold leading-tight tracking-tight transition-colors ${
+                      active ? "text-accent" : "text-foreground hover:text-accent"
                     }`}
                   >
                     {item.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </nav>
+                  </Link>
+                );
+              })}
+            </nav>
 
-          <div className="ice-overlay-fade flex items-center justify-between pb-1">
-            <div className="flex gap-4 font-title text-sm font-medium text-muted">
-              {SOCIAL.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  target={s.href.startsWith("http") ? "_blank" : undefined}
-                  rel={s.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className="transition hover:text-accent"
-                >
-                  {s.label}
-                </a>
-              ))}
+            <div className="flex items-center justify-between pb-1">
+              <div className="flex gap-4 text-sm text-muted">
+                {SOCIAL.map((s) => (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    target={s.href.startsWith("http") ? "_blank" : undefined}
+                    rel={s.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                    className="py-2 transition hover:text-accent"
+                  >
+                    {s.label}
+                  </a>
+                ))}
+              </div>
+              <ThemeToggle />
             </div>
-            <ThemeToggle />
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

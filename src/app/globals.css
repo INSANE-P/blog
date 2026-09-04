@@ -1,12 +1,24 @@
 @import "tailwindcss";
+@import "@fontsource/montserrat/400.css";
+@import "@fontsource/montserrat/500.css";
+@import "@fontsource/montserrat/700.css";
+@import "@fontsource/montserrat/800.css";
+@import "@fontsource/montserrat/900.css";
 @import "../styles/tokens.css";
 @import "../styles/animations.css";
+
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  /* 한글이 음절 단위로 잘리지 않게 어절 단위로만 줄바꿈 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 /* 링크/제목 기본값은 @layer base 안에 — 레이어 밖 규칙은 Tailwind 유틸리티를 이겨 text-* 색이 안 먹는다 */
@@ -18,19 +30,45 @@ body {
   h1,
   h2,
   h3 {
-    font-family: var(--font-title);
+    font-family: var(--font-display);
   }
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  background: var(--accent);
+  color: var(--background);
 }
 
-/* 글 본문 — 큰 줄높이와 명확한 위계(가벼운 자체 정의) */
+/* ── 타이포그래피 장치 (포트폴리오와 공유, ADR-0024) ── */
+
+/* 속이 빈 아웃라인 텍스트 — 히어로·섹션 타이틀 */
+.stroke-text {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--foreground);
+}
+
+/* 링크(그룹) 호버 시 아웃라인이 악센트로 물든다 */
+.group:hover .stroke-hover-accent {
+  -webkit-text-stroke-color: var(--accent);
+}
+
+/*
+  글 본문 (ADR-0025).
+  18px / 행간 1.8 — 행간은 WCAG 최소 1.5에 한글 보정을 더한 값이다.
+  한글은 알파벳보다 베이스라인이 낮아 같은 행간에서도 빽빽해 보인다.
+*/
 .prose {
-  font-size: 17px;
-  line-height: 1.95;
+  font-size: 18px;
+  line-height: 1.8;
   color: var(--foreground);
+  /* 양끝맞춤은 한글에서 어간을 벌려 놓아 읽기를 방해한다 */
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  .prose {
+    font-size: 17px;
+  }
 }
 .prose p {
   margin: 0 0 1.1em;

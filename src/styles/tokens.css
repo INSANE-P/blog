@@ -1,66 +1,33 @@
 /*
-  폰트는 next/font(셀프 호스팅)로 로드하고, 여기선 생성된 CSS 변수(--font-pretendard,
-  --font-gmarket)를 토큰에 연결한다(ADR-0003). 파일/등록은 src/app/fonts.ts.
+  디자인 토큰 (ADR-0024).
 
-  Frost 디자인 토큰 — 2계층
-  raw: 원시 팔레트 / semantic: 컴포넌트가 참조하는 의미 토큰
-  다크 모드는 semantic만 덮어쓴다(컴포넌트는 그대로).
+  포트폴리오와 같은 정체성을 쓴다 — 순수 흑백 배경 위에 악센트 하나.
+  색을 여러 개 쓰지 않는 것이 규율이다. 모든 곳을 강조하면 아무것도 강조되지 않는다.
+
+  폰트는 next/font(셀프 호스팅) Pretendard + @fontsource Montserrat.
+  제목만 Montserrat, 본문은 Pretendard 하나로 간다.
 */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* raw — Frost 팔레트 */
-  --frost-50: #f4f9fc;
-  --frost-100: #e6f1fb;
-  --frost-200: #d6e6f2;
-  --frost-300: #a6c6dc;
-  --frost-500: #4fb0d6;
-  --frost-600: #2f8fb5;
-  --frost-700: #2a72ad;
-  --ink-900: #1f3947;
-  --ink-700: #335160;
-  --ink-500: #6b8493;
-
-  /* semantic — 라이트 */
-  --background: var(--frost-50);
+  --background: #ffffff;
   --surface: #ffffff;
-  --border: #dbe7f0;
+  --foreground: #111111;
+  --muted: #6b6b6b;
+  --border: rgba(0, 0, 0, 0.14);
   /* 목록 행 구분처럼 "있는 듯 없는 듯" 옅은 선 */
-  --hairline: #e9f1f8;
-  --foreground: var(--ink-900);
-  --muted: var(--ink-500);
-  --accent: var(--frost-600);
-  --accent-bright: var(--frost-500);
-
-  /* 설화 로고 — 라이트 */
-  --flame-top: #b8e6f5;
-  --flame-mid: #6cc6ea;
-  --flame-low: #3f9fd6;
-  --flame-base: #2769a0;
-  --flame-inner: #bdeeff;
-  --flame-eye: #142730;
-  --dino-shadow: rgba(31, 57, 71, 0.22);
+  --hairline: rgba(0, 0, 0, 0.07);
+  --accent: #2f8fb5;
 }
 
 .dark {
-  /* semantic — 다크 */
-  --background: #0f2129;
-  --surface: #16323f;
-  --border: #25404d;
-  --hairline: #1b333f;
-  --foreground: #eaf4f9;
-  --muted: #93b2bf;
+  --background: #000000;
+  --surface: #0a0a0a;
+  --foreground: #ffffff;
+  --muted: #9a9a9a;
+  --border: rgba(255, 255, 255, 0.16);
+  --hairline: rgba(255, 255, 255, 0.09);
   --accent: #5fcdee;
-  --accent-bright: #7fd4ee;
-
-  /* 설화 로고 — 다크 */
-  --flame-top: #ffffff;
-  --flame-mid: #8fe6ff;
-  --flame-low: #4fb0e0;
-  --flame-base: #2f86bf;
-  --flame-inner: #d6f6ff;
-  --flame-eye: #0c2330;
-  --dino-shadow: rgba(2, 10, 16, 0.5);
 }
 
 /* CSS 변수를 Tailwind 유틸리티로 매핑 (bg-background, text-foreground 등) */
@@ -72,11 +39,14 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
-  --color-accent-bright: var(--accent-bright);
 
   --font-sans: var(--font-pretendard), system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
-  --font-title: var(--font-gmarket), var(--font-pretendard), system-ui, sans-serif;
+  --font-display: "Montserrat", var(--font-pretendard), system-ui, sans-serif;
 
-  --container-prose: 68ch;
+  /*
+    본문 폭. WCAG 1.4.8은 한중일 문자에 한 줄 40자 이하를 명시한다(영문은 80자).
+    한글은 글자당 정보 밀도가 높아 같은 자수라도 물리적으로 훨씬 길다.
+  */
+  --container-prose: 34rem;
 }
