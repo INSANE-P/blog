@@ -6,7 +6,6 @@ import type { ContentType, Entry } from "./types";
  * DB row를 Entry로 매핑한다 — 본문은 마크다운 원문이며 렌더는 화면(.prose)에서 한다(ADR-0014).
  */
 
-type TagRel = { name: string } | { name: string }[] | null;
 type Row = {
   slug: string;
   type: ContentType;
@@ -18,21 +17,12 @@ type Row = {
   entry_date: string | null;
   published_at: string | null;
   stokes: number | null;
-  post_tags: { tags: TagRel }[] | null;
+  /** 태그는 조인이 아니라 배열 컬럼이다(0008_tags_as_array.sql) */
+  tags: string[] | null;
 };
 
 const SELECT =
-  "slug, type, title, excerpt, content, cover_image, featured, entry_date, published_at, stokes, post_tags(tags(name))";
-const SELECT_BY_TAG =
-  "slug, type, title, excerpt, content, cover_image, featured, entry_date, published_at, stokes, post_tags!inner(tags!inner(name))";
-
-function tagNames(postTags: Row["post_tags"]): string[] | undefined {
-  if (!postTags?.length) return undefined;
-  const names = postTags
-    .map((pt) => (Array.isArray(pt.tags) ? pt.tags[0]?.name : pt.tags?.name))
-    .filter((n): n is string => !!n);
-  return names.length ? names : undefined;
-}
+  "slug, type, title, excerpt, content, cover_image, featured, entry_date, published_at, stokes, tags";
 
 function toEntry(r: Row): Entry {
   return {
@@ -41,7 +31,7 @@ function toEntry(r: Row): Entry {
     title: r.title,
     excerpt: r.excerpt ?? "",
     date: r.entry_date ?? (r.published_at ? r.published_at.slice(0, 10) : ""),
-    tags: tagNames(r.post_tags),
+    tags: r.tags?.length ? r.tags : undefined,
     featured: r.featured ?? false,
     coverImage: r.cover_image ?? undefined,
     // 마이그레이션 전(jsonb)에는 content가 객체일 수 있어 string일 때만 사용
@@ -80,10 +70,11 @@ export async function getList(type: ContentType, tag?: string): Promise<Entry[]>
   const supabase = await createClient();
   let query = supabase
     .from("posts")
-    .select(tag ? SELECT_BY_TAG : SELECT)
+    .select(SELECT)
     .eq("status", "published")
     .eq("type", type);
-  if (tag) query = query.eq("post_tags.tags.name", tag);
+  // 배열 컬럼은 contains 로 거른다 (GIN 인덱스가 받쳐 준다)
+  if (tag) query = query.contains("tags", [tag]);
   const { data } = await query.order("entry_date", { ascending: false });
   return ((data ?? []) as Row[]).map(toEntry);
 }
@@ -120,12 +111,12 @@ export async function getTags(type: ContentType): Promise<string[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("posts")
-    .select("post_tags(tags(name))")
+    .select("tags")
     .eq("status", "published")
     .eq("type", type);
   const set = new Set<string>();
-  ((data ?? []) as Pick<Row, "post_tags">[]).forEach((r) =>
-    tagNames(r.post_tags)?.forEach((n) => set.add(n)),
+  ((data ?? []) as Pick<Row, "tags">[]).forEach((r) =>
+    r.tags?.forEach((n) => set.add(n)),
   );
   return [...set];
 }
