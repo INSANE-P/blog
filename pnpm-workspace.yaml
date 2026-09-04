@@ -1,0 +1,13 @@
+# 이 프로젝트를 독립 워크스페이스로 고정한다.
+# 없으면 상위 디렉터리의 pnpm-workspace.yaml 이 잡혀서
+# 락파일이 이 저장소 밖에 생성된다(Vercel 배포가 락파일 불일치로 실패한 원인).
+packages:
+  - .
+
+# 설치 시 네이티브 빌드가 필요한 패키지.
+# sharp: 이미지 변환(ADR-0023) / unrs-resolver: eslint 의존성
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+
+confirmModulesPurge: false
