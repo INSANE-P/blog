@@ -8,6 +8,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { listPages, fetchMarkdown, toPost, type NotionPost } from "./client";
 import { htmlToMarkdown } from "./html-to-markdown";
+import { migrateBodyImages, migrateImage } from "./images";
 
 /**
  * 동기화는 로그인 세션이 아니라 토큰으로 인증된다.
@@ -26,6 +27,8 @@ export type SyncResult = {
   skipped: { slug: string; reason: string }[];
   removed: string[];
   failed: { slug: string; error: string }[];
+  /** 이미지 이관에 실패한 글. 글은 반영되지만 그 이미지는 곧 만료돼 깨진다. */
+  imageFailures: { slug: string; count: number }[];
 };
 
 /** 글 하나를 DB에 반영한다. 태그는 배열 컬럼이라 덮어쓰면 끝난다(멱등). */
@@ -90,7 +93,13 @@ async function removeGone(
  */
 export async function syncFromNotion(): Promise<SyncResult> {
   const supabase = db();
-  const result: SyncResult = { synced: [], skipped: [], removed: [], failed: [] };
+  const result: SyncResult = {
+    synced: [],
+    skipped: [],
+    removed: [],
+    failed: [],
+    imageFailures: [],
+  };
 
   const pages = await listPages();
 
@@ -105,6 +114,22 @@ export async function syncFromNotion(): Promise<SyncResult> {
       if (!post.slug) {
         result.skipped.push({ slug: post.title, reason: "슬러그가 비어 있음" });
         continue;
+      }
+
+      // 노션 이미지 URL은 한 시간이면 만료된다. 본문과 커버를 R2로 옮긴다.
+      const migrated = await migrateBodyImages(post.body);
+      post.body = migrated.body;
+      if (migrated.failed > 0) {
+        result.imageFailures.push({ slug: post.slug, count: migrated.failed });
+      }
+
+      if (post.coverUrl) {
+        try {
+          post.coverUrl = await migrateImage(post.coverUrl);
+        } catch {
+          // 커버가 실패하면 만료될 URL이 남는다. 글은 살리되 알린다.
+          result.imageFailures.push({ slug: post.slug, count: 1 });
+        }
       }
 
       await upsertPost(supabase, post);

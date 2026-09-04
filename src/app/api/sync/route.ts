@@ -40,7 +40,8 @@ export async function POST(req: Request) {
 
     // 한 글이라도 실패했으면 실패로 응답한다.
     // 부분 성공을 200으로 돌리면 아무도 알아채지 못한 채 사이트가 어긋난다.
-    const ok = result.failed.length === 0;
+    // 이미지 이관 실패도 같이 본다 — 남은 노션 URL은 곧 만료돼 그림이 깨진다.
+    const ok = result.failed.length === 0 && result.imageFailures.length === 0;
     return NextResponse.json(result, { status: ok ? 200 : 500 });
   } catch (e) {
     return NextResponse.json(
