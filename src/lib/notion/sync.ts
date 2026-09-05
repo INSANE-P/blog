@@ -26,6 +26,14 @@ export type SyncResult = {
   synced: string[];
   skipped: { slug: string; reason: string }[];
   removed: string[];
+  /**
+   * 이번 동기화로 발행이 내려간 글.
+   *
+   * `synced` 에 섞어 두면 "글이 반영됐다"와 "글이 내려갔다"를 응답만 보고 구분할 수 없다.
+   * 둘은 확인해야 할 것이 다르다 - 반영된 글은 새 화면이 나오는지, 내려간 글은
+   * 그 주소가 정말 닫혔는지 봐야 한다.
+   */
+  unpublished: string[];
   failed: { slug: string; error: string }[];
   /** 이미지 이관에 실패한 글. 글은 반영되지만 그 이미지는 곧 만료돼 깨진다. */
   imageFailures: { slug: string; count: number }[];
@@ -86,8 +94,13 @@ function sameContent(a: ExistingRow, b: Record<string, unknown>): boolean {
   });
 }
 
-/** @returns 실제로 썼으면 true, 바뀐 것이 없어 건너뛰었으면 false */
-async function upsertPost(supabase: ReturnType<typeof db>, post: NotionPost): Promise<boolean> {
+/** 쓰기 결과. 발행이 내려간 경우를 따로 알려야 호출자가 그 주소를 확인할 수 있다. */
+type WriteOutcome = "unchanged" | "written" | "unpublished";
+
+async function upsertPost(
+  supabase: ReturnType<typeof db>,
+  post: NotionPost,
+): Promise<WriteOutcome> {
   const { data: existing } = await supabase
     .from("posts")
     .select("slug, title, excerpt, content, cover_image, entry_date, tags, status, published_at")
@@ -108,7 +121,7 @@ async function upsertPost(supabase: ReturnType<typeof db>, post: NotionPost): Pr
     status: post.published ? "published" : "draft",
   };
 
-  if (prev && sameContent(prev, content)) return false;
+  if (prev && sameContent(prev, content)) return "unchanged";
 
   const row = {
     notion_page_id: post.pageId,
@@ -120,7 +133,10 @@ async function upsertPost(supabase: ReturnType<typeof db>, post: NotionPost): Pr
 
   const { error } = await supabase.from("posts").upsert(row, { onConflict: "notion_page_id" });
   if (error) throw new Error(error.message);
-  return true;
+
+  // 발행돼 있던 글이 draft 가 됐다면, 그 주소는 이제 닫혀야 한다
+  const pulled = prev?.status === "published" && content.status === "draft";
+  return pulled ? "unpublished" : "written";
 }
 
 /**
@@ -163,6 +179,7 @@ export async function syncFromNotion(): Promise<SyncResult> {
     synced: [],
     skipped: [],
     removed: [],
+    unpublished: [],
     failed: [],
     imageFailures: [],
     unknownTags: [],
@@ -204,8 +221,9 @@ export async function syncFromNotion(): Promise<SyncResult> {
         result.unknownTags.push({ slug: post.slug, tags: converted.unknownTags });
       }
 
-      const written = await upsertPost(supabase, post);
-      if (written) result.synced.push(post.slug);
+      const outcome = await upsertPost(supabase, post);
+      if (outcome === "written") result.synced.push(post.slug);
+      else if (outcome === "unpublished") result.unpublished.push(post.slug);
       else result.skipped.push({ slug: post.slug, reason: "바뀐 것이 없음" });
     } catch (e) {
       result.failed.push({ slug, error: e instanceof Error ? e.message : String(e) });
