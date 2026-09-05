@@ -4,7 +4,7 @@ import { PostArticle } from "@/features/posts/components/PostArticle";
 import { getAdjacent, getBySlug } from "@/features/posts/queries";
 import { entryHref } from "@/features/posts/types";
 import { ArticleJsonLd } from "@/lib/seo/JsonLd";
-import { lastModifiedOf } from "@/lib/seo/feed";
+import { lastModifiedOf, publishedAtOf } from "@/lib/seo/feed";
 import { SITE } from "@/lib/site";
 
 export async function generateMetadata({
@@ -32,7 +32,7 @@ export async function generateMetadata({
       title: entry.title,
       description,
       url,
-      publishedTime: entry.publishedAt ?? `${entry.date}T00:00:00Z`,
+      publishedTime: publishedAtOf(entry).toISOString(),
       modifiedTime: lastModifiedOf(entry).toISOString(),
       authors: [SITE.author.name],
       ...(entry.tags?.length ? { tags: [...entry.tags] } : {}),

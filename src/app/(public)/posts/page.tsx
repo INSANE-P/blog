@@ -4,7 +4,15 @@ import { SectionTitle } from "@/components/ui/SectionTitle";
 import { PostCard } from "@/features/posts/components/PostCard";
 import { getList } from "@/features/posts/queries";
 
-export const metadata: Metadata = { title: "Posts", alternates: { canonical: "/posts" } };
+/*
+  설명을 따로 적는다 (ADR-0044). 안 적으면 사이트 기본 설명을 물려받아
+  홈·목록·소개 셋이 검색 결과에 똑같은 문장으로 나온다 — 어느 것을 눌러야 할지 알 수 없다.
+*/
+export const metadata: Metadata = {
+  title: "Posts",
+  description: "박찬빈이 쓴 글 전부입니다. 만들다 막힌 것, 팀에서 벌인 일, 그냥 하루를 씁니다.",
+  alternates: { canonical: "/posts" },
+};
 
 /**
  * 글 목록 (ADR-0025·0026·0034).

@@ -17,10 +17,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries = await getList();
   const newest = entries.length > 0 ? lastModifiedOf(entries[0]) : new Date();
 
+  /*
+    홈과 목록은 글이 바뀌면 실제로 바뀌므로 가장 최근 글의 시각을 쓴다.
+    소개는 아니다 — 글을 하나 올렸다고 소개가 바뀌지 않는데 그렇게 적으면 거짓말이 된다.
+    틀린 `lastmod` 는 없는 것보다 나쁘다. 검색엔진이 이 값을 믿지 않게 되기 때문이다.
+  */
   return [
     { url: absolute("/"), lastModified: newest },
     { url: absolute("/posts"), lastModified: newest },
-    { url: absolute("/about"), lastModified: newest },
+    { url: absolute("/about") },
     ...entries.map((e) => ({
       url: absolute(entryHref(e)),
       lastModified: lastModifiedOf(e),

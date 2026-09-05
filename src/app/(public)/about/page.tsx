@@ -4,7 +4,11 @@ import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Guestbook } from "@/features/about/components/Guestbook";
 import { ACTIVITIES, IDENTITY, INTRO, PROJECTS, type TimelineItem } from "./data";
 
-export const metadata: Metadata = { title: "About", alternates: { canonical: "/about" } };
+export const metadata: Metadata = {
+  title: "About",
+  description: "앱과 웹을 만드는 개발자 박찬빈입니다. 만든 것과 활동, 그리고 방명록이 있습니다.",
+  alternates: { canonical: "/about" },
+};
 
 /**
  * 소개 (ADR-0038·0041).
