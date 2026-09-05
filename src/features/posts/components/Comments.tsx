@@ -44,7 +44,7 @@ export function Comments() {
     <section aria-label="댓글">
       <SectionTitle>comments</SectionTitle>
       <p className="mt-2 text-[15px] text-muted">
-        읽고 떠오른 생각이든 반박이든, 편하게 남겨주세요.
+        자유롭게 생각을 남겨주세요.
       </p>
 
       <div className="mt-7">

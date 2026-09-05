@@ -27,7 +27,7 @@ export function CodeBlock({ lang, code, children }: { lang?: string; code: strin
   }
 
   return (
-    <div className="my-8 overflow-hidden rounded-[14px] border border-hairline bg-code-bg">
+    <div className="codeblock my-8 overflow-hidden rounded-[14px] border border-hairline bg-code-bg">
       <div className="flex items-center justify-between border-b border-hairline bg-code-bar py-2.5 pl-4 pr-2.5">
         <span className="font-mono text-[12px] font-semibold tracking-wide text-muted">
           {lang ?? "code"}
