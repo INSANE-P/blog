@@ -187,25 +187,6 @@
   }
 }
 
-/* 테마 토글 — 해↔달 모핑. SVG transform이 안 먹는 환경이라 기하속성(cx/cy/r)·opacity로 구현. .ready일 때만 전환 */
-.theme-icon.ready .tm-orb {
-  transition: r 0.45s cubic-bezier(0.3, 0, 0.2, 1);
-}
-.theme-icon.ready .tm-mask {
-  transition:
-    cx 0.45s cubic-bezier(0.3, 0, 0.2, 1),
-    cy 0.45s cubic-bezier(0.3, 0, 0.2, 1),
-    r 0.45s cubic-bezier(0.3, 0, 0.2, 1);
-}
-.theme-icon.ready .tm-beams {
-  transition: opacity 0.35s ease;
-}
-@media (prefers-reduced-motion: reduce) {
-  .theme-icon * {
-    transition: none !important;
-  }
-}
-
 /* 모바일 메뉴 — 가운데서 얼음판이 퍼지듯 열린다(clip-path 원형 확장). 열렸을 때만 서리 유리(backdrop-blur) */
 .ice-overlay {
   pointer-events: none;
