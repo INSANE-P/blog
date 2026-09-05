@@ -44,7 +44,7 @@ export function PostCard({ entry }: { entry: Entry }) {
         )}
       </div>
 
-      <h3 className="mt-[22px] line-clamp-2 text-[20px] font-bold leading-[1.4] tracking-[-0.028em] text-foreground transition-colors group-hover:text-accent sm:text-[22px]">
+      <h3 className="mt-[22px] line-clamp-2 text-[20px] font-bold leading-[1.4] tracking-[-0.028em] text-foreground transition-colors group-hover:text-accent-text sm:text-[22px]">
         {entry.title}
       </h3>
 

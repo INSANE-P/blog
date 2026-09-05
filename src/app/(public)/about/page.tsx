@@ -21,7 +21,7 @@ function LinkChip({ label, href }: { label: string; href: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group inline-flex items-center gap-1 text-[14px] font-semibold text-muted transition-colors hover:text-accent"
+      className="group inline-flex items-center gap-1 text-[14px] font-semibold text-muted transition-colors hover:text-accent-text"
     >
       {label}
       <ArrowUpRight
@@ -39,13 +39,13 @@ export default function AboutPage() {
       <section className="flex flex-col-reverse items-start gap-7 sm:flex-row sm:items-center sm:gap-9">
         <div className="min-w-0 flex-1">
           <h1 className="text-[32px] font-extrabold tracking-[-0.035em] sm:text-[40px]">
-            안녕하세요, <span className="text-accent">박찬빈</span>이에요
+            안녕하세요, <span className="text-accent-text">박찬빈</span>이에요
           </h1>
           <p className="mt-3 text-[16px] text-muted">
             프론트엔드 개발자 · 세종대학교 컴퓨터공학과
           </p>
           <p className="mt-6 max-w-[42rem] text-[17px] leading-[1.75] text-prose-fg">
-            팀에서 <span className="font-semibold text-accent">같이 만들어가는 과정</span>을 좋아하는
+            팀에서 <span className="font-semibold text-accent-text">같이 만들어가는 과정</span>을 좋아하는
             프론트엔드 개발자예요. 더 나은 방법이 보이면 먼저 제안하고, 필요하면 새로운 것도 마다하지
             않고 시도해요. 재밌어 보이는 걸 만들고, 생각이 향하는 대로 움직여요.
           </p>
@@ -182,14 +182,14 @@ export default function AboutPage() {
             href="https://github.com/INSANE-P"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl border border-hairline px-5 py-3 text-[15px] font-semibold transition-colors hover:border-accent hover:text-accent"
+            className="inline-flex items-center gap-2 rounded-xl border border-hairline px-5 py-3 text-[15px] font-semibold transition-colors hover:border-accent hover:text-accent-text"
           >
             <GithubIcon className="size-[17px]" />
             GitHub
           </a>
           <a
             href="mailto:chanbin0626@gmail.com"
-            className="inline-flex items-center gap-2 rounded-xl border border-hairline px-5 py-3 text-[15px] font-semibold transition-colors hover:border-accent hover:text-accent"
+            className="inline-flex items-center gap-2 rounded-xl border border-hairline px-5 py-3 text-[15px] font-semibold transition-colors hover:border-accent hover:text-accent-text"
           >
             <Mail className="size-[17px]" />
             메일
@@ -198,7 +198,7 @@ export default function AboutPage() {
             href="https://portfolio.chanbin.dev"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl border border-hairline px-5 py-3 text-[15px] font-semibold transition-colors hover:border-accent hover:text-accent"
+            className="inline-flex items-center gap-2 rounded-xl border border-hairline px-5 py-3 text-[15px] font-semibold transition-colors hover:border-accent hover:text-accent-text"
           >
             포트폴리오
             <ArrowUpRight className="size-4" aria-hidden />

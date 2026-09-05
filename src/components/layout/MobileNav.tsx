@@ -44,7 +44,7 @@ export function MobileNav({ className }: { className?: string }) {
         onClick={() => setOpen(true)}
         aria-label="메뉴 열기"
         aria-expanded={open}
-        className="inline-flex size-11 items-center justify-center text-foreground transition hover:text-accent"
+        className="inline-flex size-11 items-center justify-center text-foreground transition hover:text-accent-text"
       >
         <Menu size={24} />
       </button>
@@ -54,13 +54,13 @@ export function MobileNav({ className }: { className?: string }) {
           <div className="mx-auto flex h-full max-w-md flex-col px-6 py-3">
             <div className="flex items-center justify-between">
               <span className="font-display text-[20px] font-black uppercase tracking-tight">
-                CHANBIN<span className="text-accent">.</span>
+                CHANBIN<span className="text-accent-text">.</span>
               </span>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="메뉴 닫기"
-                className="inline-flex size-11 items-center justify-center text-foreground transition hover:text-accent"
+                className="inline-flex size-11 items-center justify-center text-foreground transition hover:text-accent-text"
               >
                 <X size={22} />
               </button>
@@ -76,7 +76,7 @@ export function MobileNav({ className }: { className?: string }) {
                     onClick={() => setOpen(false)}
                     aria-current={active ? "page" : undefined}
                     className={`py-3 font-display text-[40px] font-extrabold leading-tight tracking-tight transition-colors ${
-                      active ? "text-accent" : "text-foreground hover:text-accent"
+                      active ? "text-accent-text" : "text-foreground hover:text-accent-text"
                     }`}
                   >
                     {item.label}
@@ -93,7 +93,7 @@ export function MobileNav({ className }: { className?: string }) {
                     href={s.href}
                     target={s.href.startsWith("http") ? "_blank" : undefined}
                     rel={s.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                    className="py-2 transition hover:text-accent"
+                    className="py-2 transition hover:text-accent-text"
                   >
                     {s.label}
                   </a>

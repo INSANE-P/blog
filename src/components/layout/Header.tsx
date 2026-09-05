@@ -15,6 +15,9 @@ import { ThemeToggle } from "./ThemeToggle";
  *
  * 높이 76px, 항목 17px. 헤더가 얇고 글씨가 작으면 "어디로 갈 수 있는지"가 눈에
  * 들어오지 않는다. 누르는 대상은 크게 둔다(피츠의 법칙).
+ *
+ * 호버는 배경을 깔지 않고 글자색만 악센트로 바꾼다. 워드마크가 이미 그렇게 반응하는데
+ * 메뉴만 회색 판이 깔리면 같은 화면에서 서로 다른 말을 하는 셈이 된다.
  */
 export function Header() {
   const pathname = usePathname();
@@ -23,8 +26,8 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-hairline bg-background/90 backdrop-blur-md">
       <div className="mx-auto flex h-[68px] w-full max-w-[1080px] items-center justify-between px-6 sm:h-[76px] sm:px-10">
         <Link href="/" aria-label="홈으로" className="group">
-          <span className="font-display text-[20px] font-black uppercase tracking-tight transition-colors group-hover:text-accent sm:text-[22px]">
-            CHANBIN<span className="text-accent">.</span>
+          <span className="font-display text-[20px] font-black uppercase tracking-tight transition-colors group-hover:text-accent-text sm:text-[22px]">
+            CHANBIN<span className="text-accent-text">.</span>
           </span>
         </Link>
 
@@ -38,10 +41,8 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-xl px-[18px] py-[11px] text-[17px] transition-colors ${
-                  active
-                    ? "font-bold text-foreground"
-                    : "font-semibold text-muted hover:bg-surface-hover hover:text-foreground"
+                className={`px-[18px] py-[11px] text-[17px] transition-colors ${
+                  active ? "font-bold text-foreground" : "font-semibold text-muted hover:text-accent-text"
                 }`}
               >
                 {item.label}

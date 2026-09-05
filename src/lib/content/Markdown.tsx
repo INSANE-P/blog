@@ -25,6 +25,7 @@ function textOf(node?: HastNode): string {
  *   - 이미지 → figure + figcaption. 노션 캡션이 마크다운 alt 로 넘어오므로 화면에 보여 준다
  *   - 코드 블록 → 언어 표시와 복사 버튼이 달린 상자
  *   - h2 → 앵커 id. 목차가 여기로 내려간다
+ *   - 표 → 가로로 넘길 수 있는 상자로 감싼다. 칸이 많아도 본문이 밀리지 않는다
  */
 export function Markdown({ children }: { children: string }) {
   // 노션은 하드 줄바꿈을 <br> 로 낸다. 원시 HTML 은 렌더하지 않으므로(XSS 안전),
@@ -62,6 +63,14 @@ export function Markdown({ children }: { children: string }) {
       const size = sizeOf(String(src ?? ""));
       // eslint-disable-next-line @next/next/no-img-element
       return <img src={String(src ?? "")} alt={alt ?? ""} width={size?.w} height={size?.h} loading="lazy" />;
+    },
+
+    table({ children }) {
+      return (
+        <div className="table-scroll">
+          <table>{children}</table>
+        </div>
+      );
     },
 
     pre({ children, node }) {

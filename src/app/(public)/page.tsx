@@ -22,7 +22,7 @@ export default async function HomePage() {
           Park
           <br />
           <span className="stroke-text stroke-text-thick">Chanbin</span>
-          <span className="text-accent">.</span>
+          <span className="text-accent-text">.</span>
         </h1>
         <p className="mt-7 text-[18px] font-medium tracking-[-0.02em] text-muted sm:text-[21px]">
           도전하고, 그 과정을 기록합니다.
@@ -35,7 +35,7 @@ export default async function HomePage() {
           <h2 className="text-[26px] font-extrabold tracking-[-0.035em] sm:text-[32px]">최근 글</h2>
           <Link
             href="/posts"
-            className="group inline-flex shrink-0 items-center gap-1.5 text-[15px] font-semibold text-muted transition-colors hover:text-accent sm:text-[16px]"
+            className="group inline-flex shrink-0 items-center gap-1.5 text-[15px] font-semibold text-muted transition-colors hover:text-accent-text sm:text-[16px]"
           >
             전체 보기
             <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />

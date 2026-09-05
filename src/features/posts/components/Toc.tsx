@@ -23,7 +23,7 @@ export function Toc({ headings }: { headings: Heading[] }) {
           <li key={h.id}>
             <a
               href={`#${h.id}`}
-              className="block py-1.5 text-[15px] leading-relaxed text-muted transition-colors hover:text-accent"
+              className="block py-1.5 text-[15px] leading-relaxed text-muted transition-colors hover:text-accent-text"
             >
               {h.text}
             </a>

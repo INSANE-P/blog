@@ -20,6 +20,19 @@
   /* 호버·칩 배경 — 선을 하나 더 긋지 않고 면으로만 눌린 느낌을 준다 */
   --surface-hover: #f4f6f7;
   --accent: #2f8fb5;
+  /*
+    글자에 쓰는 악센트.
+
+    브랜드 색 #2f8fb5 는 흰 배경에서 3.67:1 이라 작은 글자로 쓰면 WCAG AA(4.5:1)에 못 미친다.
+    링크와 태그 칩이 여기 해당한다. 같은 색 계열에서 명도만 낮춰 맞춘 값을 따로 둔다.
+    기준은 흰 배경이 아니라 틴트를 깐 칩이다 — 틴트가 배경을 살짝 어둡게 만들어
+    거기서 통과하면 흰 배경에서는 저절로 통과한다(칩 4.68:1 / 흰 배경 5.06:1).
+
+    대상(글자/면/테두리)에 따라 토큰을 나누는 방식은 토스 TDS 컬러 개편과 같은 결론이다.
+    브랜드 색 자체는 로고의 점·아이콘·진행 바처럼 정체성을 지는 자리에 그대로 남는다
+    (그림 요소 기준 3:1 은 통과한다).
+  */
+  --accent-text: #277796;
   /* 악센트를 아주 옅게 깐 면 — 인용문 배경, 태그 칩, 강조 밑줄 */
   --tint: rgba(47, 143, 181, 0.07);
   /* 코드 블록: 본문과 구분되되 튀지 않는 면 + 파일명 줄 */
@@ -41,6 +54,8 @@
   --hairline: rgba(255, 255, 255, 0.09);
   --surface-hover: #161616;
   --accent: #5fcdee;
+  /* 다크에서는 배경이 어두워 브랜드 색이 그대로 11.45:1 이다. 따로 낮출 필요가 없다. */
+  --accent-text: #5fcdee;
   --tint: rgba(95, 205, 238, 0.1);
   --code-bg: #0e0f10;
   --code-bar: #17191a;
@@ -69,6 +84,7 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
 
   --font-sans: var(--font-pretendard), system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
@@ -80,8 +96,9 @@
   */
   /*
     본문 폭. WCAG 1.4.8은 한중일 문자에 한 줄 40자 이하를 권한다.
-    18px 한글에서 42rem(672px)이 약 37자로, 상한 안쪽이면서 줄이 너무 짧아
-    끊기지 않는 지점이다. 34rem은 30자밖에 안 돼 문단이 잘게 쪼개져 보였다.
+    18px 한글에서 44rem(704px)이 약 39자로, 상한 바로 안쪽이다.
+    34rem은 30자밖에 안 돼 문단이 잘게 쪼개져 보였고, 42rem도 좁게 느껴졌다.
+    더 넓히면(46rem ≈ 41자) 권고를 넘는다.
   */
-  --container-prose: 42rem;
+  --container-prose: 44rem;
 }

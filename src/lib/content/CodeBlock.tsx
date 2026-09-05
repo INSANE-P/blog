@@ -35,7 +35,7 @@ export function CodeBlock({ lang, code, children }: { lang?: string; code: strin
         <button
           type="button"
           onClick={copy}
-          className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12px] font-semibold text-muted transition-colors hover:text-foreground"
+          className="inline-flex items-center gap-1.5 px-2 py-1.5 text-[12px] font-semibold text-muted transition-colors hover:text-accent-text"
         >
           {copied ? <Check size={14} /> : <Copy size={14} />}
           {copied ? "복사했어요" : "복사"}

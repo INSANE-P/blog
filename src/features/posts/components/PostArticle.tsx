@@ -38,7 +38,7 @@ export function PostArticle({
         <Link
           href="/posts"
           aria-label="글 목록으로 돌아가기"
-          className="-ml-2.5 inline-flex size-10 items-center justify-center rounded-xl text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
+          className="-ml-2.5 inline-flex size-10 items-center justify-center text-muted transition-colors hover:text-accent-text"
         >
           <ArrowLeft size={22} aria-hidden />
         </Link>
@@ -49,7 +49,7 @@ export function PostArticle({
               <Link
                 key={t}
                 href={`/posts?tag=${encodeURIComponent(t)}`}
-                className="rounded-lg bg-tint px-3 py-1.5 text-[13px] font-semibold text-accent"
+                className="rounded-lg bg-tint px-3 py-1.5 text-[13px] font-semibold text-accent-text"
               >
                 {t}
               </Link>
@@ -135,7 +135,7 @@ function Adjacent({
           <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
         )}
       </span>
-      <span className="mt-2.5 line-clamp-2 text-[17px] font-bold leading-snug tracking-tight transition-colors group-hover:text-accent">
+      <span className="mt-2.5 line-clamp-2 text-[17px] font-bold leading-snug tracking-tight transition-colors group-hover:text-accent-text">
         {entry.title}
       </span>
     </Link>

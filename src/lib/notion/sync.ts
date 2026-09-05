@@ -29,6 +29,11 @@ export type SyncResult = {
   failed: { slug: string; error: string }[];
   /** 이미지 이관에 실패한 글. 글은 반영되지만 그 이미지는 곧 만료돼 깨진다. */
   imageFailures: { slug: string; count: number }[];
+  /**
+   * 노션이 내보냈지만 우리가 뜻을 모르는 태그. 글자는 살렸지만 모양은 잃었다.
+   * 조용히 두면 노션이 블록을 새로 추가했을 때 글이 깨진 채로 몇 달을 간다.
+   */
+  unknownTags: { slug: string; tags: string[] }[];
 };
 
 /** 글 하나를 DB에 반영한다. 태그는 배열 컬럼이라 덮어쓰면 끝난다(멱등). */
@@ -99,6 +104,7 @@ export async function syncFromNotion(): Promise<SyncResult> {
     removed: [],
     failed: [],
     imageFailures: [],
+    unknownTags: [],
   };
 
   const pages = await listPages();
@@ -107,7 +113,8 @@ export async function syncFromNotion(): Promise<SyncResult> {
     let slug = "(알 수 없음)";
     try {
       const raw = await fetchMarkdown(page.id);
-      const post = toPost(page, htmlToMarkdown(raw));
+      const converted = htmlToMarkdown(raw);
+      const post = toPost(page, converted.markdown);
       slug = post.slug || "(슬러그 없음)";
 
       // 슬러그가 없으면 URL을 만들 수 없다 — 반영하지 않고 실패로 집계한다
@@ -130,6 +137,10 @@ export async function syncFromNotion(): Promise<SyncResult> {
           // 커버가 실패하면 만료될 URL이 남는다. 글은 살리되 알린다.
           result.imageFailures.push({ slug: post.slug, count: 1 });
         }
+      }
+
+      if (converted.unknownTags.length > 0) {
+        result.unknownTags.push({ slug: post.slug, tags: converted.unknownTags });
       }
 
       await upsertPost(supabase, post);

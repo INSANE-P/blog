@@ -11,6 +11,26 @@ html {
   scroll-behavior: smooth;
 }
 
+/*
+  목차에서 절을 누르면 그 제목이 붙박이 헤더 아래로 숨는다.
+  제목마다 스크롤이 멈출 여백을 따로 줘서 헤더에 가리지 않고 제목부터 보이게 한다.
+  헤더 높이(모바일 68px / 데스크톱 76px)에 숨 쉴 틈을 더한 값이다.
+*/
+:target,
+.prose h1,
+.prose h2,
+.prose h3 {
+  scroll-margin-top: 84px;
+}
+@media (min-width: 640px) {
+  :target,
+  .prose h1,
+  .prose h2,
+  .prose h3 {
+    scroll-margin-top: 96px;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -139,7 +159,7 @@ body {
 }
 
 .prose a {
-  color: var(--accent);
+  color: var(--accent-text);
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1.5px;
@@ -180,12 +200,17 @@ body {
 .prose ol li {
   counter-increment: prose-ol;
 }
+.prose ol li {
+  padding-left: 28px;
+}
 .prose ol li::before {
   content: counter(prose-ol);
   position: absolute;
-  left: 1px;
-  top: 0.06em;
-  font-size: 13px;
+  left: 0;
+  top: 0.3em;
+  width: 16px;
+  text-align: right;
+  font-size: 13.5px;
   font-weight: 800;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
@@ -193,6 +218,45 @@ body {
 .prose li > ul,
 .prose li > ol {
   margin: 0.4em 0;
+}
+
+/*
+  체크박스 목록(GFM).
+  브라우저 기본 마커를 지우려고 ul 전체에 악센트 점을 달아 놨더니
+  체크박스 항목에도 점이 같이 찍혔다 — 점 하나, 상자 하나가 나란히 붙는다.
+  여기서는 상자가 곧 표식이므로 점을 끈다.
+
+  상자도 직접 그린다. 운영체제 기본 체크박스는 색이 제각각이라
+  이 화면에서 유일하게 우리 악센트를 따르지 않는 요소가 된다.
+*/
+.prose ul.contains-task-list li::before {
+  content: none;
+}
+.prose li.task-list-item {
+  padding-left: 0;
+}
+.prose li.task-list-item input[type="checkbox"] {
+  appearance: none;
+  width: 1.05em;
+  height: 1.05em;
+  margin: 0 0.55em 0 0;
+  vertical-align: -0.16em;
+  /* 누를 수 있는 요소의 경계는 3:1 이 필요하다(WCAG 1.4.11). 장식용 hairline 으로는 모자란다 */
+  border: 1.5px solid var(--muted);
+  border-radius: 5px;
+  background: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 74%;
+}
+.prose li.task-list-item input[type="checkbox"]:checked {
+  border-color: var(--accent);
+  background-color: var(--accent);
+  /* 체크 표시는 배경색으로 — 라이트에선 흰 획, 다크에선 검은 획이 악센트 위에서 또렷하다 */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E");
+}
+.dark .prose li.task-list-item input[type="checkbox"]:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E");
 }
 
 /* 인용 — 세로줄 대신 면. 줄 하나는 노션·깃허브의 기본값이라 눈에 남지 않는다 */
@@ -276,11 +340,24 @@ body {
   font-size: 14px;
 }
 
-.prose table {
-  width: 100%;
+/*
+  표. 칸이 많으면 본문 폭에 욱여넣지 않고 표 안에서만 가로로 넘긴다.
+  폭을 100%로 고정하면 일곱 칸짜리 표에서 글자가 한 자씩 끊겨 읽을 수 없게 된다.
+  머리글은 줄바꿈하지 않는다 — 짧은 말이라 접히면 오히려 자리를 더 먹는다.
+*/
+.prose .table-scroll {
   margin: 2em 0;
+  overflow-x: auto;
+}
+.prose table {
+  width: auto;
+  min-width: 100%;
+  margin: 0;
   border-collapse: collapse;
   font-size: 15.5px;
+}
+.prose th {
+  white-space: nowrap;
 }
 .prose th,
 .prose td {

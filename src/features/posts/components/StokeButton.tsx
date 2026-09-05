@@ -130,12 +130,12 @@ export function StokeButton({ slug, initial = 0 }: { slug: string; initial?: num
           </g>
         </g>
       </svg>
-      <span className={`text-[15px] font-medium ${mine ? "text-accent" : "text-foreground"}`}>
+      <span className={`text-[15px] font-medium ${mine ? "text-accent-text" : "text-foreground"}`}>
         {mine ? "불 지폈어요" : "불 지피기"}
       </span>
       {/* 카운트는 "지핀 사람한테만" 보인다 — 참여 후 "나도 함께 지폈네"의 공개 순간 */}
       {mine && (
-        <span className="text-[15px] font-bold text-accent tabular-nums">{count}</span>
+        <span className="text-[15px] font-bold text-accent-text tabular-nums">{count}</span>
       )}
     </button>
   );

@@ -135,7 +135,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       onClick={toggle}
       aria-label={dark ? "라이트 모드로 전환" : "다크 모드로 전환"}
       title={dark ? "라이트 모드로 전환" : "다크 모드로 전환"}
-      className={`inline-flex size-10 items-center justify-center rounded-xl text-muted transition-colors hover:text-foreground ${className}`}
+      className={`inline-flex size-10 items-center justify-center text-muted transition-colors hover:text-accent-text ${className}`}
     >
       <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
         {/* 해 — 다크에서는 돌면서 오므라든다 */}

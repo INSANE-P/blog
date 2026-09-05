@@ -39,7 +39,7 @@ export default async function PostsPage({
                 className={
                   active
                     ? "rounded-[10px] bg-foreground px-4 py-2.5 text-[14px] font-semibold text-background"
-                    : "rounded-[10px] border border-hairline px-4 py-2.5 text-[14px] font-semibold text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
+                    : "rounded-[10px] border border-hairline px-4 py-2.5 text-[14px] font-semibold text-muted transition-colors hover:border-accent hover:text-accent-text"
                 }
               >
                 {c.label}
