@@ -51,6 +51,9 @@ const NOTION_RAW = `# 문서 제목
 <file src="https://example.com/doc.pdf">설계 문서</file>
 <page url="https://notion.so/child">하위 페이지</page>
 <unknown url="https://github.com/INSANE-P" alt="북마크" />
+
+주소 속성 이름이 바뀌어도 버티는지 — <video url="https://example.com/other.mp4">다른 이름의 영상</video>, <page href="https://notion.so/other">다른 이름의 하위 페이지</page>.
+주소가 아예 없으면 보고해야 한다 — <video>주소 없는 영상</video>.
 <table_of_contents />
 
 <mystery-block foo="bar">노션이 나중에 추가한 모르는 블록의 글자.</mystery-block>
@@ -123,6 +126,20 @@ for (const [name, needle] of MUST_DROP) {
 }
 
 console.log(`\n모르는 태그로 보고된 것: ${unknownTags.join(", ") || "(없음)"}`);
+
+console.log("\n── 다루기로 해 놓고 못 다룬 것 보고 ──");
+/*
+  다루기로 해 놓은 태그인데 값을 못 찾은 경우도 알려야 한다.
+  형광펜을 잃었을 때 가장 나빴던 것은 잃었다는 사실조차 몰랐던 것이다 —
+  `HANDLED` 에 넣으면 보고에서 빠지므로, 다루는 방법이 틀리면 조용히 사라진다.
+*/
+if (!unknownTags.some((t) => t.includes("주소 없음"))) {
+  console.log("FAIL 주소를 못 찾은 태그를 보고하지 않았다 — 조용히 링크를 잃는 상태다");
+  failed += 1;
+} else {
+  console.log("OK   주소를 못 찾은 태그를 보고한다");
+}
+
 if (!unknownTags.includes("mystery-block")) {
   console.log("FAIL 모르는 태그를 보고하지 않았다 — 조용히 버리는 상태로 되돌아갔다");
   failed += 1;

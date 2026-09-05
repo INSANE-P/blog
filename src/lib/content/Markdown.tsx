@@ -139,11 +139,35 @@ export function Markdown({ children }: { children: string }) {
  * 그림이 늦게 와도 글이 밀리지 않는다. 치수를 모르는 그림(노션 밖에서 링크로 넣은 것)은
  * 자리를 잡을 수 없으므로 폭을 채우는 대신 원래 크기를 지키게 둔다.
  */
+/**
+ * 그림의 크기 갈래 (ADR-0046).
+ *
+ * 처음에는 "세로가 더 길면 세로형, 아니면 넓게" 둘로만 나눴다.
+ * 그러면 943×754(5:4) 처럼 **거의 정사각형인 그림도 본문 밖으로 나간다.**
+ * 실제로 그렇게 나갔고, 글을 읽다 말고 큰 덩어리를 만나는 꼴이 됐다.
+ *
+ * 넓게 낼 만한 그림은 **가로로 긴 것**뿐이다. 16:9(1.78) 짜리 화면 캡처나 파노라마는
+ * 좁히면 안이 안 보이지만, 4:3 이나 5:4 는 넓혀도 얻는 것이 없고 자리만 크게 먹는다.
+ * 그래서 1.7 을 경계로 둔다 — 16:9 는 넘고 3:2(1.5) 는 못 넘는 자리다.
+ */
+function fitOf(size: { w: number; h: number } | undefined) {
+  if (!size) return "unknown";
+  if (size.h > size.w * 1.15) return "tall";
+  if (size.w >= size.h * 1.7) return "wide";
+  return "normal";
+}
+
 function Figure({ src, caption }: { src: string; caption: string }) {
   const size = sizeOf(src);
-  const tall = size ? size.h > size.w * 1.15 : false;
   return (
-    <figure data-fit={size ? (tall ? "tall" : "wide") : "unknown"}>
+    <figure
+      data-fit={fitOf(size)}
+      /*
+        그림의 원래 폭을 CSS 에 넘긴다. 이것이 없으면 작은 그림이 본문 폭까지 늘어나
+        흐려진다 — 없는 화소를 만들어 낼 수는 없다.
+      */
+      style={size ? ({ "--nat": `${size.w}px` } as React.CSSProperties) : undefined}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={caption} width={size?.w} height={size?.h} loading="lazy" />
       {caption && <figcaption>{caption}</figcaption>}
