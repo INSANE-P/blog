@@ -79,22 +79,37 @@ export function lastModifiedOf(entry: FeedEntry): Date {
  *
  * 본문 전체가 아니라 요약만 싣는다. 마크다운 원문을 그대로 흘리면 리더마다 다르게 깨지고,
  * HTML 로 바꿔 넣으려면 렌더 경로를 하나 더 만들어야 한다. 요약은 어디서든 같게 보인다.
+ *
+ * `pubDate` 는 화면에 보이는 날짜다. 처음에는 마지막 변경 시각을 넣었는데,
+ * 그러면 글 화면의 날짜와 리더의 날짜가 서로 다르게 보인다 —
+ * 구조화 데이터에서 고친 것과 같은 종류의 어긋남이다.
+ *
+ * 대가가 하나 있다. 과거 날짜로 올린 글은 리더에서 그 날짜 자리에 꽂혀 아래로 묻힌다.
+ * 그래도 리더는 `guid` 로 새 글을 판단하므로 알림은 정상적으로 간다 — 순서만 아래다.
+ * 정적 블로그 생성기들도 같은 선택을 한다.
+ *
+ * 최근 것 몇 개만 싣는다. 글이 쌓여도 피드가 무한정 커지지 않아야 한다 —
+ * 리더는 이 파일을 자주, 통째로 받아 간다.
  */
 export function buildRss({
   entries,
   site,
   hrefOf,
   now = new Date(),
+  limit = 20,
 }: {
   entries: FeedEntry[];
   site: FeedSite;
   /** 글 하나의 사이트 안 경로 — 부르는 쪽의 규칙을 그대로 쓴다 */
   hrefOf: (entry: FeedEntry) => string;
   now?: Date;
+  /** 실을 글 수. 기본 20 — 리더들이 흔히 쓰는 크기다 */
+  limit?: number;
 }): string {
   const abs = (path: string) => `${site.url}${path.startsWith("/") ? path : `/${path}`}`;
 
   const items = entries
+    .slice(0, limit)
     .map((e) => {
       const url = abs(hrefOf(e));
       return [
@@ -102,7 +117,7 @@ export function buildRss({
         `      <title>${xmlEscape(e.title)}</title>`,
         `      <link>${xmlEscape(url)}</link>`,
         `      <guid isPermaLink="true">${xmlEscape(url)}</guid>`,
-        `      <pubDate>${lastModifiedOf(e).toUTCString()}</pubDate>`,
+        `      <pubDate>${publishedAtOf(e).toUTCString()}</pubDate>`,
         e.excerpt ? `      <description>${xmlEscape(e.excerpt)}</description>` : "",
         "    </item>",
       ]
