@@ -8,6 +8,14 @@ import { useEffect, useRef } from "react";
  * 긴 글에서 "얼마나 남았나"를 모르면 읽다 말고 스크롤바를 확인하게 된다.
  * 화면 맨 위에 선 하나만 둔다 — 퍼센트 숫자를 띄우면 글이 아니라 진도를 보게 만든다.
  *
+ * 1280px 이상에서는 내린다. 그 폭부터는 목차 패널이 오른쪽에 서서 지나온 절과 지금 절을
+ * 계속 보여 주므로(ADR-0039), 맨 위의 선은 같은 말을 덜 정확하게 되풀이하는 것이 된다.
+ * 절 단위가 % 보다 거칠지만, 읽는 사람이 알고 싶은 것은 "몇 퍼센트"가 아니라
+ * "어디쯤"이라 그쪽이 더 쓸모 있다.
+ *
+ * 좁은 화면에서는 그대로 둔다. 거기서는 목차가 접혀 있어 읽는 동안 보이지 않으므로
+ * 이 선이 유일한 위치 표시다.
+ *
  * 선은 링크 밑줄과 같은 번개 타일을 쓰고(`--spark-line`), 끝에는 불꽃이 맺힌다.
  * 촘촘한 톱니로 만들었더니 물결로 읽혔고, 흐리게 깔았더니 라이트 모드에서 사라졌다.
  * 대부분 평평하고 가끔 튀는 지금 모양이 읽는 동안 시끄럽지 않으면서 전류로 보인다.
@@ -64,7 +72,10 @@ export function ReadingProgress() {
   }, []);
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[10px] print:hidden">
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[10px] xl:hidden print:hidden"
+    >
       {/* 번개 결의 선 — 링크 밑줄과 같은 타일이라 사이트 안에서 뜻이 이어진다 */}
       <div
         ref={line}

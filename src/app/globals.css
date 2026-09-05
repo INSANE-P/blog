@@ -85,6 +85,10 @@ body {
   모양은 mask 로 넣고 색은 background-color 로 준다. 데이터 URI 안에 색을 박으면
   라이트·다크에 각각 한 벌씩 두어야 하는데, mask 로 분리하면 한 벌로 두 테마를 덮는다.
   타일을 반복시키므로 글자가 길든 짧든 스파크 간격이 같다.
+
+  쓸 때 주의 — `spark-line` 클래스는 **늘 붙여 두고** `data-here` 만 켜고 꺼야 한다.
+  둘을 같은 순간에 붙이면 `::after` 가 그때 처음 생기느라 clip-path 의 출발값이 없어
+  전환이 통째로 건너뛴다. 밑줄이 그어지는 대신 이미 그어진 채로 튀어나온다.
 */
 :root {
   --spark-line: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='58' height='9' viewBox='0 0 58 9'%3E%3Cpath d='M0 6.5 H11 L14 2.2 L19 6.5 H31 L33.5 4.2 L36.5 6.5 H47 L50 1.8 L55 6.5 H58' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -128,6 +132,25 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .spark-line::after {
+    transition: none;
+  }
+}
+
+/*
+  목차 펼치기/접기.
+
+  높이를 재지 않고 `grid-template-rows: 0fr ↔ 1fr` 로 편다.
+  JS 로 scrollHeight 를 재서 max-height 를 주는 방식은 항목 수나 글자 줄바꿈이 바뀔 때마다
+  다시 재야 하고, 넉넉히 잡아 두면 접힐 때 한참 뜸을 들인다.
+*/
+.toc-collapse {
+  display: grid;
+  transition:
+    grid-template-rows 0.32s cubic-bezier(0.22, 0.8, 0.3, 1),
+    opacity 0.24s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .toc-collapse {
     transition: none;
   }
 }

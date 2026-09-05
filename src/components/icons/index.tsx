@@ -129,3 +129,12 @@ export function Check(props: IconProps) {
     </Svg>
   );
 }
+
+/** 아래 꺾쇠 — 펼치기/접기. 열리면 180도 돌려 쓴다 */
+export function ChevronDown(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M6 9.5l6 6 6-6" />
+    </Svg>
+  );
+}
