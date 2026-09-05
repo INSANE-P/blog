@@ -1,76 +1,53 @@
 import Link from "next/link";
-import { NAV } from "./nav";
 
-/* 링크 이름은 표지에 속하므로 영문 소문자로 둔다(ADR-0029) */
-const CHANNELS = [
+/** 밖으로 나가는 링크만 둔다. 사이트 안의 이동은 붙박이 헤더가 맡는다. */
+const ELSEWHERE = [
   { label: "github", href: "https://github.com/INSANE-P" },
   { label: "portfolio", href: "https://portfolio.chanbin.dev" },
   { label: "mail", href: "mailto:chanbin0626@gmail.com" },
 ];
 
 /**
- * 푸터 (ADR-0026).
+ * 푸터 (ADR-0028·0036).
  *
- * 원형 아이콘 버튼을 걷어내고 글자 링크 목록으로 바꿨다. 아이콘만 있으면 어디로 가는지
- * 눌러 봐야 알고, 본문과 떨어져 떠 보인다. 갈 곳이 셋뿐이라 이름을 그대로 쓰는 편이 빠르다.
+ * 사이트 지도가 아니라 마무리 인사다. 깊이가 목록 → 글 두 단계뿐이고 페이지가 둘뿐인데
+ * 푸터에 열을 나눠 링크를 늘어놓으면, 있지도 않은 구조를 흉내 내는 셈이 된다.
  *
- * 비어 있던 세로 공간은 실제로 존재하는 링크로 채웠다. 없는 메뉴로 열을 만들어
- * 규모를 꾸미지는 않는다 — 눌러서 아무 데도 가지 않는 링크가 가장 값싼 인상을 준다.
+ * 그래서 셋을 걷어냈다.
+ *
+ *   - `pages` 열 — 붙박이 헤더가 항상 보여 주는 것을 한 번 더 적은 것이었다
+ *   - 열 제목(`pages`·`elsewhere`) — 링크 셋에 붙인 제목은 없는 구조를 만든다
+ *   - 태그라인 — 히어로와 모바일 메뉴에 이미 있다. 세 번째는 반복이다
+ *
+ * 남은 것은 누가 썼는지(워드마크·저작권)와 밖으로 나가는 길뿐이다.
  */
 export function Footer() {
   return (
     <footer className="mt-24 border-t border-hairline">
-      <div className="mx-auto w-full max-w-[1080px] px-6 py-14 sm:px-10 sm:py-16">
-        <div className="flex flex-col gap-10 sm:flex-row sm:justify-between sm:gap-16">
-          <div>
-            <Link href="/" className="group inline-block">
-              <span className="spark-line font-display text-[18px] font-black uppercase tracking-tight">
-                CHANBIN<span className="text-accent">.</span>
-              </span>
-            </Link>
-            <p className="mt-3 text-[14px] text-muted">도전하고, 그 과정을 기록합니다.</p>
-            <p className="mt-6 text-[13px] text-muted/70">© {new Date().getFullYear()} 박찬빈</p>
-          </div>
-
-          <div className="flex gap-14 sm:gap-20">
-            <FooterColumn title="pages" items={NAV.map((n) => ({ ...n }))} />
-            <FooterColumn title="elsewhere" items={CHANNELS} />
-          </div>
+      <div className="mx-auto flex w-full max-w-[1080px] flex-col gap-6 px-6 py-12 sm:flex-row sm:items-center sm:justify-between sm:px-10">
+        <div className="flex items-baseline gap-4">
+          <Link href="/" className="group">
+            <span className="spark-line font-display text-[18px] font-black uppercase tracking-tight">
+              CHANBIN<span className="text-accent">.</span>
+            </span>
+          </Link>
+          <span className="text-[13px] text-muted/70">© {new Date().getFullYear()} 박찬빈</span>
         </div>
+
+        <nav aria-label="바깥 링크" className="flex flex-wrap gap-x-7 gap-y-2">
+          {ELSEWHERE.map(({ label, href }) => (
+            <a
+              key={label}
+              href={href}
+              target={href.startsWith("http") ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              className="font-display text-[14px] lowercase text-muted transition-colors hover:text-accent-text"
+            >
+              <span className="spark-line">{label}</span>
+            </a>
+          ))}
+        </nav>
       </div>
     </footer>
-  );
-}
-
-function FooterColumn({
-  title,
-  items,
-}: {
-  title: string;
-  items: { label: string; href: string }[];
-}) {
-  return (
-    <nav aria-label={title}>
-      <h2 className="font-display text-[13px] font-bold lowercase tracking-tight text-foreground">
-        {title}
-      </h2>
-      <ul className="mt-4 space-y-3">
-        {items.map(({ label, href }) => {
-          const external = href.startsWith("http") || href.startsWith("mailto:");
-          return (
-            <li key={label}>
-              <a
-                href={href}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel={external ? "noopener noreferrer" : undefined}
-                className="font-display text-[14px] lowercase text-muted transition-colors hover:text-accent-text"
-              >
-                <span className="spark-line">{label}</span>
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
   );
 }
