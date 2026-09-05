@@ -567,3 +567,26 @@ body {
 .dark .hljs-literal {
   color: #e0b073;
 }
+
+/*
+  댓글 iframe 의 바닥 색 (ADR-0040).
+
+  giscus 는 자기 shadow DOM 안에서 iframe 에 `color-scheme: light dark` 를 건다.
+  그래서 안쪽 문서의 기본 글자색이 **운영체제 설정**을 따른다 — 우리 화면이 다크여도
+  OS 가 라이트면 기본 글자색이 검정이 된다.
+
+  평소에는 테마 CSS 가 색을 다 덮으니 드러나지 않는다. 그런데 테마 CSS 가 실리지 못하면
+  (개발 중 http 주소는 https iframe 안에서 mixed-content 로 막히고, 배포 뒤에도
+  404·차단기·네트워크 실패가 있다) 색 변수가 하나도 정의되지 않아 기본값만 남는다.
+  그 순간 검은 배경 위에 검은 글씨가 되어 댓글이 통째로 사라진다. 실제로 그 상태였다.
+
+  ::part 로 바깥에서 지정한 값은 shadow 안쪽 규칙을 이긴다.
+  그래서 iframe 의 바닥 색을 OS 가 아니라 우리 테마에 묶어 둔다.
+  테마 CSS 가 실리든 안 실리든 글자는 최소한 읽힌다.
+*/
+giscus-widget::part(iframe) {
+  color-scheme: light;
+}
+.dark giscus-widget::part(iframe) {
+  color-scheme: dark;
+}
