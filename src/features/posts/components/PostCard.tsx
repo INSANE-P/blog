@@ -54,16 +54,18 @@ export function PostCard({ entry }: { entry: Entry }) {
         </p>
       )}
 
-      <div className="mt-[18px] flex flex-wrap items-center gap-2">
-        {entry.tags?.map((t) => (
-          <span
-            key={t}
-            className="rounded-[9px] border border-hairline px-[13px] py-[7px] text-[13px] font-semibold text-muted"
-          >
-            {t}
+      {/*
+        태그는 상자가 아니라 한 줄 활자다(ADR-0035).
+        카드에는 이미 둥근 커버가 있어서, 그 위에 작은 상자를 또 얹으면
+        제목보다 상자가 먼저 눈에 들어온다. 대문자 자간으로 눕히면 제목이 주인공으로 남는다.
+      */}
+      <div className="mt-[18px] flex items-baseline gap-4">
+        {entry.tags && entry.tags.length > 0 && (
+          <span className="font-display text-[12px] font-bold uppercase tracking-[0.11em] text-muted">
+            {entry.tags.join(" · ")}
           </span>
-        ))}
-        <span className="ml-auto text-[14px] tabular-nums text-muted/75">
+        )}
+        <span className="ml-auto shrink-0 text-[14px] tabular-nums text-muted/75">
           {formatDate(entry.date)}
         </span>
       </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Giscus from "@giscus/react";
+import { SectionTitle } from "@/components/ui/SectionTitle";
 
 /**
  * 댓글 (ADR-0021·0028·0029).
@@ -13,7 +14,7 @@ import Giscus from "@giscus/react";
  * 어느 서비스에나 있는 빈 상태 패턴이라 이 사이트의 것으로 읽히지 않았고, 무엇보다
  * giscus 가 이미 댓글 쓴 사람들의 얼굴을 보여 준다 — 그 위에 표식을 또 얹으면 얼굴이 둘이 된다.
  *
- * 대신 홈의 섹션 문법을 그대로 쓴다(영문 소문자 제목 + 한글 한 줄). 화면마다 다른 방식으로
+ * 대신 홈의 절 제목을 그대로 쓴다(아웃라인 대문자 + 한글 한 줄). 화면마다 다른 방식으로
  * 제목을 다는 것이 "직접 만든 것처럼" 보이지 않게 하는 가장 큰 원인이다.
  *
  * 테마는 우리 .dark 클래스를 감시해 맞춘다.
@@ -41,9 +42,7 @@ export function Comments() {
 
   return (
     <section aria-label="댓글">
-      <h2 className="font-display text-[26px] font-extrabold lowercase tracking-[-0.035em]">
-        comments
-      </h2>
+      <SectionTitle>comments</SectionTitle>
       <p className="mt-2 text-[15px] text-muted">
         읽고 떠오른 생각이든 반박이든, 편하게 남겨주세요.
       </p>

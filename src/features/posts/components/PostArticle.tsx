@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "@/components/icons";
+import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Markdown } from "@/lib/content/Markdown";
 import { extractHeadings, readingMinutes } from "@/lib/content/headings";
 import { formatDate } from "@/lib/utils/date";
@@ -40,21 +41,17 @@ export function PostArticle({
           글 맨 위에 있어 봐야 읽기 시작하기 전에 나가는 문부터 보게 만든다.
           다 읽은 뒤의 갈 곳은 아래 이어 읽기가 맡는다.
         */}
+        {/*
+          제목 위 커커. 목록 카드와 같은 활자다 — 같은 정보가 화면마다 다른 모양이면
+          같은 것으로 읽히지 않는다. 누를 수는 없다(필터를 걷어냈으므로, ADR-0034).
+        */}
         {entry.tags && entry.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {/* 태그는 누를 수 없다 — 필터를 걷어냈으므로 갈 곳이 없다(ADR-0034) */}
-            {entry.tags.map((t) => (
-              <span
-                key={t}
-                className="rounded-lg bg-tint px-3 py-1.5 text-[13px] font-semibold text-accent-text"
-              >
-                {t}
-              </span>
-            ))}
+          <div className="font-display text-[12px] font-bold uppercase tracking-[0.11em] text-muted">
+            {entry.tags.join(" · ")}
           </div>
         )}
 
-        <h1 className="mt-6 text-[32px] font-extrabold leading-[1.28] tracking-[-0.035em] sm:text-[42px]">
+        <h1 className="mt-4 text-[32px] font-extrabold leading-[1.28] tracking-[-0.035em] sm:text-[42px]">
           {entry.title}
         </h1>
 
@@ -83,14 +80,12 @@ export function PostArticle({
         </div>
 
         {/*
-          아래 두 절은 홈과 같은 문법을 쓴다 — 영문 소문자 제목(ADR-0029).
-          화면마다 제목 다는 방식이 다르면 한 사람이 만든 것으로 보이지 않는다.
+          아래 두 절은 홈·목록과 같은 절 제목을 쓴다(ADR-0032·0035).
+          본문이 끝난 뒤에 오므로 읽기를 끊지 않고, 같은 제목을 쓰면 한 사이트로 읽힌다.
         */}
         {(prev || next) && (
           <section className="mt-16 border-t border-hairline pt-12">
-            <h2 className="font-display text-[26px] font-extrabold lowercase tracking-[-0.035em]">
-              keep reading
-            </h2>
+            <SectionTitle>keep reading</SectionTitle>
             <nav className="mt-7 grid gap-3 sm:grid-cols-2">
               <Adjacent entry={prev} direction="prev" />
               <Adjacent entry={next} direction="next" />
