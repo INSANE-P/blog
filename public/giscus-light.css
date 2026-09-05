@@ -1,0 +1,65 @@
+/*
+  Giscus 커스텀 테마 — 라이트 (ADR-0028).
+  giscus 기본 light 를 바탕으로 색만 우리 토큰으로 덮는다.
+  값은 src/styles/tokens.css 와 같아야 한다 — 여기만 옛 색이 남아 있으면
+  댓글창만 다른 사이트처럼 보인다(실제로 개편 뒤 그 상태였다).
+*/
+@import "https://giscus.app/themes/light.css";
+
+main {
+  --color-canvas-default: #ffffff; /* background */
+  --color-canvas-subtle: #f4f6f7; /* surface-hover */
+  --color-canvas-inset: #f4f6f7;
+  --color-fg-default: #17181a; /* prose-fg */
+  --color-fg-muted: #6b6b6b; /* muted */
+  --color-fg-subtle: #6b6b6b;
+  --color-border-default: rgba(0, 0, 0, 0.14); /* border */
+  --color-border-muted: rgba(0, 0, 0, 0.07); /* hairline */
+  --color-neutral-muted: rgba(47, 143, 181, 0.07); /* tint */
+  --color-accent-fg: #277796; /* accent-text */
+  --color-accent-emphasis: #277796;
+  --color-accent-muted: rgba(47, 143, 181, 0.3);
+  --color-btn-text: #17181a;
+  --color-btn-bg: #ffffff;
+  --color-btn-border: rgba(0, 0, 0, 0.14);
+  --color-btn-hover-bg: #f4f6f7;
+  --color-btn-primary-bg: #277796;
+  --color-btn-primary-hover-bg: #2f8fb5;
+  --color-btn-primary-text: #ffffff;
+  --color-btn-primary-border: transparent;
+}
+
+main .gsc-comment-box,
+main .gsc-comment .gsc-comment-header,
+main .gsc-comment .gsc-comment-content {
+  border-radius: 14px;
+}
+
+/* 우리 화면에는 상자 위에 이미 안내 한 줄이 있다 — giscus 자체 머리말은 지운다 */
+main .gsc-comments > .gsc-header {
+  display: none;
+}
+
+/*
+  댓글 아바타 (ADR-0028).
+
+  giscus 는 GitHub 아바타를 원으로 그린다. 이 사이트의 면은 전부 둥근 사각형이라
+  (카드 18px · 코드 14px · 칩 9px) 아바타만 원이면 혼자 다른 문법을 쓴다.
+  모양만 맞추고 아바타 자체는 그대로 둔다 — 누가 썼는지는 얼굴이 가장 빨리 말해 준다.
+*/
+main .gsc-comment-author-avatar,
+main .gsc-comment-box-write .gsc-comment-author-avatar,
+main img[class*="avatar"] {
+  border-radius: 11px;
+}
+
+/* 답글 화살표(말풍선 꼬리)는 아바타가 원일 때를 전제로 그려져 어긋난다 */
+main .gsc-comment-box-tabs::before,
+main .gsc-comment::before {
+  display: none;
+}
+
+/* 코드 블록은 본문과 같은 결로 */
+main .gsc-comment-content pre {
+  border-radius: 12px;
+}

@@ -35,16 +35,21 @@ export function PostArticle({
       <ReadingProgress />
 
       <article className="mx-auto w-full max-w-[var(--container-prose)] px-6 pb-4 pt-12 sm:pt-16">
+        {/*
+          돌아가기는 아이콘 버튼이 아니라 글줄에 맞춘 텍스트로 둔다.
+          40px 짜리 동그란 버튼이 본문 바로 위에 떠 있으면 어느 선에도 맞지 않아
+          혼자 얹혀 있는 것처럼 보인다. 글자로 두면 아래 제목·태그와 왼쪽 선이 맞는다.
+        */}
         <Link
           href="/posts"
-          aria-label="글 목록으로 돌아가기"
-          className="-ml-2.5 inline-flex size-10 items-center justify-center text-muted transition-colors hover:text-accent-text"
+          className="group inline-flex items-center gap-1.5 text-[14px] font-semibold text-muted transition-colors hover:text-accent-text"
         >
-          <ArrowLeft size={22} aria-hidden />
+          <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
+          목록으로
         </Link>
 
         {entry.tags && entry.tags.length > 0 && (
-          <div className="mt-5 flex flex-wrap gap-2">
+          <div className="mt-6 flex flex-wrap gap-2">
             {entry.tags.map((t) => (
               <Link
                 key={t}
@@ -85,15 +90,14 @@ export function PostArticle({
           <Markdown>{body}</Markdown>
         </div>
 
-        {/* 반응 — "불 지피기" */}
-        <div className="mt-16 border-t border-hairline pt-10 text-center">
-          <p className="mb-4 text-[15px] text-muted">이 글이 좋았다면, 불을 지펴주세요</p>
+        {/* 반응 — 로그인 없이 남길 수 있는 유일한 자리 */}
+        <div className="mt-16 border-t border-hairline pt-12 text-center">
           <StokeButton slug={entry.slug} initial={entry.stokes ?? 0} />
         </div>
 
         {/* 이어 읽기 */}
         {(prev || next) && (
-          <nav className="mt-14 grid gap-3 sm:grid-cols-2">
+          <nav className="mt-16 grid gap-3 sm:grid-cols-2">
             <Adjacent entry={prev} direction="prev" />
             <Adjacent entry={next} direction="next" />
           </nav>

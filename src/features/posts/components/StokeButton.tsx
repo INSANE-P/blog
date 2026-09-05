@@ -3,58 +3,47 @@
 import { useEffect, useState } from "react";
 import { stokePost } from "../actions";
 
-/** 설화의 불꽃(겉불 + 속불). 색은 --flame-* 토큰이라 라이트/다크에서 다르게 보인다. */
-const FLAME =
-  "M40 58 C28 58 20 52 21 43 C21 36 24 31 28 33 C30 26 34 19 40 16 C46 19 50 26 52 33 C56 31 59 37 58 44 C58 53 52 58 40 58 Z";
-const FLAME_INNER =
-  "M40 53 C31 53 26 49 26 43 C26 38 28 34 31 36 C33 30 36 25 40 23 C44 25 47 30 49 36 C52 34 54 38 54 43 C54 49 49 53 40 53 Z";
-
 const storageKey = (slug: string) => `stoked:${slug}`;
 
-/**
- * 누른 지점에서 frost 빛이 원형으로 화면을 한 번 퍼졌다 빠르게 사라지는 연출.
- * 색(번짐·링)은 .dark 스코프 CSS로 라이트/다크에 맞춘다. 모션 최소화 설정이면 안 만든다.
- */
-function fireBurst(x: number, y: number) {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-  const base = Math.max(window.innerWidth, window.innerHeight) * 0.5;
-
-  const root = document.createElement("div");
-  root.className = "stoke-burst";
-
-  const place = (el: HTMLDivElement) => {
-    el.style.left = `${x}px`;
-    el.style.top = `${y}px`;
-  };
-
-  const wash = document.createElement("div");
-  wash.className = "sb-fx sb-wash";
-  place(wash);
-  wash.style.width = wash.style.height = `${base}px`;
-  wash.style.animation = "sb-wash 0.7s ease-out forwards";
-  root.appendChild(wash);
-
-  const ring = document.createElement("div");
-  ring.className = "sb-fx sb-ring";
-  place(ring);
-  ring.style.width = ring.style.height = `${base * 0.9}px`;
-  ring.style.animation = "sb-ring 0.72s ease-out forwards";
-  root.appendChild(ring);
-
-  document.body.appendChild(root);
-  window.setTimeout(() => root.remove(), 900);
+/** 네 갈래 스파클 — 테마 토글의 별과 같은 도형이다. 이 사이트에서 "좋다"는 이 모양으로 말한다. */
+function Sparkle({ size = 20 }: { size?: number }) {
+  const R = 9.4;
+  const w = R * 0.17;
+  const d = [
+    `M 12,${12 - R}`,
+    `Q ${12 + w},${12 - w} ${12 + R},12`,
+    `Q ${12 + w},${12 + w} 12,${12 + R}`,
+    `Q ${12 - w},${12 + w} ${12 - R},12`,
+    `Q ${12 - w},${12 - w} 12,${12 - R}`,
+    "Z",
+  ].join(" ");
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden>
+      <path d={d} fill="currentColor" />
+    </svg>
+  );
 }
 
 /**
- * "불 지피기" 반응 버튼 — 평소 일렁이고, 호버하면 피어오르고, 누르면 한 번 크게 타오른다.
- * 누르면 좁은 RPC(stokePost)로 카운트가 DB에 영속된다(ADR-0016).
- * 중복은 브라우저당 1회(localStorage)로 가볍게 막는다 — 이미 지핀 글은 다시 못 누른다.
+ * 글 끝 반응 (ADR-0028).
+ *
+ * "불 지피기"였던 것을 바꿨다. 불꽃은 예전 정체성(설화·서리)에 딸린 은유였는데
+ * 그 정체성을 걷어내면서 색 토큰(--flame-*)까지 지워, 불꽃이 정의되지 않은 색으로
+ * 그려지고 있었다. 은유만 남고 근거는 사라진 상태였다.
+ *
+ * 대신 스파클을 쓴다. 다크 모드의 별과 같은 도형이라 이 사이트 안에서 뜻이 이어지고,
+ * 반짝임은 설명 없이 "좋았다"로 읽힌다.
+ *
+ * 로그인을 요구하지 않는 것이 이 버튼의 존재 이유다. 댓글은 GitHub 계정이 있어야 하지만
+ * 글이 좋았다는 말은 그 문턱 없이 남길 수 있어야 한다. 중복은 브라우저당 한 번으로
+ * 가볍게 막는다 — 엄밀히 세는 것이 목적이 아니라 반응을 받는 것이 목적이다.
+ *
+ * 숫자는 누른 사람에게만 보인다. 0으로 시작하는 숫자가 보이면 아무도 안 눌렀다는 사실이
+ * 먼저 읽혀서, 누르려던 사람도 손을 거둔다.
  */
 export function StokeButton({ slug, initial = 0 }: { slug: string; initial?: number }) {
   const [count, setCount] = useState(initial);
   const [mine, setMine] = useState(false);
-  const [lit, setLit] = useState(false);
   const [pending, setPending] = useState(false);
 
   // localStorage는 클라이언트에서만 — 하이드레이션 이후 내 상태를 복원한다.
@@ -66,14 +55,10 @@ export function StokeButton({ slug, initial = 0 }: { slug: string; initial?: num
     }
   }, [slug]);
 
-  async function stoke(e: React.MouseEvent<HTMLButtonElement>) {
+  async function react() {
     if (mine || pending) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    fireBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
     setMine(true);
     setPending(true);
-    setLit(true);
-    window.setTimeout(() => setLit(false), 600);
     setCount((c) => c + 1); // 낙관적 반영
 
     const next = await stokePost(slug);
@@ -85,7 +70,7 @@ export function StokeButton({ slug, initial = 0 }: { slug: string; initial?: num
       try {
         localStorage.setItem(storageKey(slug), "1");
       } catch {
-        // 무시 — 이번 세션 동안은 지핀 상태로 동작
+        // 무시 — 이번 세션 동안은 누른 상태로 동작
       }
     }
     setPending(false);
@@ -94,49 +79,22 @@ export function StokeButton({ slug, initial = 0 }: { slug: string; initial?: num
   return (
     <button
       type="button"
-      onClick={stoke}
+      onClick={react}
       aria-pressed={mine}
-      disabled={pending}
-      className={`stoke inline-flex items-center gap-2.5 rounded-full border px-6 py-3 transition hover:-translate-y-0.5 ${
-        lit ? "is-lit" : ""
-      } ${mine ? "is-mine" : ""}`}
-      style={{
-        borderColor: mine ? "var(--accent)" : "var(--border)",
-        background: mine
-          ? "color-mix(in srgb, var(--accent) 12%, var(--surface))"
-          : "var(--surface)",
-      }}
+      disabled={pending || mine}
+      className={`group inline-flex items-center gap-2.5 rounded-full border px-6 py-3 text-[15px] font-semibold transition-colors ${
+        mine
+          ? "border-accent/45 bg-tint text-accent-text"
+          : "border-hairline text-muted hover:border-accent/45 hover:text-accent-text"
+      }`}
     >
-      <svg width="24" height="24" viewBox="16 12 48 48" aria-hidden className="overflow-visible">
-        <defs>
-          <linearGradient
-            id="stoke-grad"
-            gradientUnits="userSpaceOnUse"
-            x1="40"
-            y1="16"
-            x2="40"
-            y2="58"
-          >
-            <stop offset="0" stopColor="var(--flame-top)" />
-            <stop offset="0.4" stopColor="var(--flame-mid)" />
-            <stop offset="0.78" stopColor="var(--flame-low)" />
-            <stop offset="1" stopColor="var(--flame-base)" />
-          </linearGradient>
-        </defs>
-        <g className="stoke-flame">
-          <g className="stoke-flicker">
-            <path d={FLAME} fill="url(#stoke-grad)" />
-            <path d={FLAME_INNER} fill="var(--flame-inner)" />
-          </g>
-        </g>
-      </svg>
-      <span className={`text-[15px] font-medium ${mine ? "text-accent-text" : "text-foreground"}`}>
-        {mine ? "불 지폈어요" : "불 지피기"}
+      <span
+        className={`transition-transform ${mine ? "text-accent" : "text-muted group-hover:scale-110 group-hover:text-accent"}`}
+      >
+        <Sparkle />
       </span>
-      {/* 카운트는 "지핀 사람한테만" 보인다 — 참여 후 "나도 함께 지폈네"의 공개 순간 */}
-      {mine && (
-        <span className="text-[15px] font-bold text-accent-text tabular-nums">{count}</span>
-      )}
+      {mine ? "고마워요" : "좋았어요"}
+      {mine && <span className="tabular-nums font-bold">{count}</span>}
     </button>
   );
 }

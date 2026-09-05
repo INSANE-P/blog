@@ -51,7 +51,6 @@ export default function AboutPage() {
           </p>
         </div>
 
-        {/* 설화를 안은 공룡 — 다른 화면과 같은 캐릭터로 톤을 맞춘다 */}
       </section>
 
       {/* 기술 */}

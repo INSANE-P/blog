@@ -1,0 +1,62 @@
+/*
+  Giscus 커스텀 테마 — 다크 (ADR-0028).
+  값은 src/styles/tokens.css 의 .dark 와 같아야 한다.
+*/
+@import "https://giscus.app/themes/dark.css";
+
+main {
+  --color-canvas-default: #000000; /* background */
+  --color-canvas-subtle: #161616; /* surface-hover */
+  --color-canvas-inset: #161616;
+  --color-fg-default: #dfe2e5; /* prose-fg */
+  --color-fg-muted: #9a9a9a; /* muted */
+  --color-fg-subtle: #9a9a9a;
+  --color-border-default: rgba(255, 255, 255, 0.16); /* border */
+  --color-border-muted: rgba(255, 255, 255, 0.09); /* hairline */
+  --color-neutral-muted: rgba(95, 205, 238, 0.1); /* tint */
+  --color-accent-fg: #5fcdee; /* accent-text */
+  --color-accent-emphasis: #5fcdee;
+  --color-accent-muted: rgba(95, 205, 238, 0.3);
+  --color-btn-text: #ffffff;
+  --color-btn-bg: #161616;
+  --color-btn-border: rgba(255, 255, 255, 0.16);
+  --color-btn-hover-bg: #1f1f1f;
+  --color-btn-primary-bg: #5fcdee;
+  --color-btn-primary-hover-bg: #7ad8f4;
+  --color-btn-primary-text: #000000;
+  --color-btn-primary-border: transparent;
+}
+
+main .gsc-comment-box,
+main .gsc-comment .gsc-comment-header,
+main .gsc-comment .gsc-comment-content {
+  border-radius: 14px;
+}
+
+main .gsc-comments > .gsc-header {
+  display: none;
+}
+
+/*
+  댓글 아바타 (ADR-0028).
+
+  giscus 는 GitHub 아바타를 원으로 그린다. 이 사이트의 면은 전부 둥근 사각형이라
+  (카드 18px · 코드 14px · 칩 9px) 아바타만 원이면 혼자 다른 문법을 쓴다.
+  모양만 맞추고 아바타 자체는 그대로 둔다 — 누가 썼는지는 얼굴이 가장 빨리 말해 준다.
+*/
+main .gsc-comment-author-avatar,
+main .gsc-comment-box-write .gsc-comment-author-avatar,
+main img[class*="avatar"] {
+  border-radius: 11px;
+}
+
+/* 답글 화살표(말풍선 꼬리)는 아바타가 원일 때를 전제로 그려져 어긋난다 */
+main .gsc-comment-box-tabs::before,
+main .gsc-comment::before {
+  display: none;
+}
+
+/* 코드 블록은 본문과 같은 결로 */
+main .gsc-comment-content pre {
+  border-radius: 12px;
+}
