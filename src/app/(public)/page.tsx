@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "@/components/icons";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { SectionTitle } from "@/components/ui/SectionTitle";
 import { PostCard } from "@/features/posts/components/PostCard";
 import { getRecent } from "@/features/posts/queries";
 
@@ -33,11 +34,9 @@ export default async function HomePage() {
       </section>
 
       {/* 최근 글 — 제목은 표지라 영문 소문자다(ADR-0029) */}
-      <section className="border-t border-hairline pt-14 sm:pt-16">
-        <div className="mb-8 flex items-baseline justify-between sm:mb-9">
-          <h2 className="font-display text-[30px] font-extrabold lowercase tracking-[-0.035em] sm:text-[36px]">
-            new
-          </h2>
+      <section className="pt-20 sm:pt-24">
+        <div className="mb-9 flex items-end justify-between gap-6 sm:mb-10">
+          <SectionTitle>new</SectionTitle>
           <Link
             href="/posts"
             className="group inline-flex shrink-0 items-center gap-1.5 font-display text-[15px] font-semibold lowercase text-muted transition-colors hover:text-accent-text sm:text-[16px]"

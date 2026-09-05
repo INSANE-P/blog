@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight, Menu, X } from "@/components/icons";
@@ -25,11 +26,20 @@ const SOCIAL = [
  * 순서가 있으면 "메뉴가 열렸다"로 읽힌다. 배경은 움직이지 않는다 — 아래 주석 참고.
  *
  * 닫는 방법을 셋 둔다 — X, Esc, 항목 선택. 전체 화면을 덮는 것은 빠져나갈 길이 분명해야 한다.
+ *
+ * 덮개는 반드시 body 로 옮겨 그린다(포털). 헤더에 backdrop-filter 가 걸려 있는데,
+ * backdrop-filter 를 가진 요소는 자기 자손의 position:fixed 기준점이 된다.
+ * 그대로 두면 inset-0 이 화면 전체가 아니라 헤더 박스(가로 전체 × 68px)를 가리켜서,
+ * 덮개가 헤더 높이만큼만 칠해지고 그 아래로 뒤 페이지가 그대로 비친다.
  */
 export function MobileNav({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const [shown, setShown] = useState(false);
+  // 포털은 DOM 이 있어야 하므로 마운트 이후에만 그린다(서버 렌더 안전)
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => setMounted(true), []);
 
   // 경로가 바뀌면(항목을 눌렀으면) 닫는다
   useEffect(() => setOpen(false), [pathname]);
@@ -72,8 +82,10 @@ export function MobileNav({ className }: { className?: string }) {
         그대로 비친다 — 특히 다크에서는 배경끼리 같은 검정이라 히어로의 흰 글자만 떠올라
         화면이 깨진 것처럼 보였다. 움직이는 것은 안의 내용뿐이어야 한다.
       */}
-      {open && (
-        <div className="fixed inset-0 z-50 bg-background">
+      {open &&
+        mounted &&
+        createPortal(
+          <div className="fixed inset-0 z-[60] bg-background">
           <div className="flex h-full flex-col px-6">
             {/* 머리줄 — 열기 전 헤더와 같은 자리에 같은 크기로 둔다 */}
             <div className="flex h-[68px] shrink-0 items-center justify-between">
@@ -141,9 +153,10 @@ export function MobileNav({ className }: { className?: string }) {
               </div>
               <ThemeToggle className="-mr-2" />
             </div>
-          </div>
-        </div>
-      )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
