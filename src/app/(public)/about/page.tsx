@@ -1,25 +1,14 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ArrowUpRight, Mail } from "@/components/icons";
 import { GithubIcon } from "@/components/ui/GithubIcon";
-import { SectionLabel } from "@/components/ui/SectionLabel";
 import { AWARDS, PROJECTS, STACK } from "./data";
 
 export const metadata: Metadata = { title: "소개" };
 
-// 옅은 틴트 + accent 톤 — 목록의 태그 배지와 같은 언어(일관성)
-const chipStyle = {
-  background: "color-mix(in srgb, var(--accent) 8%, var(--surface))",
-  borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)",
-  color: "color-mix(in srgb, var(--accent) 52%, var(--foreground))",
-};
-
+/** 칩 — 목록 카드의 태그와 같은 언어로 맞춘다. 누를 수 없는 것에는 악센트를 쓰지 않는다. */
 function Tag({ children }: { children: React.ReactNode }) {
   return (
-    <span
-      className="rounded-md border px-2 py-0.5 font-display text-[11px] font-medium"
-      style={chipStyle}
-    >
+    <span className="rounded-[9px] border border-hairline px-3 py-1.5 text-[13px] font-semibold text-muted">
       {children}
     </span>
   );
@@ -32,11 +21,11 @@ function LinkChip({ label, href }: { label: string; href: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group inline-flex items-center gap-0.5 font-display text-[13px] font-medium text-muted transition hover:text-accent"
+      className="group inline-flex items-center gap-1 text-[14px] font-semibold text-muted transition-colors hover:text-accent"
     >
       {label}
       <ArrowUpRight
-        className="size-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+        className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
         aria-hidden
       />
     </a>
@@ -49,13 +38,13 @@ export default function AboutPage() {
       {/* 인트로 — 이름 + 한 문단 + 마스코트(사진 대신) */}
       <section className="flex flex-col-reverse items-start gap-7 sm:flex-row sm:items-center sm:gap-9">
         <div className="min-w-0 flex-1">
-          <h1 className="text-[30px] font-bold tracking-tight text-foreground">
+          <h1 className="text-[32px] font-extrabold tracking-[-0.035em] sm:text-[40px]">
             안녕하세요, <span className="text-accent">박찬빈</span>이에요
           </h1>
-          <p className="mt-2 font-display text-sm text-muted">
+          <p className="mt-3 text-[16px] text-muted">
             프론트엔드 개발자 · 세종대학교 컴퓨터공학과
           </p>
-          <p className="mt-5 break-keep text-[15px] leading-relaxed text-foreground/90">
+          <p className="mt-6 max-w-[42rem] text-[17px] leading-[1.75] text-prose-fg">
             팀에서 <span className="font-semibold text-accent">같이 만들어가는 과정</span>을 좋아하는
             프론트엔드 개발자예요. 더 나은 방법이 보이면 먼저 제안하고, 필요하면 새로운 것도 마다하지
             않고 시도해요. 재밌어 보이는 걸 만들고, 생각이 향하는 대로 움직여요.
@@ -66,12 +55,12 @@ export default function AboutPage() {
       </section>
 
       {/* 기술 */}
-      <section className="mt-16 border-t border-border pt-10">
-        <SectionLabel>기술</SectionLabel>
-        <dl className="mt-6 flex flex-col gap-4">
+      <section className="mt-20 border-t border-hairline pt-12">
+        <h2 className="text-[26px] font-extrabold tracking-[-0.035em] sm:text-[30px]">기술</h2>
+        <dl className="mt-7 flex flex-col gap-5">
           {STACK.map(({ label, items }) => (
             <div key={label} className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:gap-5">
-              <dt className="w-24 shrink-0 font-display text-[13px] font-medium text-muted">
+              <dt className="w-24 shrink-0 pt-1.5 text-[15px] font-semibold text-muted">
                 {label}
               </dt>
               <dd className="flex flex-wrap gap-1.5">
@@ -85,22 +74,22 @@ export default function AboutPage() {
       </section>
 
       {/* 프로젝트 */}
-      <section className="mt-16 border-t border-border pt-10">
-        <SectionLabel>프로젝트</SectionLabel>
+      <section className="mt-20 border-t border-hairline pt-12">
+        <h2 className="text-[26px] font-extrabold tracking-[-0.035em] sm:text-[30px]">프로젝트</h2>
         <div className="mt-7 flex flex-col gap-10">
           {PROJECTS.map((p) => (
             <article key={p.name}>
               <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                <h3 className="text-[20px] font-bold tracking-tight text-foreground">{p.name}</h3>
+                <h3 className="text-[21px] font-bold tracking-[-0.02em]">{p.name}</h3>
                 {p.status && (
-                  <span className="inline-flex items-center gap-1.5 font-display text-[12px] text-muted">
+                  <span className="inline-flex items-center gap-1.5 text-[14px] text-muted">
                     <span className="size-1.5 rounded-full bg-accent" aria-hidden />
                     {p.status}
                   </span>
                 )}
               </div>
-              <p className="mt-1.5 text-[14px] text-muted">{p.tagline}</p>
-              <p className="mt-1 font-display text-[12px] text-muted">
+              <p className="mt-2 text-[16px] text-muted">{p.tagline}</p>
+              <p className="mt-1.5 text-[14px] text-muted">
                 {p.period} · {p.role}
               </p>
 
@@ -108,11 +97,11 @@ export default function AboutPage() {
                 {p.points.map((pt) => (
                   <li
                     key={pt}
-                    className="flex gap-2.5 text-[14px] leading-relaxed text-foreground/90"
+                    className="flex gap-3 text-[16px] leading-[1.75] text-prose-fg"
                   >
                     <span
-                      className="mt-2 size-1 shrink-0 rounded-full"
-                      style={{ background: "color-mix(in srgb, var(--accent) 55%, transparent)" }}
+                      className="mt-[0.65em] size-1.5 shrink-0 rounded-full"
+                      style={{ background: "var(--accent)", opacity: 0.65 }}
                       aria-hidden
                     />
                     {pt}
@@ -137,14 +126,14 @@ export default function AboutPage() {
       </section>
 
       {/* 활동 */}
-      <section className="mt-16 border-t border-border pt-10">
-        <SectionLabel>활동</SectionLabel>
+      <section className="mt-20 border-t border-hairline pt-12">
+        <h2 className="text-[26px] font-extrabold tracking-[-0.035em] sm:text-[30px]">활동</h2>
         <article className="mt-7">
           <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-            <h3 className="text-[20px] font-bold tracking-tight text-foreground">그리디 (Greedy)</h3>
-            <span className="font-display text-[12px] text-muted">2025.03 ~ 현재</span>
+            <h3 className="text-[21px] font-bold tracking-[-0.02em]">그리디 (Greedy)</h3>
+            <span className="text-[14px] text-muted">2025.03 ~ 현재</span>
           </div>
-          <p className="mt-1.5 text-[14px] text-muted">
+          <p className="mt-2 text-[16px] text-muted">
             세종대학교 SW 학술 동아리 · 2기 멘티 → 3기 스터디 리드 → 4기 메인테이너
           </p>
           <ul className="mt-4 flex flex-col gap-2">
@@ -152,10 +141,10 @@ export default function AboutPage() {
               "스터디 리드로 상태관리 미션을 Zustand·TanStack Query 기반으로 재설계 (3기)",
               "메인테이너로 새 미션 설계 및 학습 자료 제작 (4기)",
             ].map((pt) => (
-              <li key={pt} className="flex gap-2.5 text-[14px] leading-relaxed text-foreground/90">
+              <li key={pt} className="flex gap-3 text-[16px] leading-[1.75] text-prose-fg">
                 <span
-                  className="mt-2 size-1 shrink-0 rounded-full"
-                  style={{ background: "color-mix(in srgb, var(--accent) 55%, transparent)" }}
+                  className="mt-[0.65em] size-1.5 shrink-0 rounded-full"
+                  style={{ background: "var(--accent)", opacity: 0.65 }}
                   aria-hidden
                 />
                 {pt}
@@ -172,46 +161,48 @@ export default function AboutPage() {
       </section>
 
       {/* 수상 */}
-      <section className="mt-16 border-t border-border pt-10">
-        <SectionLabel>수상</SectionLabel>
-        <ul className="mt-6 flex flex-col gap-5">
+      <section className="mt-20 border-t border-hairline pt-12">
+        <h2 className="text-[26px] font-extrabold tracking-[-0.035em] sm:text-[30px]">수상</h2>
+        <ul className="mt-7 flex flex-col gap-7">
           {AWARDS.map((a) => (
             <li key={a.title}>
-              <div className="text-[15px] font-semibold text-foreground">{a.title}</div>
-              <div className="mt-1 font-display text-[12px] text-muted">{a.by}</div>
-              <div className="mt-0.5 text-[13px] text-muted">{a.note}</div>
+              <div className="text-[17px] font-bold">{a.title}</div>
+              <div className="mt-1.5 text-[15px] text-muted">{a.by}</div>
+              <div className="mt-1 text-[15px] text-muted">{a.note}</div>
             </li>
           ))}
         </ul>
       </section>
 
       {/* 연락처 */}
-      <section className="mt-16 border-t border-border pt-10">
-        <SectionLabel>연락처</SectionLabel>
-        <div className="mt-6 flex flex-wrap items-center gap-3">
+      <section className="mt-20 border-t border-hairline pt-12">
+        <h2 className="text-[26px] font-extrabold tracking-[-0.035em] sm:text-[30px]">연락처</h2>
+        <div className="mt-7 flex flex-wrap items-center gap-3">
           <a
             href="https://github.com/INSANE-P"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 font-display text-[13px] font-medium text-foreground transition hover:border-accent hover:text-accent"
+            className="inline-flex items-center gap-2 rounded-xl border border-hairline px-5 py-3 text-[15px] font-semibold transition-colors hover:border-accent hover:text-accent"
           >
             <GithubIcon className="size-[17px]" />
             GitHub
           </a>
           <a
             href="mailto:chanbin0626@gmail.com"
-            className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 font-display text-[13px] font-medium text-foreground transition hover:border-accent hover:text-accent"
+            className="inline-flex items-center gap-2 rounded-xl border border-hairline px-5 py-3 text-[15px] font-semibold transition-colors hover:border-accent hover:text-accent"
           >
             <Mail className="size-[17px]" />
             메일
           </a>
-          <Link
-            href="/resume"
-            className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 font-display text-[13px] font-medium text-muted transition hover:border-accent hover:text-accent"
+          <a
+            href="https://portfolio.chanbin.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl border border-hairline px-5 py-3 text-[15px] font-semibold transition-colors hover:border-accent hover:text-accent"
           >
-            이력서
-            <span className="font-display text-[11px] text-accent">준비중</span>
-          </Link>
+            포트폴리오
+            <ArrowUpRight className="size-4" aria-hidden />
+          </a>
         </div>
       </section>
     </div>
