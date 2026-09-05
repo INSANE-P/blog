@@ -7,27 +7,30 @@ import { NAV } from "./nav";
 import { ThemeToggle } from "./ThemeToggle";
 
 /**
- * 헤더 (ADR-0024).
+ * 헤더 (ADR-0024·0026).
  *
- * 로고는 그림이 아니라 활자다 — 포트폴리오와 같은 아웃라인 워드마크를 쓴다.
- * 마스코트나 심볼을 두지 않는 이유는, 유지할 브랜드 자산을 늘리지 않기 위해서다.
+ * 로고는 그림이 아니라 활자다 — 포트폴리오와 같은 워드마크를 쓴다. 다만 헤더에서는
+ * 속을 채운다. 히어로의 큰 아웃라인은 획이 굵어 형태가 읽히지만, 22px에서는 선만 남아
+ * 흐려 보인다. 아웃라인은 크기가 클 때만 성립하는 장치다.
+ *
+ * 높이 76px, 항목 17px. 헤더가 얇고 글씨가 작으면 "어디로 갈 수 있는지"가 눈에
+ * 들어오지 않는다. 누르는 대상은 크게 둔다(피츠의 법칙).
  */
 export function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-hairline bg-background/85 backdrop-blur">
-      <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-3.5">
-        <Link href="/" className="group" aria-label="홈으로">
-          <span className="font-display text-[17px] font-extrabold uppercase tracking-tight">
-            <span className="stroke-text stroke-hover-accent transition-all">CHANBIN</span>
-            <span className="text-accent">.</span>
+    <header className="sticky top-0 z-40 border-b border-hairline bg-background/90 backdrop-blur-md">
+      <div className="mx-auto flex h-[68px] w-full max-w-[1080px] items-center justify-between px-6 sm:h-[76px] sm:px-10">
+        <Link href="/" aria-label="홈으로" className="group">
+          <span className="font-display text-[20px] font-black uppercase tracking-tight transition-colors group-hover:text-accent sm:text-[22px]">
+            CHANBIN<span className="text-accent">.</span>
           </span>
         </Link>
 
         <MobileNav className="sm:hidden" />
 
-        <nav className="hidden items-center gap-1 sm:flex">
+        <nav className="hidden items-center sm:flex">
           {NAV.map((item) => {
             const active = pathname.startsWith(item.href);
             return (
@@ -35,17 +38,17 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`px-3 py-2 text-[15px] transition-colors ${
-                  active ? "text-foreground" : "text-muted hover:text-foreground"
+                className={`rounded-xl px-[18px] py-[11px] text-[17px] transition-colors ${
+                  active
+                    ? "font-bold text-foreground"
+                    : "font-semibold text-muted hover:bg-surface-hover hover:text-foreground"
                 }`}
               >
                 {item.label}
               </Link>
             );
           })}
-          <span className="ml-1.5">
-            <ThemeToggle />
-          </span>
+          <ThemeToggle className="ml-2" />
         </nav>
       </div>
     </header>

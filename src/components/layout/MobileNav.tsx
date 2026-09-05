@@ -51,11 +51,10 @@ export function MobileNav({ className }: { className?: string }) {
 
       {open && (
         <div className="fixed inset-0 z-50 bg-background">
-          <div className="mx-auto flex h-full max-w-md flex-col px-5 py-3.5">
+          <div className="mx-auto flex h-full max-w-md flex-col px-6 py-3">
             <div className="flex items-center justify-between">
-              <span className="font-display text-[17px] font-extrabold uppercase tracking-tight">
-                <span className="stroke-text">CHANBIN</span>
-                <span className="text-accent">.</span>
+              <span className="font-display text-[20px] font-black uppercase tracking-tight">
+                CHANBIN<span className="text-accent">.</span>
               </span>
               <button
                 type="button"
