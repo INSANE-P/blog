@@ -27,41 +27,52 @@ import { SectionTitle } from "@/components/ui/SectionTitle";
  * 한 번 받아 두면 브라우저가 캐시한다. 없으면 내장 테마로 물러난다 —
  * 우리 색은 잃더라도 댓글이 안 보이는 것보다는 낫다.
  *
+ * 폴백은 `noborder_*` 가 아니라 `light`/`dark` 다. noborder_dark 는 상자 배경이 #1e1e20 이라
+ * 우리 순수 검정과 거의 붙어 상자가 구분되지 않고, 글자도 10.5:1 로 흐리다.
+ * `dark` 는 글자가 16:1 이고 테두리가 있어 상자가 떨어져 보인다 —
+ * 폴백에서는 우리 결보다 읽히는 것이 먼저다.
+ *
  * http(로컬)에서는 애초에 mixed-content 로 막히므로 확인 없이 내장 테마를 쓴다.
  */
 export function Comments() {
-  // 초기엔 내장 테마(SSR/하이드레이션 안전), 마운트 후 실제 환경에 맞춰 갱신
-  const [theme, setTheme] = useState("noborder_light");
+  // 커스텀 테마 파일을 쓸 수 있는지 — 마운트 때 한 번만 확인한다
+  const [customOk, setCustomOk] = useState<boolean | null>(null);
+  const [dark, setDark] = useState(false);
 
   useEffect(() => {
-    let alive = true;
-
-    const compute = async () => {
-      const dark = document.documentElement.classList.contains("dark");
-      const builtin = dark ? "noborder_dark" : "noborder_light";
-
-      if (window.location.protocol !== "https:") {
-        setTheme(builtin);
-        return;
-      }
-
-      const url = `${window.location.origin}/giscus-${dark ? "dark" : "light"}.css`;
-      try {
-        const res = await fetch(url, { method: "HEAD" });
-        if (alive) setTheme(res.ok ? url : builtin);
-      } catch {
-        if (alive) setTheme(builtin);
-      }
-    };
-
-    compute();
-    const observer = new MutationObserver(() => void compute());
+    const sync = () => setDark(document.documentElement.classList.contains("dark"));
+    sync();
+    const observer = new MutationObserver(sync);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    /*
+      확인은 마운트 때 한 번뿐이다. 테마를 바꿀 때마다 확인하면 토글할 때마다
+      네트워크 왕복을 기다리게 되어 "안 바뀐다"로 느껴진다.
+      파일이 있는지 없는지는 이 화면이 떠 있는 동안 변하지 않는다.
+    */
+    if (window.location.protocol !== "https:") {
+      setCustomOk(false);
+      return;
+    }
+    let alive = true;
+    fetch(`${window.location.origin}/giscus-light.css`, { method: "HEAD" })
+      .then((res) => alive && setCustomOk(res.ok))
+      .catch(() => alive && setCustomOk(false));
     return () => {
       alive = false;
-      observer.disconnect();
     };
   }, []);
+
+  // 확인 전(null)에는 내장 테마로 둔다 — 잘못된 주소를 넘겨 색이 통째로 빠지는 것보다 낫다
+  const theme =
+    customOk === true
+      ? `${window.location.origin}/giscus-${dark ? "dark" : "light"}.css`
+      : dark
+        ? "dark"
+        : "light";
 
   return (
     <section aria-label="댓글">

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "@/components/icons";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Markdown } from "@/lib/content/Markdown";
-import { extractHeadings, readingMinutes } from "@/lib/content/headings";
+import { extractHeadings } from "@/lib/content/headings";
 import { formatDate } from "@/lib/utils/date";
 import type { Entry } from "../types";
 import { entryHref } from "../types";
@@ -59,8 +59,6 @@ export function PostArticle({
           <span className="font-bold text-foreground">박찬빈</span>
           <Dot />
           <time dateTime={entry.date}>{formatDate(entry.date)}</time>
-          <Dot />
-          <span>{readingMinutes(body)}분</span>
         </div>
 
         {entry.coverImage && (

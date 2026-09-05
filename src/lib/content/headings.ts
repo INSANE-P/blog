@@ -61,15 +61,3 @@ export function extractHeadings(md: string): Heading[] {
   }
   return out;
 }
-
-/**
- * 읽는 시간(분).
- *
- * 영어 기준의 분당 단어 수를 쓰면 한글 글이 실제보다 훨씬 길게 나온다.
- * 한글은 글자 하나가 담는 정보가 많아 분당 500자 정도로 잡는 것이 실제 체감에 가깝다.
- * 코드 블록은 눈으로 훑는 속도가 달라 글자 수에서 뺀다.
- */
-export function readingMinutes(md: string): number {
-  const text = stripFences(md).replace(/!\[[^\]]*\]\([^)]*\)/g, "");
-  return Math.max(1, Math.round(text.replace(/\s/g, "").length / 500));
-}
