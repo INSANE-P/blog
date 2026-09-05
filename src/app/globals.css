@@ -47,6 +47,11 @@ body {
   -webkit-text-stroke: 1px var(--foreground);
 }
 
+/* 큰 활자용 굵은 아웃라인 — 1px 획은 50px 이상에서 실처럼 가늘어져 형태가 흐려진다 */
+.stroke-text-thick {
+  -webkit-text-stroke-width: 2px;
+}
+
 /* 링크(그룹) 호버 시 아웃라인이 악센트로 물든다 */
 .group:hover .stroke-hover-accent {
   -webkit-text-stroke-color: var(--accent);

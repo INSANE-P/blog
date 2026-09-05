@@ -45,7 +45,7 @@ function LinkChip({ label, href }: { label: string; href: string }) {
 
 export default function AboutPage() {
   return (
-    <div className="mx-auto max-w-3xl px-5 pb-4 pt-16">
+    <div className="mx-auto w-full max-w-[1080px] px-6 pb-4 pt-16 sm:px-10 sm:pt-20">
       {/* 인트로 — 이름 + 한 문단 + 마스코트(사진 대신) */}
       <section className="flex flex-col-reverse items-start gap-7 sm:flex-row sm:items-center sm:gap-9">
         <div className="min-w-0 flex-1">

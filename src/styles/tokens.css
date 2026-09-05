@@ -17,6 +17,8 @@
   --border: rgba(0, 0, 0, 0.14);
   /* 목록 행 구분처럼 "있는 듯 없는 듯" 옅은 선 */
   --hairline: rgba(0, 0, 0, 0.07);
+  /* 호버·칩 배경 — 선을 하나 더 긋지 않고 면으로만 눌린 느낌을 준다 */
+  --surface-hover: #f4f6f7;
   --accent: #2f8fb5;
 }
 
@@ -27,6 +29,7 @@
   --muted: #9a9a9a;
   --border: rgba(255, 255, 255, 0.16);
   --hairline: rgba(255, 255, 255, 0.09);
+  --surface-hover: #161616;
   --accent: #5fcdee;
 }
 
@@ -34,6 +37,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
   --color-border: var(--border);
   --color-hairline: var(--hairline);
   --color-foreground: var(--foreground);
