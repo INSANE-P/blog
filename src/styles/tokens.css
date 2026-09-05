@@ -1,82 +1,126 @@
 /*
-  폰트는 next/font(셀프 호스팅)로 로드하고, 여기선 생성된 CSS 변수(--font-pretendard,
-  --font-gmarket)를 토큰에 연결한다(ADR-0003). 파일/등록은 src/app/fonts.ts.
+  디자인 토큰 (ADR-0024).
 
-  Frost 디자인 토큰 — 2계층
-  raw: 원시 팔레트 / semantic: 컴포넌트가 참조하는 의미 토큰
-  다크 모드는 semantic만 덮어쓴다(컴포넌트는 그대로).
+  포트폴리오와 같은 정체성을 쓴다 — 순수 흑백 배경 위에 악센트 하나.
+  색을 여러 개 쓰지 않는 것이 규율이다. 모든 곳을 강조하면 아무것도 강조되지 않는다.
+
+  폰트는 next/font(셀프 호스팅) Pretendard + @fontsource Montserrat.
+  제목만 Montserrat, 본문은 Pretendard 하나로 간다.
 */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* raw — Frost 팔레트 */
-  --frost-50: #f4f9fc;
-  --frost-100: #e6f1fb;
-  --frost-200: #d6e6f2;
-  --frost-300: #a6c6dc;
-  --frost-500: #4fb0d6;
-  --frost-600: #2f8fb5;
-  --frost-700: #2a72ad;
-  --ink-900: #1f3947;
-  --ink-700: #335160;
-  --ink-500: #6b8493;
-
-  /* semantic — 라이트 */
-  --background: var(--frost-50);
+  --background: #ffffff;
   --surface: #ffffff;
-  --border: #dbe7f0;
+  --foreground: #111111;
+  --muted: #6b6b6b;
+  --border: rgba(0, 0, 0, 0.14);
   /* 목록 행 구분처럼 "있는 듯 없는 듯" 옅은 선 */
-  --hairline: #e9f1f8;
-  --foreground: var(--ink-900);
-  --muted: var(--ink-500);
-  --accent: var(--frost-600);
-  --accent-bright: var(--frost-500);
+  --hairline: rgba(0, 0, 0, 0.07);
+  /* 호버·칩 배경 — 선을 하나 더 긋지 않고 면으로만 눌린 느낌을 준다 */
+  --surface-hover: #f4f6f7;
+  --accent: #2f8fb5;
+  /*
+    글자에 쓰는 악센트.
 
-  /* 설화 로고 — 라이트 */
-  --flame-top: #b8e6f5;
-  --flame-mid: #6cc6ea;
-  --flame-low: #3f9fd6;
-  --flame-base: #2769a0;
-  --flame-inner: #bdeeff;
-  --flame-eye: #142730;
-  --dino-shadow: rgba(31, 57, 71, 0.22);
+    브랜드 색 #2f8fb5 는 흰 배경에서 3.67:1 이라 작은 글자로 쓰면 WCAG AA(4.5:1)에 못 미친다.
+    링크와 태그 칩이 여기 해당한다. 같은 색 계열에서 명도만 낮춰 맞춘 값을 따로 둔다.
+    기준은 흰 배경이 아니라 틴트를 깐 칩이다 — 틴트가 배경을 살짝 어둡게 만들어
+    거기서 통과하면 흰 배경에서는 저절로 통과한다(칩 4.68:1 / 흰 배경 5.06:1).
+
+    대상(글자/면/테두리)에 따라 토큰을 나누는 방식은 토스 TDS 컬러 개편과 같은 결론이다.
+    브랜드 색 자체는 로고의 점·아이콘·진행 바처럼 정체성을 지는 자리에 그대로 남는다
+    (그림 요소 기준 3:1 은 통과한다).
+  */
+  --accent-text: #277796;
+  /* 악센트를 아주 옅게 깐 면 — 인용문 배경, 태그 칩, 강조 밑줄 */
+  --tint: rgba(47, 143, 181, 0.07);
+  /*
+    형광펜 (ADR-0042). 라이트는 흰 종이에 옅은 잉크를 얹는다 — 글자색은 그대로 둔다.
+    --mark-fg 는 그 위에 올라갈 글자색이다.
+  */
+  --mark: rgba(47, 143, 181, 0.22);
+  --mark-fg: var(--prose-fg);
+  /* 코드 블록: 본문과 구분되되 튀지 않는 면 + 파일명 줄 */
+  --code-bg: #f6f8f9;
+  --code-bar: #eceff1;
+  /*
+    본문 글자색. UI 텍스트(--foreground)와 따로 둔다.
+    라이트에서는 순검정보다 살짝 낮춰 긴 글에서 눈이 덜 피로하게 한다.
+  */
+  --prose-fg: #17181a;
 }
 
 .dark {
-  /* semantic — 다크 */
-  --background: #0f2129;
-  --surface: #16323f;
-  --border: #25404d;
-  --hairline: #1b333f;
-  --foreground: #eaf4f9;
-  --muted: #93b2bf;
+  --background: #000000;
+  --surface: #0a0a0a;
+  --foreground: #ffffff;
+  --muted: #9a9a9a;
+  /*
+    다크의 선은 라이트를 그대로 뒤집지 않는다.
+    같은 대비 수치라도 어두운 배경 위의 얇은 밝은 선은 훨씬 덜 보인다 —
+    라이트의 0.07 을 그대로 옮긴 0.09 는 화면에서 사실상 사라졌다.
+    라이트와 마찬가지로 두 모드가 각자의 기준을 갖는다(ADR-0027).
+  */
+  --border: rgba(255, 255, 255, 0.22);
+  --hairline: rgba(255, 255, 255, 0.14);
+  --surface-hover: #161616;
   --accent: #5fcdee;
-  --accent-bright: #7fd4ee;
+  /* 다크에서는 배경이 어두워 브랜드 색이 그대로 11.45:1 이다. 따로 낮출 필요가 없다. */
+  --accent-text: #5fcdee;
+  --tint: rgba(95, 205, 238, 0.1);
+  /*
+    다크는 뒤집는다. 검은 화면에서 옅은 띠는 "칠했다"가 아니라 "어둡게 깔았다"로 읽히고,
+    띠를 밝히면 그 위 밝은 글자의 대비가 무너진다(알파 .72 에서 흰 글자 3.46:1).
+    그래서 잉크를 끝까지 밝히고 글자를 검게 뒤집는다 — 11.45:1 로 가장 잘 읽힌다.
+  */
+  --mark: var(--accent);
+  --mark-fg: #000000;
+  --code-bg: #0e0f10;
+  --code-bar: #17191a;
+  /*
+    다크의 본문은 순수 흰색을 쓰지 않는다. 검은 배경 위 흰 글자는 OLED에서
+    빛이 번져(헤일레이션) 긴 글을 읽기 어렵게 만든다. 제목·UI 는 흰색을 유지하고
+    본문만 한 단계 낮춰 대비를 18:1 로 두었다(순수 흰색은 21:1, WCAG AA 기준은 4.5:1).
 
-  /* 설화 로고 — 다크 */
-  --flame-top: #ffffff;
-  --flame-mid: #8fe6ff;
-  --flame-low: #4fb0e0;
-  --flame-base: #2f86bf;
-  --flame-inner: #d6f6ff;
-  --flame-eye: #0c2330;
-  --dino-shadow: rgba(2, 10, 16, 0.5);
+    라이트 값을 그대로 뒤집지 않는 이유이기도 하다 — 같은 토큰이라도 어두운 배경에서는
+    체감 대비가 달라서, 두 모드는 각자의 명도 기준을 가져야 한다(토스 TDS 컬러 개편과 같은 결론).
+  */
+  --prose-fg: #dfe2e5;
 }
 
 /* CSS 변수를 Tailwind 유틸리티로 매핑 (bg-background, text-foreground 등) */
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-tint: var(--tint);
+  --color-mark: var(--mark);
+  --color-mark-fg: var(--mark-fg);
+  --color-code-bg: var(--code-bg);
+  --color-code-bar: var(--code-bar);
+  --color-prose-fg: var(--prose-fg);
   --color-border: var(--border);
   --color-hairline: var(--hairline);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
-  --color-accent-bright: var(--accent-bright);
+  --color-accent-text: var(--accent-text);
 
   --font-sans: var(--font-pretendard), system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
-  --font-title: var(--font-gmarket), var(--font-pretendard), system-ui, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  --font-display: "Montserrat", var(--font-pretendard), system-ui, sans-serif;
 
-  --container-prose: 68ch;
+  /*
+    본문 폭. WCAG 1.4.8은 한중일 문자에 한 줄 40자 이하를 명시한다(영문은 80자).
+    한글은 글자당 정보 밀도가 높아 같은 자수라도 물리적으로 훨씬 길다.
+  */
+  /*
+    본문 폭. WCAG 1.4.8은 한중일 문자에 한 줄 40자 이하를 권한다.
+    18px 한글에서 44rem(704px)이 약 39자로, 상한 바로 안쪽이다.
+    34rem은 30자밖에 안 돼 문단이 잘게 쪼개져 보였고, 42rem도 좁게 느껴졌다.
+    더 넓히면(46rem ≈ 41자) 권고를 넘는다.
+  */
+  --container-prose: 44rem;
 }

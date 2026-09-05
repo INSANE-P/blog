@@ -2,54 +2,65 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FlameLogo } from "@/components/brand/FlameLogo";
 import { MobileNav } from "./MobileNav";
 import { NAV } from "./nav";
 import { ThemeToggle } from "./ThemeToggle";
 
+/**
+ * 헤더 (ADR-0024·0026).
+ *
+ * 로고는 그림이 아니라 활자다 — 포트폴리오와 같은 워드마크를 쓴다. 다만 헤더에서는
+ * 속을 채운다. 히어로의 큰 아웃라인은 획이 굵어 형태가 읽히지만, 22px에서는 선만 남아
+ * 흐려 보인다. 아웃라인은 크기가 클 때만 성립하는 장치다.
+ *
+ * 높이 76px, 항목 17px. 헤더가 얇고 글씨가 작으면 "어디로 갈 수 있는지"가 눈에
+ * 들어오지 않는다. 누르는 대상은 크게 둔다(피츠의 법칙).
+ *
+ * 호버는 배경을 깔지 않고 글자색만 악센트로 바꾼다. 워드마크가 이미 그렇게 반응하는데
+ * 메뉴만 회색 판이 깔리면 같은 화면에서 서로 다른 말을 하는 셈이 된다.
+ *
+ * 항목도 워드마크와 같은 몬세라트로 짠다. 이 줄은 화면에서 유일하게 영문만 있는 자리라
+ * 서체까지 맞춰야 한 덩어리로 읽힌다(ADR-0029).
+ *
+ * 밑줄은 번개가 지나가듯 그어진다(ADR-0030). 지금 보고 있는 페이지는 켜 둔다 —
+ * 굵기와 색만으로는 어디에 있는지가 약하게 읽힌다.
+ */
 export function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background">
-      <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-3">
-        {/* 로고 — 평소 정적, 호버하면 불꽃이 살아나고 이름이 점등(.logo-link, animations.css) */}
-        <Link href="/" className="logo-link group flex items-center gap-2">
-          {/* 불꽃은 밑동이 무거워 광학적으로 살짝 낮아 보임 → 2px 올려 텍스트와 시각 정렬 */}
-          <FlameLogo size={28} animated={false} className="-translate-y-[2px]" />
-          <span className="font-title text-lg font-bold text-foreground transition-colors group-hover:text-accent">
-            설화
+    <header className="sticky top-0 z-40 border-b border-hairline bg-background/90 backdrop-blur-md">
+      <div className="mx-auto flex h-[68px] w-full max-w-[1080px] items-center justify-between px-6 sm:h-[76px] sm:px-10">
+        <Link href="/" aria-label="홈으로" className="group">
+          <span className="spark-line font-display text-[20px] font-black uppercase tracking-tight sm:text-[22px]">
+            CHANBIN<span className="text-accent">.</span>
           </span>
         </Link>
 
-        {/* 모바일 — 햄버거(얼음판 확장 오버레이) */}
         <MobileNav className="sm:hidden" />
 
-        {/* 데스크탑 — 인라인 내비. 홈은 로고가 대신하므로 제외 */}
-        <nav className="hidden items-center gap-1 font-title sm:flex">
-          {NAV.filter((item) => item.href !== "/").map((item) => {
+        <nav className="hidden items-center sm:flex">
+          {NAV.map((item) => {
             const active = pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-lg px-3 py-1.5 text-[15px] font-medium transition-colors ${
-                  active ? "text-accent" : "text-muted hover:bg-surface hover:text-foreground"
-                }`}
-                style={
-                  active
-                    ? { background: "color-mix(in srgb, var(--accent) 12%, transparent)" }
-                    : undefined
-                }
+                className="px-[15px] py-[11px]"
               >
-                {item.label}
+                <span
+                  data-here={active || undefined}
+                  className={`spark-line font-display text-[17px] tracking-[-0.01em] transition-colors ${
+                    active ? "font-bold text-foreground" : "font-semibold text-muted hover:text-accent-text"
+                  }`}
+                >
+                  {item.label}
+                </span>
               </Link>
             );
           })}
-          <span className="ml-1.5">
-            <ThemeToggle />
-          </span>
+          <ThemeToggle className="ml-2" />
         </nav>
       </div>
     </header>

@@ -1,221 +1,153 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowUpRight, Mail } from "lucide-react";
-import { DinoMascot } from "@/components/brand/DinoMascot";
-import { GithubIcon } from "@/components/ui/GithubIcon";
-import { SectionLabel } from "@/components/ui/SectionLabel";
-import { AWARDS, PROJECTS, STACK } from "./data";
+import { LinkIcon } from "@/components/icons";
+import { SectionTitle } from "@/components/ui/SectionTitle";
+import { Guestbook } from "@/features/about/components/Guestbook";
+import { ACTIVITIES, IDENTITY, INTRO, PROJECTS, type TimelineItem } from "./data";
 
-export const metadata: Metadata = { title: "소개" };
+export const metadata: Metadata = { title: "About" };
 
-// 옅은 틴트 + accent 톤 — 목록의 태그 배지와 같은 언어(일관성)
-const chipStyle = {
-  background: "color-mix(in srgb, var(--accent) 8%, var(--surface))",
-  borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)",
-  color: "color-mix(in srgb, var(--accent) 52%, var(--foreground))",
-};
-
-function Tag({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      className="rounded-md border px-2 py-0.5 font-title text-[11px] font-medium"
-      style={chipStyle}
-    >
-      {children}
-    </span>
-  );
-}
-
-/** 외부 링크 칩 — 라벨 + 살짝 떠오르는 화살표. 모두 새 탭. */
-function LinkChip({ label, href }: { label: string; href: string }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group inline-flex items-center gap-0.5 font-title text-[13px] font-medium text-muted transition hover:text-accent"
-    >
-      {label}
-      <ArrowUpRight
-        className="size-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-        aria-hidden
-      />
-    </a>
-  );
-}
-
+/**
+ * 소개 (ADR-0038·0041).
+ *
+ * 명함 → 짧은 소개 → 만든 것 → 활동 → 방명록.
+ * 읽는 화면이라 본문과 같은 폭을 쓴다. 이전에는 1080px 에 칩과 카드를 늘어놓은
+ * 훑는 화면이었는데, 그건 포트폴리오가 하는 일이었다.
+ *
+ * 한때 "지금" 절을 뒀다가 뺐다. 내용이 좋아도 사람이 손으로 고쳐야 하는 절은
+ * 결국 안 고치게 되고, 안 고쳐진 "지금"은 있는 것보다 나쁘다.
+ * 시기가 적힌 목록은 그 문제가 없다 — 지나간 것은 지나간 대로 남는다.
+ *
+ * 수상은 넣지 않는다. 여기는 무엇을 해왔는지 말하는 자리이고 상은 포트폴리오가 한다.
+ * 대신 목록 끝에서 포트폴리오로 넘긴다 — 두 곳에서 같은 말을 하지 않으면서
+ * 더 보고 싶은 사람에게 갈 곳을 준다.
+ *
+ * 사이트를 어떻게 만들었는지(노션 동기화·R2·ADR)를 적었다가 뺐다.
+ * 만든 사람에게는 재미있는 이야기지만 읽으러 온 사람이 궁금해하는 것은 아니다.
+ * 그 이야기는 글로 쓰면 된다.
+ *
+ * 마지막은 방명록이다(ADR-0041). 소개는 한 사람에 대해 읽는 자리라,
+ * 다 읽고 나면 한마디 남기고 싶어지는 곳이 마지막에 있는 편이 자연스럽다.
+ */
 export default function AboutPage() {
   return (
-    <div className="mx-auto max-w-3xl px-5 pb-4 pt-16">
-      {/* 인트로 — 이름 + 한 문단 + 마스코트(사진 대신) */}
-      <section className="flex flex-col-reverse items-start gap-7 sm:flex-row sm:items-center sm:gap-9">
-        <div className="min-w-0 flex-1">
-          <h1 className="text-[30px] font-bold tracking-tight text-foreground">
-            안녕하세요, <span className="text-accent">박찬빈</span>이에요
-          </h1>
-          <p className="mt-2 font-title text-sm text-muted">
-            프론트엔드 개발자 · 세종대학교 컴퓨터공학과
-          </p>
-          <p className="mt-5 break-keep text-[15px] leading-relaxed text-foreground/90">
-            팀에서 <span className="font-semibold text-accent">같이 만들어가는 과정</span>을 좋아하는
-            프론트엔드 개발자예요. 더 나은 방법이 보이면 먼저 제안하고, 필요하면 새로운 것도 마다하지
-            않고 시도해요. 재밌어 보이는 걸 만들고, 생각이 향하는 대로 움직여요.
-          </p>
-        </div>
+    <div className="mx-auto w-full max-w-[var(--container-prose)] px-6 pb-8 pt-16 sm:pt-20">
+      <SectionTitle as="h1">about</SectionTitle>
 
-        {/* 설화를 안은 공룡 — 다른 화면과 같은 캐릭터로 톤을 맞춘다 */}
-        <DinoMascot size={188} className="shrink-0 self-center" />
-      </section>
+      {/*
+        명함. 이름과 갈 곳을 한 상자에 모은다.
+        흩어 두면 "연락처" 절을 따로 만들어야 하는데, 위에 모으면 처음 온 사람이
+        누구이고 어디로 가면 되는지를 먼저 안다.
+      */}
+      <section className="mt-10 rounded-[18px] bg-surface-hover px-6 py-7 sm:px-8">
+        <p className="text-[21px] font-bold tracking-[-0.02em]">
+          {IDENTITY.name}
+          <span className="ml-3 font-display text-[13px] font-bold uppercase tracking-[0.14em] text-muted">
+            {IDENTITY.nameEn}
+          </span>
+        </p>
+        <p className="mt-2 text-[15px] text-muted">
+          {IDENTITY.role} · {IDENTITY.affiliation}
+        </p>
 
-      {/* 기술 */}
-      <section className="mt-16 border-t border-border pt-10">
-        <SectionLabel>기술</SectionLabel>
-        <dl className="mt-6 flex flex-col gap-4">
-          {STACK.map(({ label, items }) => (
-            <div key={label} className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:gap-5">
-              <dt className="w-24 shrink-0 font-title text-[13px] font-medium text-muted">
-                {label}
-              </dt>
-              <dd className="flex flex-wrap gap-1.5">
-                {items.map((it) => (
-                  <Tag key={it}>{it}</Tag>
-                ))}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+        {/*
+          라벨을 값 위에 얹고 셋을 나란히 둔다.
+          앞서 라벨을 왼쪽 고정 폭(74px)에 두었더니 "PORTFOLIO" 가 두 줄로 접혔다.
+          글자 길이에 맞춰 칸을 고정하면 항목 이름이 바뀔 때마다 다시 깨진다.
 
-      {/* 프로젝트 */}
-      <section className="mt-16 border-t border-border pt-10">
-        <SectionLabel>프로젝트</SectionLabel>
-        <div className="mt-7 flex flex-col gap-10">
-          {PROJECTS.map((p) => (
-            <article key={p.name}>
-              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                <h3 className="text-[20px] font-bold tracking-tight text-foreground">{p.name}</h3>
-                {p.status && (
-                  <span className="inline-flex items-center gap-1.5 font-title text-[12px] text-muted">
-                    <span className="size-1.5 rounded-full bg-accent" aria-hidden />
-                    {p.status}
-                  </span>
-                )}
-              </div>
-              <p className="mt-1.5 text-[14px] text-muted">{p.tagline}</p>
-              <p className="mt-1 font-title text-[12px] text-muted">
-                {p.period} · {p.role}
-              </p>
-
-              <ul className="mt-4 flex flex-col gap-2">
-                {p.points.map((pt) => (
-                  <li
-                    key={pt}
-                    className="flex gap-2.5 text-[14px] leading-relaxed text-foreground/90"
-                  >
-                    <span
-                      className="mt-2 size-1 shrink-0 rounded-full"
-                      style={{ background: "color-mix(in srgb, var(--accent) 55%, transparent)" }}
-                      aria-hidden
-                    />
-                    {pt}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-4 flex flex-wrap gap-1.5">
-                {p.tech.map((t) => (
-                  <Tag key={t}>{t}</Tag>
-                ))}
-              </div>
-
-              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-                {p.links.map((l) => (
-                  <LinkChip key={l.label} label={l.label} href={l.href} />
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {/* 활동 */}
-      <section className="mt-16 border-t border-border pt-10">
-        <SectionLabel>활동</SectionLabel>
-        <article className="mt-7">
-          <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-            <h3 className="text-[20px] font-bold tracking-tight text-foreground">그리디 (Greedy)</h3>
-            <span className="font-title text-[12px] text-muted">2025.03 ~ 현재</span>
-          </div>
-          <p className="mt-1.5 text-[14px] text-muted">
-            세종대학교 SW 학술 동아리 · 2기 멘티 → 3기 스터디 리드 → 4기 메인테이너
-          </p>
-          <ul className="mt-4 flex flex-col gap-2">
-            {[
-              "스터디 리드로 상태관리 미션을 Zustand·TanStack Query 기반으로 재설계 (3기)",
-              "메인테이너로 새 미션 설계 및 학습 자료 제작 (4기)",
-            ].map((pt) => (
-              <li key={pt} className="flex gap-2.5 text-[14px] leading-relaxed text-foreground/90">
-                <span
-                  className="mt-2 size-1 shrink-0 rounded-full"
-                  style={{ background: "color-mix(in srgb, var(--accent) 55%, transparent)" }}
-                  aria-hidden
-                />
-                {pt}
+          값에 truncate 를 걸었던 것도 뺐다. 넘침을 감추면 글자 아래에 그려지는 번개 밑줄까지
+          함께 잘려 나간다 — 밑줄이 이상하게 보이던 원인이다.
+        */}
+        <ul className="mt-6 grid gap-x-8 gap-y-5 border-t border-hairline pt-6 sm:grid-cols-3">
+          {IDENTITY.links.map(({ label, value, href }) => {
+            const external = href.startsWith("http");
+            return (
+              <li key={label} className="min-w-0">
+                <span className="block font-display text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
+                  {label}
+                </span>
+                <a
+                  href={href}
+                  target={external ? "_blank" : undefined}
+                  rel="noopener noreferrer"
+                  className="mt-1.5 inline-flex items-baseline gap-1 text-[15px] transition-colors hover:text-accent-text"
+                >
+                  <span className="spark-line break-all">{value}</span>
+                  {external && <LinkIcon size={14} className="shrink-0 translate-y-px" />}
+                </a>
               </li>
-            ))}
-          </ul>
-          <div className="mt-4">
-            <LinkChip
-              label="스터디 소개 발표 자료"
-              href="https://insane-p.github.io/greedy-frontend-study/"
-            />
-          </div>
-        </article>
-      </section>
-
-      {/* 수상 */}
-      <section className="mt-16 border-t border-border pt-10">
-        <SectionLabel>수상</SectionLabel>
-        <ul className="mt-6 flex flex-col gap-5">
-          {AWARDS.map((a) => (
-            <li key={a.title}>
-              <div className="text-[15px] font-semibold text-foreground">{a.title}</div>
-              <div className="mt-1 font-title text-[12px] text-muted">{a.by}</div>
-              <div className="mt-0.5 text-[13px] text-muted">{a.note}</div>
-            </li>
-          ))}
+            );
+          })}
         </ul>
       </section>
 
-      {/* 연락처 */}
-      <section className="mt-16 border-t border-border pt-10">
-        <SectionLabel>연락처</SectionLabel>
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <a
-            href="https://github.com/INSANE-P"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 font-title text-[13px] font-medium text-foreground transition hover:border-accent hover:text-accent"
-          >
-            <GithubIcon className="size-[17px]" />
-            GitHub
-          </a>
-          <a
-            href="mailto:chanbin0626@gmail.com"
-            className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 font-title text-[13px] font-medium text-foreground transition hover:border-accent hover:text-accent"
-          >
-            <Mail className="size-[17px]" />
-            메일
-          </a>
-          <Link
-            href="/resume"
-            className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 font-title text-[13px] font-medium text-muted transition hover:border-accent hover:text-accent"
-          >
-            이력서
-            <span className="font-title text-[11px] text-accent">준비중</span>
-          </Link>
-        </div>
+      <div className="prose mt-12">
+        {INTRO.map((p) => (
+          <p key={p}>{p}</p>
+        ))}
+      </div>
+
+      <section className="mt-20">
+        <SectionTitle>projects</SectionTitle>
+        <Timeline items={PROJECTS} />
+        <a
+          href="https://portfolio.chanbin.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-8 inline-flex items-baseline gap-1 text-[15px] text-muted transition-colors hover:text-accent-text"
+        >
+          <span className="spark-line">자세한 이야기는 포트폴리오에</span>
+          <LinkIcon size={14} className="shrink-0 translate-y-px" />
+        </a>
+      </section>
+
+      <section className="mt-20">
+        <SectionTitle>activities</SectionTitle>
+        <Timeline items={ACTIVITIES} />
+      </section>
+
+      {/*
+        방명록. `writing` 절(이 블로그에 무엇을 쓰는지)이 있던 자리다.
+        그건 읽으러 온 사람이 궁금해하는 것이 아니라 쓰는 사람의 다짐에 가까웠고,
+        어차피 글 목록을 보면 무엇을 쓰는지 안다. 대신 남기고 갈 자리를 뒀다.
+      */}
+      <section className="mt-20">
+        <Guestbook />
       </section>
     </div>
+  );
+}
+
+/**
+ * 시기가 붙은 목록.
+ *
+ * 시기를 왼쪽 칸에 고정하면 눈이 한 줄로 내려가며 언제인지를 먼저 훑을 수 있다.
+ * 좁은 화면에서는 칸을 나누지 않고 시기를 이름 위에 얹는다 —
+ * 8.5rem 을 떼어 주면 이름이 두 줄로 접힌다.
+ *
+ * 한 항목은 이름 + "무엇인지" + "무엇을 맡았는지" 세 조각이다. 문장은 쓰지 않는다.
+ * 맡은 것은 한 칸 띄고 흐리게 둔다 — 같은 줄에 두면 눈이 어디서 끊어야 할지 모르고,
+ * 줄을 나누면 목록이 다섯 항목이 아니라 열다섯 줄로 보인다.
+ *
+ * 세로 레일과 점은 두지 않았다. 시기가 이미 왼쪽에 줄지어 서 있어서
+ * 선을 더 그으면 같은 말을 두 번 하는 것이 된다.
+ */
+function Timeline({ items }: { items: readonly TimelineItem[] }) {
+  return (
+    <ol className="mt-9 flex flex-col gap-7">
+      {items.map((item) => (
+        <li key={item.name} className="grid gap-1 sm:grid-cols-[8.5rem_1fr] sm:gap-6">
+          <span className="pt-[3px] font-display text-[13px] font-semibold tabular-nums text-muted">
+            {item.period}
+          </span>
+          <div>
+            <p className="text-[17px] font-bold tracking-[-0.01em]">{item.name}</p>
+            <p className="mt-1.5 text-[15px] leading-[1.7] text-prose-fg">
+              {item.what}
+              <span className="text-muted"> · {item.role}</span>
+            </p>
+          </div>
+        </li>
+      ))}
+    </ol>
   );
 }

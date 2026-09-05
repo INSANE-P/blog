@@ -1,105 +1,122 @@
-// 소개 페이지 콘텐츠 — 화면(page.tsx)과 분리해 내용만 여기서 고친다.
+/*
+  소개 페이지 내용 (ADR-0038).
 
-export const STACK: { label: string; items: string[] }[] = [
-  { label: "언어", items: ["TypeScript", "JavaScript", "Dart"] },
-  { label: "프레임워크", items: ["React", "Next.js", "Flutter"] },
-  { label: "상태·데이터", items: ["Zustand", "TanStack Query", "Riverpod", "MSW"] },
-  { label: "테스트", items: ["Vitest", "Cypress"] },
-  { label: "인프라·배포", items: ["GitHub Actions", "AWS", "Vercel", "GitHub Pages"] },
+  구성은 명함 → 짧은 소개 → 만든 것 → 활동 → 방명록.
+
+  한때 "지금" 절을 뒀다가 뺐다. 내용이 좋아도 사람이 손으로 고쳐야 하는 절은
+  결국 안 고치게 되고, 안 고쳐진 "지금"은 있는 것보다 나쁘다.
+  대신 시기가 적힌 목록으로 바꿨다 — 지나간 것은 지나간 대로 남으면 되고,
+  포트폴리오를 갱신할 때 같이 손보면 된다.
+
+  수상은 넣지 않는다. 소개는 무엇을 해왔는지 말하는 자리이고
+  상은 포트폴리오가 하는 일이다. 같은 말을 두 곳에서 하지 않는다.
+
+  소개 문단은 본인이 쓴 문장을 그대로 둔다. 목록은 아예 문장을 쓰지 않는다.
+  "무엇인지"와 "무엇을 맡았는지"만 명사구로 적는다 — 자세한 이야기는 포트폴리오가 한다.
+  목록에 문장을 섞으면 읽는 사람이 훑지 못하고 한 줄씩 읽게 된다.
+  방명록 안내처럼 읽는 사람에게 말을 거는 문구만 해요체다 —
+  거기는 자기를 설명하는 자리가 아니라 부탁하는 자리라 결이 다르다.
+*/
+
+export const IDENTITY = {
+  name: "박찬빈",
+  nameEn: "PARK CHANBIN",
+  role: "개발자",
+  affiliation: "세종대학교 컴퓨터공학과",
+  links: [
+    { label: "github", value: "INSANE-P", href: "https://github.com/INSANE-P" },
+    { label: "email", value: "chanbin0626@gmail.com", href: "mailto:chanbin0626@gmail.com" },
+    { label: "portfolio", value: "portfolio.chanbin.dev", href: "https://portfolio.chanbin.dev" },
+  ],
+} as const;
+
+/**
+ * 자기소개 — 세 문단을 넘기지 않는다.
+ *
+ * 이 문장들은 본인이 쓴 것이다. 손대지 않는다.
+ * 한 번 "더 잘 읽히게" 다듬었다가 톤이 통째로 바뀌어 되돌렸다 —
+ * 짧게 끊고 단정하는 문장이 글맛은 나지만 쓴 사람의 말투가 아니었다.
+ */
+export const INTRO: string[] = [
+  "앱과 웹을 만드는 개발자입니다. 창업 팀에서는 서비스 개발뿐 아니라 기획, 운영, 홍보, 행사처럼 팀에 필요한 일들을 함께 하고 있습니다. 세종대 개발 동아리 그리디에서는 운영과 프로젝트 활동에 참여했습니다.",
+  "개발을 중심으로 시작했지만, 실제 사람들이 쓰는 서비스를 만들기 위해 개발 밖의 일에도 자연스럽게 참여하고 있습니다.",
+  "놀기도 좋아하고 낭만도 챙깁니다. 시간 나면 여행 갑니다.",
 ];
 
-export type Project = {
-  name: string;
-  tagline: string;
-  status?: string;
+export type TimelineItem = {
+  /** 왼쪽에 서는 시기. 진행 중이면 `~` 로 끝난다 */
   period: string;
+  name: string;
+  /** 무엇인지. 한 덩어리 명사구로 — 문장으로 쓰면 목록이 아니라 글이 된다 */
+  what: string;
+  /** 무엇을 맡았는지. 자세한 이야기는 포트폴리오가 한다 */
   role: string;
-  tech: string[];
-  points: string[];
-  links: { label: string; href: string }[];
 };
 
-export const PROJECTS: Project[] = [
+/*
+  두 칸으로 나눠 둔 이유. 한 줄에 이어 붙이면 언젠가 누가 문장을 쓰게 되고,
+  다섯 줄 중 하나만 서술형이어도 목록이 무너진다. 칸이 나뉘어 있으면 그 자리에
+  무엇을 적어야 하는지가 형태로 정해진다.
+*/
+
+/** 만든 것 — 시작이 늦은 것부터 */
+export const PROJECTS: TimelineItem[] = [
   {
-    name: "경찰과 도둑 (경도)",
-    tagline: "위치 기반 실시간 멀티플레이어 모바일 게임",
-    status: "출시·운영 중",
-    period: "2025.10 ~",
-    role: "프론트엔드 (앱·웹)",
-    tech: ["Flutter", "Dart", "STOMP/WebSocket", "Riverpod", "Next.js"],
-    points: [
-      "STOMP WebSocket으로 로비·게임 실시간 채팅과 게임 시스템 구현",
-      "끊긴 연결을 수동 재연결 + FCM 기반 자동 재연결로 복구",
-      "앱 소개 웹사이트(Next.js) 구현, 인앱 브라우저 딥링크 문제 해결",
-    ],
-    links: [
-      { label: "소개 사이트", href: "https://copsnro66ers.site/" },
-      { label: "App Store", href: "https://apps.apple.com/kr/app/id6756843948" },
-      {
-        label: "Google Play",
-        href: "https://play.google.com/store/apps/details?id=com.elipair.copsandrobbers",
-      },
-      { label: "GitHub", href: "https://github.com/cops-and-robbers/cops-and-robbers-FE" },
-    ],
+    period: "2026.08 ~",
+    name: "gitmoru",
+    what: "저장소가 침해됐을 때 무엇이 바뀌었는지 확인하는 도구",
+    role: "기획·개발, npm 배포",
   },
   {
-    name: "올클 (ALLCLL)",
-    tagline: "세종대학교 수강신청 도우미",
-    status: "운영 중",
-    period: "2025.12 ~",
-    role: "프론트엔드",
-    tech: ["React", "TypeScript", "Zustand", "TanStack Query", "MSW", "Storybook"],
-    points: [
-      "졸업 요건 검사 기능을 담당해 개발",
-      "복잡한 졸업 요건 도메인을 대시보드·검사 플로우로 구현",
-    ],
-    links: [
-      { label: "서비스", href: "https://allcll.kr" },
-      { label: "GitHub", href: "https://github.com/allcll/allcll-frontend" },
-    ],
-  },
-  {
-    name: "Footure",
-    tagline: "축구 선수 이적 퍼포먼스 예측 서비스",
     period: "2026.03 ~",
-    role: "프론트엔드 · AI 추론 서버",
-    tech: ["React", "TypeScript", "FastAPI", "Docker", "GitHub Actions", "AWS"],
-    points: [
-      "선수 검색·상세, 시즌 지표 그래프, AI 예측 어드민 페이지 구현",
-      "FastAPI 기반 AI 추론 서버 구축, Docker·GitHub Actions로 EC2 자동 배포",
-    ],
-    links: [
-      { label: "서비스", href: "https://footure.site/" },
-      { label: "프론트 GitHub", href: "https://github.com/5sondoson/5sondoson-fe" },
-      { label: "AI 서버 GitHub", href: "https://github.com/5sondoson/5sondoson-ai" },
-    ],
+    name: "Footure",
+    what: "축구 선수 이적 퍼포먼스·시장가치 예측 서비스",
+    role: "프론트엔드, AI 추론 서버",
   },
   {
-    name: "세종 줍줍 (Zup-Zup)",
-    tagline: "세종대학교 지도 기반 분실물 찾기 웹 · 첫 팀 프로젝트",
-    period: "2025.07 ~ 2026.04",
-    role: "프론트엔드",
-    tech: ["React", "TypeScript", "Vite", "Zustand", "TanStack Query", "AWS CloudFront"],
-    points: [
-      "분실물 찾기·로그인·마이페이지 등 주요 페이지 구현, AWS CloudFront로 첫 배포",
-      "MSW로 목 서버를 구축해 백엔드와 병렬 개발",
-    ],
-    links: [
-      { label: "서비스", href: "https://www.sejong-zupzup.kr" },
-      { label: "GitHub", href: "https://github.com/greedy-team/zup-zup-fe" },
-    ],
+    period: "2025.12 ~",
+    name: "올클",
+    what: "세종대학교 수강신청 도우미",
+    role: "프론트엔드, 졸업요건 검사",
+  },
+  {
+    period: "2025.10 ~",
+    name: "경찰과 도둑",
+    what: "위치 기반 실시간 멀티플레이어 모바일 게임",
+    role: "프론트엔드 (앱·웹)",
+  },
+  {
+    period: "2025.07 – 2026.04",
+    name: "세종 줍줍",
+    what: "세종대학교 지도 기반 분실물 찾기 웹",
+    role: "프론트엔드, 배포",
   },
 ];
 
-export const AWARDS = [
+/** 활동 — 동아리와 행사 */
+export const ACTIVITIES: TimelineItem[] = [
   {
-    title: "2026 세종 창업 아이디어리그 — 대상",
-    by: "세종대학교 SW중심대학사업단",
-    note: "실시간 멀티플레이어 게임 '경찰과 도둑'",
+    period: "2025.03 ~",
+    name: "그리디",
+    what: "세종대학교 SW 학술 동아리",
+    role: "2기 멘티 → 3기 스터디 리드 → 4기 메인테이너",
   },
   {
-    title: "제13회 세종대학교 SW·AI 해커톤 — 장려상",
-    by: "세종대학교 SW중심대학사업단",
-    note: "GitHub 활동 데이터 기반 팀 결성 플랫폼",
+    period: "준비 중",
+    name: "그리디콘",
+    what: "그리디가 여는 현업 연사 초청 컨퍼런스",
+    role: "연사 섭외, 후원 컨택",
+  },
+  {
+    period: "2026",
+    name: "서울게임타운",
+    what: "인디게임 전시회 · 〈경찰과 도둑〉 부스",
+    role: "참가 신청, 현장 운영",
+  },
+  {
+    period: "2026",
+    name: "세종대 축제 부스",
+    what: "그리디 멤버들이 만든 게임으로 연 부스",
+    role: "기획, 현장 운영",
   },
 ];

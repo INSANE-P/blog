@@ -1,36 +1,124 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
+
+const f = (n: number) => n.toFixed(2);
+/** 중심(12,12)에서 반지름 r, 각 a(도) 지점 */
+const at = (r: number, a: number): [number, number] => [
+  12 + r * Math.cos((a * Math.PI) / 180),
+  12 + r * Math.sin((a * Math.PI) / 180),
+];
 
 /**
- * 테마 토글 — 해↔달을 하나의 SVG로 모핑한다(광선 접힘 + 초승달 마스크 이동).
- * 불꽃은 브랜드 전용이라, 토글은 보편적인 해/달로 역할을 나눈다.
+ * 네 갈래 스파클 — 변을 오목하게 당겨 끝이 가늘어진다.
+ * `waist` 가 작을수록 허리가 잘록해져 갈래가 날카로워진다.
+ * 해와 별이 같은 함수를 쓴다 — 서로 다른 도형이면 한 장치의 두 상태로 읽히지 않는다.
+ */
+function sparkle(cx: number, cy: number, R: number, waist = 0.17, rot = 0): string {
+  const w = R * waist;
+  const pts: [number, number][] = [
+    [0, -R],
+    [w, -w],
+    [R, 0],
+    [w, w],
+    [0, R],
+    [-w, w],
+    [-R, 0],
+    [-w, -w],
+  ];
+  const r = (rot * Math.PI) / 180;
+  const P = pts.map(([x, y]): [number, number] => [
+    cx + x * Math.cos(r) - y * Math.sin(r),
+    cy + x * Math.sin(r) + y * Math.cos(r),
+  ]);
+  const at = (i: number) => `${f(P[i][0])},${f(P[i][1])}`;
+  return [
+    `M ${at(0)}`,
+    `Q ${at(1)} ${at(2)}`,
+    `Q ${at(3)} ${at(4)}`,
+    `Q ${at(5)} ${at(6)}`,
+    `Q ${at(7)} ${at(0)}`,
+    "Z",
+  ].join(" ");
+}
+
+/*
+  해 — 같은 스파클을 45° 돌려 겹쳐 갈래 여덟을 만든다.
+
+  직선 삼각형 광선 열둘로 그렸다가 바꿨다. 별은 변이 오목한데 해는 곧은 삼각형이라
+  둘이 서로 다른 문법을 썼고, 24px 에서는 광선이 뭉쳐 회색 덩어리가 됐다.
+  같은 함수로 그리면 "별이 자라 해가 된다"로 읽히고, 허리를 잘록하게(0.07) 당기면
+  작아져도 갈래가 살아 있다.
+
+  갈래는 여덟이다. 넷이면 다크의 별과 구분되지 않는다 — 같은 자리에 번갈아 나오는 둘은
+  한눈에 달라야 한다.
+*/
+const SUN_RAYS = [sparkle(12, 12, 11, 0.07), sparkle(12, 12, 11, 0.07, 45)];
+
+const STAR_MAIN = sparkle(12, 12, 9.4);
+const STAR_SUB = [
+  { d: sparkle(19.4, 5.4, 3.2, 0.2), opacity: 0.75 },
+  { d: sparkle(5, 18.4, 2.3, 0.2), opacity: 0.55 },
+];
+
+/**
+ * 테마 토글 (ADR-0026).
+ *
+ * 라이트는 해, 다크는 별 하나다. 누르면 해가 돌면서 오므라들고 그 자리에서 별이 돌며 피어난다.
+ *
+ * 후보를 실제 크기로 렌더해 놓고 골랐다. 화면을 보지 않고 정하면 설명만 그럴듯한 것이 나온다.
+ * 반차 원(◐)은 21px에서 회색 덩어리였고, "타원 궤도 + 가운데 점"은 눈알로 보였다.
+ * 별자리 안은 규칙적으로 두면 꺾은선 그래프로 읽혔다.
+ *
+ * 해와 별이 같은 도형 함수를 쓴다 — 별은 갈래 넷, 해는 같은 갈래를 45° 돌려 겹친 여덟이다.
+ * 서로 다른 문법으로 그리면 한 장치의 두 상태가 아니라 아이콘 두 개로 읽힌다.
+ * 정다각형이 아니라 변을 오목하게 당겨 끝이 가늘어지게 했다 — 작아져도 갈래가 살아 있다.
+ *
+ * 색은 악센트 하나뿐 — 해의 몸통과 큰 별. 헤더에서 색을 가진 유일한 요소라
+ * 시선이 정확히 여기에 온다(폰 레스토프 효과).
+ *
+ * 전환은 두 그림을 각각 회전·확대·투명도로만 여닫는다. 모양을 서로 모핑하지 않는 이유는,
+ * 광선 열둘과 스파클은 점 개수가 달라 중간 프레임이 반드시 뭉개지기 때문이다.
+ * 회전을 서로 반대로 줘서 갈아 끼우는 느낌이 아니라 하나가 돌아 다른 하나가 되게 했다.
  *
  * - 저장: localStorage('theme'). 루트 init 스크립트가 초기 클래스를 칠해 깜빡임 없음.
- * - ready 플래그로 첫 로드 시 전환 애니메이션을 막는다(이후 클릭에만 애니메이션).
- * - 누르면 토글 지점에서 테마가 얼음처럼 번지듯/거둬지듯 전환(View Transitions, animations.css).
+ * - 테마 자체는 누른 지점에서 번지듯/거둬지듯 바뀐다(View Transitions, animations.css).
  */
-export function ThemeToggle() {
+export function ThemeToggle({ className = "" }: { className?: string }) {
   const [dark, setDark] = useState(false);
-  const [ready, setReady] = useState(false);
-  const maskId = useId();
+  const [mounted, setMounted] = useState(false);
+  const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
     setDark(document.documentElement.classList.contains("dark"));
-    const r = requestAnimationFrame(() => setReady(true));
-    return () => cancelAnimationFrame(r);
+    setAnimate(!window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    setMounted(true);
   }, []);
 
   function toggle(e: React.MouseEvent<HTMLButtonElement>) {
     const next = !dark;
+
+    /*
+      저장은 전환 밖에서 먼저 한다.
+      localStorage.setItem 은 동기 디스크 쓰기라, 전환 콜백 안에 두면 그 프레임이 길어진다.
+      프레임 간격을 재 보니 최대 프레임이 25.2ms → 29.3ms 로 늘고 긴 프레임 수도 늘었다.
+      전환 중간에 한 번 걸리는 느낌의 원인이 여기였다.
+    */
+    try {
+      localStorage.setItem("theme", next ? "dark" : "light");
+    } catch {
+      // 접근 불가(시크릿 등) 시 무시 — 토글 자체는 동작한다
+    }
+
+    /*
+      아이콘 상태는 flushSync 로 콜백 안에서 즉시 반영한다.
+      React 의 기본 갱신은 비동기라, 그냥 두면 브라우저가 새 화면을 찍은 뒤에 아이콘이 바뀌어
+      전환이 끝나고 나서 아이콘만 따로 바뀌는 것처럼 보인다.
+    */
     const apply = () => {
-      setDark(next);
+      flushSync(() => setDark(next));
       document.documentElement.classList.toggle("dark", next);
-      try {
-        localStorage.setItem("theme", next ? "dark" : "light");
-      } catch {
-        // localStorage 접근 불가(시크릿 등) 시 무시 — 토글 자체는 동작
-      }
     };
 
     const root = document.documentElement;
@@ -45,7 +133,7 @@ export function ThemeToggle() {
       return;
     }
 
-    // 토글 버튼 중심에서 화면 가장 먼 모서리까지 얼음이 퍼지는 반경
+    // 누른 지점에서 화면 가장 먼 모서리까지가 원의 반경
     const rect = e.currentTarget.getBoundingClientRect();
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
@@ -61,48 +149,49 @@ export function ThemeToggle() {
     Promise.resolve(vt?.finished).finally(() => root.classList.remove(dir));
   }
 
+  // 첫 렌더에는 전환을 끈다 — 켜 두면 페이지를 열 때 아이콘이 혼자 돈다
+  const moving = mounted && animate;
+  const swap = moving
+    ? { transition: "transform 0.55s cubic-bezier(0.34, 1.2, 0.5, 1), opacity 0.35s ease" }
+    : {};
+
   return (
     <button
       type="button"
       onClick={toggle}
       aria-label={dark ? "라이트 모드로 전환" : "다크 모드로 전환"}
-      className="inline-flex size-8 items-center justify-center rounded-md text-muted transition-colors hover:text-accent"
+      title={dark ? "라이트 모드로 전환" : "다크 모드로 전환"}
+      className={`inline-flex size-10 items-center justify-center text-muted transition-colors hover:text-accent-text ${className}`}
     >
-      <svg
-        className={`theme-icon ${dark ? "is-dark" : ""} ${ready ? "ready" : ""}`}
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        aria-hidden
-      >
-        <mask id={maskId}>
-          <rect x="0" y="0" width="24" height="24" fill="white" />
-          {/* 마스크 원 — 라이트(원 밖) → 다크(커지고 가까이 와 해를 크게 베어물어 초승달) */}
-          <circle className="tm-mask" cx={dark ? 19 : 26} cy={dark ? 7 : 10} r={dark ? 9 : 6} fill="black" />
-        </mask>
-        <circle
-          className="tm-orb"
-          cx="12"
-          cy="12"
-          r={dark ? 9 : 6}
-          fill="currentColor"
-          mask={`url(#${maskId})`}
-        />
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
+        {/* 해 — 다크에서는 돌면서 오므라든다 */}
         <g
-          className="tm-beams"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          style={{ opacity: dark ? 0 : 1 }}
+          style={{
+            transform: `rotate(${dark ? 60 : 0}deg) scale(${dark ? 0 : 1})`,
+            transformOrigin: "12px 12px",
+            opacity: dark ? 0 : 1,
+            ...swap,
+          }}
         >
-          <line x1="12" y1="1" x2="12" y2="3" />
-          <line x1="12" y1="21" x2="12" y2="23" />
-          <line x1="4.2" y1="4.2" x2="5.6" y2="5.6" />
-          <line x1="18.4" y1="18.4" x2="19.8" y2="19.8" />
-          <line x1="1" y1="12" x2="3" y2="12" />
-          <line x1="21" y1="12" x2="23" y2="12" />
-          <line x1="4.2" y1="19.8" x2="5.6" y2="18.4" />
-          <line x1="18.4" y1="5.6" x2="19.8" y2="4.2" />
+          {SUN_RAYS.map((d, i) => (
+            <path key={i} d={d} fill="currentColor" opacity={0.8} />
+          ))}
+          <circle cx="12" cy="12" r="4.5" fill="var(--accent)" />
+        </g>
+
+        {/* 별 — 반대 방향으로 돌며 피어난다 */}
+        <g
+          style={{
+            transform: `rotate(${dark ? 0 : -70}deg) scale(${dark ? 1 : 0})`,
+            transformOrigin: "12px 12px",
+            opacity: dark ? 1 : 0,
+            ...swap,
+          }}
+        >
+          <path d={STAR_MAIN} fill="var(--accent)" />
+          {STAR_SUB.map((s, i) => (
+            <path key={i} d={s.d} fill="currentColor" opacity={s.opacity} />
+          ))}
         </g>
       </svg>
     </button>

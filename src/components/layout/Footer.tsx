@@ -1,47 +1,52 @@
 import Link from "next/link";
-import { Mail } from "lucide-react";
-import { FlameLogo } from "@/components/brand/FlameLogo";
-import { GithubIcon } from "@/components/ui/GithubIcon";
 
-const SOCIAL: { label: string; href: string; Icon: React.ComponentType<{ className?: string }> }[] =
-  [
-    { label: "GitHub", href: "https://github.com/INSANE-P", Icon: GithubIcon },
-    { label: "메일", href: "mailto:chanbin0626@gmail.com", Icon: Mail },
-  ];
+/** 밖으로 나가는 링크만 둔다. 사이트 안의 이동은 붙박이 헤더가 맡는다. */
+const ELSEWHERE = [
+  { label: "github", href: "https://github.com/INSANE-P" },
+  { label: "portfolio", href: "https://portfolio.chanbin.dev" },
+  { label: "mail", href: "mailto:chanbin0626@gmail.com" },
+];
 
+/**
+ * 푸터 (ADR-0028·0036).
+ *
+ * 사이트 지도가 아니라 마무리 인사다. 깊이가 목록 → 글 두 단계뿐이고 페이지가 둘뿐인데
+ * 푸터에 열을 나눠 링크를 늘어놓으면, 있지도 않은 구조를 흉내 내는 셈이 된다.
+ *
+ * 그래서 셋을 걷어냈다.
+ *
+ *   - `pages` 열 — 붙박이 헤더가 항상 보여 주는 것을 한 번 더 적은 것이었다
+ *   - 열 제목(`pages`·`elsewhere`) — 링크 셋에 붙인 제목은 없는 구조를 만든다
+ *   - 태그라인 — 히어로와 모바일 메뉴에 이미 있다. 세 번째는 반복이다
+ *
+ * 남은 것은 누가 썼는지(워드마크·저작권)와 밖으로 나가는 길뿐이다.
+ */
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-border">
-      <div className="mx-auto max-w-3xl px-5 py-12">
-        {/* 둘러보기는 sticky 헤더가 대신하므로, 푸터는 브랜드(좌) + 소셜(우)만 */}
-        <div className="flex items-start justify-between gap-6">
-          <div className="max-w-[280px]">
-            <Link href="/" className="flex items-center gap-2">
-              <FlameLogo size={24} animated={false} name="footer" className="-translate-y-[2px]" />
-              <span className="font-title text-base font-bold text-foreground">설화</span>
-            </Link>
-            <p className="mt-3 text-[13px] leading-relaxed text-muted">
-              눈과 불 사이, 한 줄씩 쌓아가요.
-            </p>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-2.5">
-            {SOCIAL.map(({ label, href, Icon }) => (
-              <a
-                key={label}
-                href={href}
-                aria-label={label}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="inline-flex size-9 items-center justify-center rounded-full border border-hairline text-muted transition hover:border-accent hover:text-accent"
-              >
-                <Icon className="size-[18px]" />
-              </a>
-            ))}
-          </div>
+    <footer className="mt-24 border-t border-hairline">
+      <div className="mx-auto flex w-full max-w-[1080px] flex-col gap-6 px-6 py-12 sm:flex-row sm:items-center sm:justify-between sm:px-10">
+        <div className="flex items-baseline gap-4">
+          <Link href="/" className="group">
+            <span className="spark-line font-display text-[18px] font-black uppercase tracking-tight">
+              CHANBIN<span className="text-accent">.</span>
+            </span>
+          </Link>
+          <span className="text-[13px] text-muted/70">© {new Date().getFullYear()} 박찬빈</span>
         </div>
 
-        <div className="mt-12 border-t border-hairline pt-6 text-xs text-muted">© 설화 · 박찬빈</div>
+        <nav aria-label="바깥 링크" className="flex flex-wrap gap-x-7 gap-y-2">
+          {ELSEWHERE.map(({ label, href }) => (
+            <a
+              key={label}
+              href={href}
+              target={href.startsWith("http") ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              className="font-display text-[14px] lowercase text-muted transition-colors hover:text-accent-text"
+            >
+              <span className="spark-line">{label}</span>
+            </a>
+          ))}
+        </nav>
       </div>
     </footer>
   );
