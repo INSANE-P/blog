@@ -469,8 +469,15 @@ body {
   border: 1px solid var(--hairline);
   background: var(--surface-hover);
 }
-.prose figure[data-fit="wide"] img {
-  width: 100%;
+/*
+  그림은 제 원래 폭보다 크게 늘리지 않는다 (ADR-0046).
+  `--nat` 은 그림의 실제 가로 크기다(Figure 가 넣어 준다).
+  없는 화소를 만들어 낼 수는 없으므로, 늘리면 흐려지기만 한다.
+*/
+.prose figure[data-fit="wide"] img,
+.prose figure[data-fit="normal"] img {
+  width: min(100%, var(--nat, 100%));
+  margin-inline: auto;
 }
 .prose figure[data-fit="tall"] {
   max-width: 360px;
@@ -547,15 +554,18 @@ body {
   앞에 두면 뒤따르는 `margin: 2.2em 0` 단축 속성이 margin-left 를 0 으로 되돌려,
   폭만 넓어지고 가운데로 미는 힘이 사라져 왼쪽으로 튀어나간다(실제로 그렇게 깨졌다).
 
-  치수를 아는 가로형 그림에만 적용한다. 세로형은 좁혀야 하고, 치수를 모르는 그림은
-  자리를 미리 잡을 수 없어 넓히면 밀림이 커진다.
+  **가로로 긴 그림에만** 적용한다(가로가 세로의 1.7 배 이상, ADR-0046).
+  처음에는 세로형이 아니면 전부 넓혔는데, 그러면 5:4 처럼 거의 정사각형인 그림도
+  본문 밖으로 나가 글 읽는 흐름 한가운데 큰 덩어리가 생긴다.
+  세로형은 좁혀야 하고, 치수를 모르는 그림은 자리를 미리 잡을 수 없어 넓히면 밀림이 커진다.
+  넓히더라도 그림의 원래 폭은 넘지 않는다.
   표와 코드도 넓히지 않는다. 표는 칸이 둘뿐이면 832px 로 늘어나 텅 비어 보이고,
   코드는 상자 안에서 이미 가로로 넘길 수 있어 넓힐 실익이 없다. 무엇보다 글보다 넓은 상자는
   "일부러 넓힌 것"이 아니라 "정렬이 어긋난 것"으로 보인다 — 그림만 예외인 이유는 그림은
   넓어도 그림으로 읽히기 때문이다.
 */
 .prose figure[data-fit="wide"] {
-  width: min(52rem, 100vw - 2.5rem);
+  width: min(52rem, 100vw - 2.5rem, var(--nat, 52rem));
   margin-left: 50%;
   margin-right: 0;
   transform: translateX(-50%);

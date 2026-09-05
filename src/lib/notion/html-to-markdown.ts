@@ -86,6 +86,17 @@ function asBlockquote(inner: string): string {
 }
 
 /** 링크 한 줄. 제목이 없으면 주소를 제목으로 쓴다 */
+/**
+ * 태그에서 주소를 찾는다 (ADR-0046).
+ *
+ * 이름 하나만 보면 노션이 표기를 바꾸는 순간 조용히 링크가 사라진다.
+ * 형광펜을 `_background` 로 짐작했다가 통째로 잃은 것과 같은 함정이라,
+ * 있을 법한 이름을 다 본다.
+ */
+function urlOf(head: string): string | undefined {
+  return attr(head, "src") ?? attr(head, "url") ?? attr(head, "href");
+}
+
 function asLink(label: string, url?: string): string {
   const text = label
     .replace(/<[^>]+>/g, "")
@@ -128,6 +139,19 @@ const HANDLED = new Set([
 
 export function htmlToMarkdown(md: string): MarkdownConversion {
   const unknown = new Set<string>();
+
+  /*
+    다루는 태그인데 주소를 못 찾았을 때 알린다 (ADR-0046).
+
+    형광펜을 잃었을 때 가장 나빴던 것은 잃었다는 사실조차 몰랐다는 점이다.
+    `HANDLED` 에 넣어 둔 태그는 "우리가 다룬다"는 뜻이라 보고에서 빠지는데,
+    다루는 방법이 틀렸으면 그대로 조용히 사라진다.
+    그래서 다루기로 해 놓고 못 다룬 경우를 따로 알린다.
+  */
+  const report = (tag: string): undefined => {
+    unknown.add(`${tag}(주소 없음)`);
+    return undefined;
+  };
 
   // 코드는 통째로 빼 두었다가 마지막에 되돌린다.
   const vault: string[] = [];
@@ -192,21 +216,21 @@ export function htmlToMarkdown(md: string): MarkdownConversion {
     // "여기 무언가 있었다"는 사실은 남겨야 한다(ADR-0023 남는 문제).
     .replace(
       /<(video|audio|pdf|file)([^>]*)>([\s\S]*?)<\/\1>/gi,
-      (_m, _tag: string, head: string, inner: string) => asLink(inner, attr(head, "src")),
+      (_m, tag: string, head: string, inner: string) => asLink(inner, urlOf(head) ?? report(tag)),
     )
     .replace(/<(video|audio|pdf|file)([^>]*)\/>/gi, (_m, tag: string, head: string) =>
-      asLink(attr(head, "alt") ?? tag, attr(head, "src")),
+      asLink(attr(head, "alt") ?? tag, urlOf(head) ?? report(tag)),
     )
 
     // 하위 페이지·데이터베이스 → 링크
     .replace(
       /<(page|database)([^>]*)>([\s\S]*?)<\/\1>/gi,
-      (_m, _tag: string, head: string, inner: string) => asLink(inner, attr(head, "url")),
+      (_m, tag: string, head: string, inner: string) => asLink(inner, urlOf(head) ?? report(tag)),
     )
 
     // 북마크·임베드·링크 미리보기 등 노션이 마크다운으로 못 내는 것들
     .replace(/<unknown([^>]*)\/?>/gi, (_m, head: string) =>
-      asLink(attr(head, "alt") ?? "링크", attr(head, "url")),
+      asLink(attr(head, "alt") ?? "링크", urlOf(head) ?? report("unknown")),
     )
 
     // 문단 안 줄바꿈. 마크다운에서 줄바꿈은 "공백 두 개 + 개행"이다
