@@ -1,0 +1,222 @@
+/*
+  Giscus 커스텀 테마 — 방명록 라이트 (ADR-0041).
+
+  글 아래의 댓글과 **일부러 다르게** 생겼다. 댓글은 방금 읽은 것에 대한 대답이라
+  말풍선이 맞지만, 방명록은 지나간 사람이 남기고 간 쪽지에 가깝다.
+  같은 위젯이라도 하는 일이 다르면 다르게 보여야 온 사람이 무엇을 하는 자리인지 안다.
+
+  다른 점은 셋이다.
+    - 남긴 글이 쪽지 카드로 깔린다. 자리가 남으면 옆으로도 붙는다
+    - 이름 아래에 번개가 지나간다 — 이 사이트에서 "지나간 자국"이 뜻하는 그것이다
+    - 반응·답글·소유자 표는 지운다. 방명록은 주고받는 자리가 아니다
+
+  클래스 이름은 추측하지 않고 실제 위젯의 DOM 에서 뽑았다.
+*/
+@import "https://giscus.app/themes/light.css";
+
+main {
+  --color-canvas-default: #ffffff; /* background */
+  --color-canvas-subtle: #f4f6f7; /* surface-hover */
+  --color-canvas-inset: #f4f6f7;
+  --color-canvas-overlay: #ffffff;
+  --color-fg-default: #17181a; /* prose-fg */
+  --color-fg-muted: #6b6b6b; /* muted */
+  --color-fg-subtle: #6b6b6b;
+  --color-border-default: rgba(0, 0, 0, 0.14); /* border */
+  --color-border-muted: rgba(0, 0, 0, 0.07); /* hairline */
+  --color-neutral-muted: rgba(47, 143, 181, 0.07); /* tint */
+  --color-accent-fg: #277796; /* accent-text */
+  --color-accent-emphasis: #277796;
+  --color-accent-muted: rgba(47, 143, 181, 0.3);
+  --color-btn-text: #17181a;
+  --color-btn-bg: #ffffff;
+  --color-btn-border: rgba(0, 0, 0, 0.14);
+  --color-btn-hover-bg: #f4f6f7;
+  --color-btn-primary-bg: #277796;
+  --color-btn-primary-hover-bg: #2f8fb5;
+  --color-btn-primary-text: #ffffff;
+  --color-btn-primary-border: transparent;
+
+  /* 아래 규칙들이 쓰는 값 — 테마마다 이 블록만 다르면 된다 */
+  --ours-fg: #111111;
+  --ours-surface: #f4f6f7;
+  --ours-hairline: rgba(0, 0, 0, 0.07);
+  --ours-border: rgba(0, 0, 0, 0.16);
+  --ours-accent: #277796;
+  --ours-accent-soft: rgba(47, 143, 181, 0.45);
+  --ours-muted: #6b6b6b;
+  --ours-overlay: #ffffff;
+  --ours-spark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='58' height='9' viewBox='0 0 58 9'%3E%3Cpath d='M0 6.5 H11 L14 2.2 L19 6.5 H31 L33.5 4.2 L36.5 6.5 H47 L50 1.8 L55 6.5 H58' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* 우리 화면에는 위에 이미 제목과 안내 한 줄이 있다 — giscus 자체 머리말은 지운다 */
+main .gsc-comments > .gsc-header {
+  display: none;
+}
+
+/*
+  남긴 글이 깔리는 판.
+
+  `auto-fit` 이라 글이 하나뿐이면 빈 칸이 접히고 카드가 폭을 다 쓴다.
+  `auto-fill` 로 두면 혼자 남은 쪽지가 왼쪽 반만 차지해 어색하다.
+  `align-items: start` 가 없으면 짧은 쪽지가 옆의 긴 쪽지 높이까지 늘어난다.
+*/
+main .gsc-timeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: start;
+  gap: 14px;
+  padding: 0;
+}
+
+/* 쪽지 한 장 */
+main .gsc-comment {
+  padding: 0;
+}
+main .gsc-comment > div {
+  border: 1px solid var(--ours-hairline);
+  border-radius: 16px;
+  background: var(--ours-surface);
+  padding: 16px 18px 18px;
+}
+
+/* 답글은 방명록에서 다루지 않는다 — 반응·답글 수·소유자 표를 지운다 */
+main .gsc-comment-footer,
+main .gsc-replies,
+main .gsc-comment-author .color-box-border-info,
+main .gsc-comment-author + div {
+  display: none;
+}
+
+main .gsc-comment-header {
+  padding: 0;
+  border: 0;
+}
+main .gsc-comment-author {
+  gap: 10px;
+  align-items: center;
+}
+
+/* 얼굴은 둥근 사각형으로 — 이 사이트의 면은 전부 둥근 사각형이다 */
+main .gsc-comment-author-avatar img {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  margin-right: 8px;
+}
+
+/*
+  이름 아래로 번개가 지나간다.
+
+  giscus 는 이름 span 에 `overflow: hidden` 을 걸어 두는데, 우리 쪽 `overflow: visible` 이
+  이기지 못한다. 우선순위는 우리가 높은데도 그렇고, 읽을 수 있는 스타일시트 어디에서도
+  이기는 규칙을 찾지 못했다(측정해 봤다). 원인을 더 파는 대신 잘릴 수 없는 자리로 옮겼다.
+
+  밑줄을 상자 **밖**(bottom: -6px)이 아니라 안쪽 여백에 그린다. padding 은 넘침 자르기의
+  안쪽이라 overflow 가 무엇이든 잘리지 않는다. 늘어난 높이는 같은 크기의 음수 margin 으로
+  되돌려 다른 줄이 밀리지 않게 한다.
+*/
+main .gsc-comment-author-avatar > span {
+  position: relative;
+  padding-bottom: 9px;
+  margin-bottom: -9px;
+  font-weight: 700;
+  color: var(--ours-fg);
+}
+main .gsc-comment-author-avatar > span::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 8px;
+  background-color: var(--ours-accent);
+  -webkit-mask: var(--ours-spark) repeat-x left bottom / auto 100%;
+  mask: var(--ours-spark) repeat-x left bottom / auto 100%;
+}
+
+/* 남긴 때는 오른쪽 끝으로 밀어 두고 작게 */
+main .gsc-comment-author > a.link-secondary {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--ours-muted);
+}
+
+main .gsc-comment-content {
+  margin-top: 16px;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1.7;
+}
+main .gsc-comment-content > p:last-child {
+  margin-bottom: 0;
+}
+
+/*
+  남기는 자리.
+
+  점선으로 둘러 둔다 — 채워야 할 빈 자리라는 뜻이 형태로 읽힌다.
+  쪽지들이 실선 카드이므로 점선 하나만으로도 "이건 아직 비어 있다"가 구분된다.
+  초점이 오면 실선 악센트로 바뀐다.
+*/
+main .gsc-comment-box {
+  margin-top: 22px;
+  border: 1.5px dashed var(--ours-border);
+  border-radius: 16px;
+  background: transparent;
+  transition:
+    border-color 0.2s ease,
+    border-style 0.2s ease;
+}
+main .gsc-comment-box:focus-within {
+  border-style: solid;
+  border-color: var(--ours-accent-soft);
+}
+main .gsc-comment-box-tabs {
+  background: transparent;
+  border-bottom: 1px solid var(--ours-hairline);
+  border-radius: 16px 16px 0 0;
+}
+
+/* 상자가 이미 테두리다 — 안쪽의 두 번째 테두리를 지운다 */
+main .gsc-comment-box-write,
+main .gsc-comment-box-textarea-extras {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+main .gsc-comment-box-textarea {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  min-height: 104px;
+  padding: 14px 14px 18px;
+  font-size: 15px;
+  line-height: 1.75;
+}
+main .gsc-comment-box-textarea:focus {
+  box-shadow: none;
+  outline: none;
+}
+main .gsc-comment-box-textarea::placeholder {
+  color: var(--ours-muted);
+}
+main .gsc-comment-box-bottom {
+  padding: 10px 14px 12px;
+}
+main .gsc-comment-box-markdown-hint {
+  color: var(--ours-muted);
+}
+main .gsc-comment-box-buttons .btn {
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-weight: 600;
+}
+
+/* 반응 팝오버는 안 쓰지만, 떠 버릴 경우를 대비해 색은 맞춰 둔다 */
+main .gsc-reactions-popover,
+main .gsc-reactions-menu {
+  background: var(--ours-overlay);
+  border: 1px solid var(--ours-hairline);
+  border-radius: 14px;
+}

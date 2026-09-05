@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Giscus from "@giscus/react";
 import { SectionTitle } from "@/components/ui/SectionTitle";
+import { useGiscusTheme } from "@/lib/giscus";
 
 /**
  * 댓글 (ADR-0021·0028·0029).
@@ -17,69 +17,15 @@ import { SectionTitle } from "@/components/ui/SectionTitle";
  * 대신 홈의 절 제목을 그대로 쓴다(아웃라인 대문자 + 한글 한 줄). 화면마다 다른 방식으로
  * 제목을 다는 것이 "직접 만든 것처럼" 보이지 않게 하는 가장 큰 원인이다.
  *
- * 테마는 우리 .dark 클래스를 감시해 맞춘다.
- *
- * 커스텀 테마 CSS 를 giscus 가 불러오지 못하면 색 변수가 하나도 적용되지 않아
- * 글자색이 기본값인 검정이 된다. 흰 배경에서는 우연히 읽히지만 검은 배경에서는
- * 댓글이 통째로 보이지 않는다. 실제로 그 상태가 한 번 나왔다.
- *
- * 그래서 주소를 넘기기 전에 파일이 실제로 있는지 먼저 확인한다. 같은 출처라 CORS 문제가 없고,
- * 한 번 받아 두면 브라우저가 캐시한다. 없으면 내장 테마로 물러난다 —
- * 우리 색은 잃더라도 댓글이 안 보이는 것보다는 낫다.
- *
- * 폴백은 `noborder_*` 가 아니라 `light`/`dark` 다. noborder_dark 는 상자 배경이 #1e1e20 이라
- * 우리 순수 검정과 거의 붙어 상자가 구분되지 않고, 글자도 10.5:1 로 흐리다.
- * `dark` 는 글자가 16:1 이고 테두리가 있어 상자가 떨어져 보인다 —
- * 폴백에서는 우리 결보다 읽히는 것이 먼저다.
- *
- * http(로컬)에서는 애초에 mixed-content 로 막히므로 확인 없이 내장 테마를 쓴다.
+ * 테마 판단은 소개의 방명록과 같아서 `useGiscusTheme` 으로 뺐다.
  */
 export function Comments() {
-  // 커스텀 테마 파일을 쓸 수 있는지 — 마운트 때 한 번만 확인한다
-  const [customOk, setCustomOk] = useState<boolean | null>(null);
-  const [dark, setDark] = useState(false);
-
-  useEffect(() => {
-    const sync = () => setDark(document.documentElement.classList.contains("dark"));
-    sync();
-    const observer = new MutationObserver(sync);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    /*
-      확인은 마운트 때 한 번뿐이다. 테마를 바꿀 때마다 확인하면 토글할 때마다
-      네트워크 왕복을 기다리게 되어 "안 바뀐다"로 느껴진다.
-      파일이 있는지 없는지는 이 화면이 떠 있는 동안 변하지 않는다.
-    */
-    if (window.location.protocol !== "https:") {
-      setCustomOk(false);
-      return;
-    }
-    let alive = true;
-    fetch(`${window.location.origin}/giscus-light.css`, { method: "HEAD" })
-      .then((res) => alive && setCustomOk(res.ok))
-      .catch(() => alive && setCustomOk(false));
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  // 확인 전(null)에는 내장 테마로 둔다 — 잘못된 주소를 넘겨 색이 통째로 빠지는 것보다 낫다
-  const theme =
-    customOk === true
-      ? `${window.location.origin}/giscus-${dark ? "dark" : "light"}.css`
-      : dark
-        ? "dark"
-        : "light";
+  const theme = useGiscusTheme("giscus");
 
   return (
     <section aria-label="댓글">
       <SectionTitle>comments</SectionTitle>
-      <p className="mt-2 text-[15px] text-muted">
-        자유롭게 생각을 남겨주세요.
-      </p>
+      <p className="mt-2 text-[15px] text-muted">자유롭게 생각을 남겨주세요.</p>
 
       <div className="mt-7">
         {/*
@@ -92,8 +38,6 @@ export function Comments() {
           처음 테마가 박혀 있으므로 나중에 로드돼도 옛 테마로 뜬다.
 
           새로 만들면 src 에 지금 테마가 담긴 채로 뜨므로 이 경로를 아예 타지 않는다.
-          대가는 테마를 바꿀 때 댓글이 다시 불러와지는 것인데,
-          가끔 안 바뀌는 것보다 매번 확실히 바뀌는 편이 낫다.
         */}
         <Giscus
           key={theme}
