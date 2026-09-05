@@ -43,7 +43,20 @@ export function Markdown({ children }: { children: string }) {
       (눌러도 아무 데도 가지 않는다).
     */
     h2({ children, node }) {
-      return <h2 id={slugify(plainText(textOf(node as HastNode)), seen)}>{children}</h2>;
+      const id = slugify(plainText(textOf(node as HastNode)), seen);
+      return (
+        <h2 id={id}>
+          {children}
+          {/*
+            절 하나만 골라 공유할 수 있게 앵커를 단다. 목차가 쓰는 것과 같은 id 다.
+            마우스를 올릴 수 있는 기기에서는 평소 숨기고, 손가락으로 쓰는 기기에서는
+            늘 보여 준다 — 호버가 없는 곳에서 호버로만 드러나는 것은 없는 것과 같다.
+          */}
+          <a href={`#${id}`} className="heading-anchor" aria-label={`${plainText(textOf(node as HastNode))} 절 링크`}>
+            #
+          </a>
+        </h2>
+      );
     },
 
     /*
@@ -98,6 +111,14 @@ export function Markdown({ children }: { children: string }) {
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[rehypeKatex, rehypeHighlight]}
+      /*
+        각주 안내 문구를 우리말로. 기본값은 "Footnotes"·"Back to content" 라
+        한글 글 끝에 영문 제목이 혼자 서 있게 된다.
+      */
+      remarkRehypeOptions={{
+        footnoteLabel: "각주",
+        footnoteBackLabel: "본문으로 돌아가기",
+      }}
       components={components}
     >
       {normalized}

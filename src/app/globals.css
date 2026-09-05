@@ -209,6 +209,85 @@ body {
   text-decoration-thickness: 1.5px;
 }
 
+/*
+  밖으로 나가는 링크에는 화살표를 붙인다.
+  이 사이트 안의 링크는 모두 상대 경로(/posts/...)라 http 로 시작하면 바깥이다.
+  누르기 전에 "여기서 나간다"를 알 수 있어야 한다.
+*/
+.prose a[href^="http"]::after {
+  content: "↗";
+  display: inline-block;
+  margin-left: 0.15em;
+  font-size: 0.85em;
+  text-decoration: none;
+  vertical-align: 0.05em;
+}
+
+/*
+  절 링크. 목차가 쓰는 것과 같은 id 를 가리킨다.
+  마우스를 올릴 수 있는 기기에서만 숨긴다 — 호버가 없는 곳에서 호버로만 드러나는 것은
+  아예 없는 것과 같다.
+*/
+.prose .heading-anchor {
+  margin-left: 0.3em;
+  color: var(--accent-text);
+  font-weight: 700;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+@media (hover: hover) {
+  .prose .heading-anchor {
+    opacity: 0;
+  }
+  .prose h2:hover .heading-anchor,
+  .prose .heading-anchor:focus-visible {
+    opacity: 1;
+  }
+}
+
+/* 키보드 키 — 단축키를 적을 때 */
+.prose kbd {
+  display: inline-block;
+  min-width: 1.7em;
+  padding: 0.15em 0.45em;
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--foreground);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+}
+
+/*
+  각주(GFM). 본문이 끝난 뒤 작은 글씨로 모인다.
+  번호를 누르면 본문의 그 자리로 돌아간다 — remark-gfm 이 양방향 링크를 만들어 준다.
+*/
+.prose .footnotes {
+  margin-top: 3em;
+  padding-top: 1.5em;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.9em;
+  color: var(--muted);
+}
+.prose .footnotes h2 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin: 0 0 0.8em;
+  color: var(--muted);
+}
+.prose .footnotes ol li::before {
+  font-size: 12px;
+}
+.prose sup a {
+  text-decoration: none;
+  font-weight: 700;
+  padding: 0 0.1em;
+}
+
 /* 굵게 — 형광펜처럼 밑동만 옅게 깐다. 색을 바꾸면 링크로 오해받는다 */
 .prose strong {
   font-weight: 700;
