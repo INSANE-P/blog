@@ -4,7 +4,7 @@ import { SectionTitle } from "@/components/ui/SectionTitle";
 import { PostCard } from "@/features/posts/components/PostCard";
 import { getList } from "@/features/posts/queries";
 
-export const metadata: Metadata = { title: "Posts" };
+export const metadata: Metadata = { title: "Posts", alternates: { canonical: "/posts" } };
 
 /**
  * 글 목록 (ADR-0025·0026·0034).

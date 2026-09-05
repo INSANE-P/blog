@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { pretendard } from "./fonts";
+import { SITE } from "@/lib/site";
 import "./globals.css";
 
 /*
@@ -7,30 +8,31 @@ import "./globals.css";
   불꽃·서리 정체성을 걷어내면서 그 이름이 가리키던 것이 화면에 하나도 남지 않았고,
   포트폴리오와 같은 사람이라는 사실이 이름에서 바로 읽히는 편이 낫다.
 */
-const description = "도전하고, 그 과정을 기록합니다. 박찬빈의 개인 블로그.";
-// 커스텀 도메인이 생기면 Vercel env NEXT_PUBLIC_SITE_URL만 바꾸면 된다.
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://frost-log.vercel.app";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE.url),
   title: {
-    default: "박찬빈",
-    template: "%s · 박찬빈",
+    default: SITE.name,
+    template: `%s · ${SITE.name}`,
   },
-  description,
+  description: SITE.description,
   icons: { icon: "/favicon.svg" },
+  // 쿼리스트링이 붙은 주소가 중복 페이지로 잡히지 않게 정본을 밝힌다 (ADR-0044)
+  alternates: {
+    canonical: "/",
+    types: { "application/rss+xml": [{ url: "/rss.xml", title: `${SITE.name} 피드` }] },
+  },
   openGraph: {
     type: "website",
-    siteName: "박찬빈",
-    locale: "ko_KR",
-    url: siteUrl,
-    title: "박찬빈",
-    description,
+    siteName: SITE.name,
+    locale: SITE.locale,
+    url: SITE.url,
+    title: SITE.name,
+    description: SITE.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: "박찬빈",
-    description,
+    title: SITE.name,
+    description: SITE.description,
   },
 };
 
@@ -39,11 +41,7 @@ const themeInitScript = `(function(){try{var m=matchMedia('(prefers-color-scheme
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="ko"
-      className={pretendard.variable}
-      suppressHydrationWarning
-    >
+    <html lang="ko" className={pretendard.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>

@@ -4,7 +4,7 @@ import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Guestbook } from "@/features/about/components/Guestbook";
 import { ACTIVITIES, IDENTITY, INTRO, PROJECTS, type TimelineItem } from "./data";
 
-export const metadata: Metadata = { title: "About" };
+export const metadata: Metadata = { title: "About", alternates: { canonical: "/about" } };
 
 /**
  * 소개 (ADR-0038·0041).
