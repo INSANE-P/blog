@@ -10,6 +10,9 @@ import { getRecent } from "@/features/posts/queries";
  * 홈을 전체 목록으로 만들지 않았다. 글이 적을 때는 그게 밀도 있어 보이지만,
  * 쌓이면 홈이 끝없는 목록이 되어 "이 사람이 누구인지"가 사라진다.
  * 그래서 최근 6편만 두고 전체 목록으로 가는 문을 연다(밀러의 법칙, 7±2).
+ *
+ * 섹션 제목은 영문 소문자다(ADR-0029). 사이트의 구조를 가리키는 말이라 표지에 속한다 —
+ * 소개 페이지의 "기술"·"프로젝트"처럼 글의 내용을 가리키는 말은 한글로 남는다.
  */
 export default async function HomePage() {
   const recent = await getRecent(6);

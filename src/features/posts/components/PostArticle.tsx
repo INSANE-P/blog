@@ -83,21 +83,32 @@ export function PostArticle({
           <Markdown>{body}</Markdown>
         </div>
 
-        {/* 반응 — 로그인 없이 남길 수 있는 유일한 자리 */}
-        <div className="mt-16 border-t border-hairline pt-12 text-center">
+        {/*
+          반응 — 로그인 없이 남길 수 있는 유일한 자리.
+          선을 긋지 않고 여백만으로 띄운다. 본문이 끝난 자리에 선을 그으면 "끝"이 먼저 읽혀서
+          이어 읽기와 댓글이 덤처럼 보인다.
+        */}
+        <div className="mt-16 text-center">
           <StokeButton slug={entry.slug} initial={entry.stokes ?? 0} />
         </div>
 
-        {/* 이어 읽기 */}
+        {/*
+          아래 두 절은 홈과 같은 문법을 쓴다 — 영문 소문자 제목(ADR-0029).
+          화면마다 제목 다는 방식이 다르면 한 사람이 만든 것으로 보이지 않는다.
+        */}
         {(prev || next) && (
-          <nav className="mt-16 grid gap-3 sm:grid-cols-2">
-            <Adjacent entry={prev} direction="prev" />
-            <Adjacent entry={next} direction="next" />
-          </nav>
+          <section className="mt-20 border-t border-hairline pt-12">
+            <h2 className="font-display text-[26px] font-extrabold lowercase tracking-[-0.035em]">
+              keep reading
+            </h2>
+            <nav className="mt-7 grid gap-3 sm:grid-cols-2">
+              <Adjacent entry={prev} direction="prev" />
+              <Adjacent entry={next} direction="next" />
+            </nav>
+          </section>
         )}
 
-        {/* 댓글 — Giscus(GitHub Discussions) */}
-        <div className="mt-14 border-t border-hairline pt-10">
+        <div className="mt-20 border-t border-hairline pt-12">
           <Comments />
         </div>
       </article>
@@ -123,11 +134,11 @@ function Adjacent({
       href={entryHref(entry)}
       className="group flex flex-col rounded-2xl border border-hairline p-5 transition-colors hover:border-accent/40 hover:bg-surface-hover"
     >
-      <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-muted">
+      <span className="inline-flex items-center gap-1.5 font-display text-[13px] font-semibold lowercase text-muted">
         {isPrev && (
           <ArrowLeft size={15} className="transition-transform group-hover:-translate-x-0.5" />
         )}
-        {isPrev ? "이전 글" : "다음 글"}
+        {isPrev ? "previous" : "next"}
         {!isPrev && (
           <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
         )}

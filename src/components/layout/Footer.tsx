@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { NAV } from "./nav";
 
+/* 링크 이름은 표지에 속하므로 영문 소문자로 둔다(ADR-0029) */
 const CHANNELS = [
-  { label: "GitHub", href: "https://github.com/INSANE-P" },
-  { label: "포트폴리오", href: "https://portfolio.chanbin.dev" },
-  { label: "메일", href: "mailto:chanbin0626@gmail.com" },
+  { label: "github", href: "https://github.com/INSANE-P" },
+  { label: "portfolio", href: "https://portfolio.chanbin.dev" },
+  { label: "mail", href: "mailto:chanbin0626@gmail.com" },
 ];
 
 /**
@@ -32,11 +33,8 @@ export function Footer() {
           </div>
 
           <div className="flex gap-14 sm:gap-20">
-            <FooterColumn
-              title="둘러보기"
-              items={NAV.map((n) => ({ label: n.label, href: n.href }))}
-            />
-            <FooterColumn title="채널" items={CHANNELS} />
+            <FooterColumn title="pages" items={NAV.map((n) => ({ ...n }))} />
+            <FooterColumn title="elsewhere" items={CHANNELS} />
           </div>
         </div>
       </div>
@@ -53,7 +51,9 @@ function FooterColumn({
 }) {
   return (
     <nav aria-label={title}>
-      <h2 className="text-[13px] font-bold tracking-tight text-foreground">{title}</h2>
+      <h2 className="font-display text-[13px] font-bold lowercase tracking-tight text-foreground">
+        {title}
+      </h2>
       <ul className="mt-4 space-y-3">
         {items.map(({ label, href }) => {
           const external = href.startsWith("http") || href.startsWith("mailto:");
@@ -63,7 +63,7 @@ function FooterColumn({
                 href={href}
                 target={href.startsWith("http") ? "_blank" : undefined}
                 rel={external ? "noopener noreferrer" : undefined}
-                className="text-[14px] text-muted transition-colors hover:text-accent-text"
+                className="font-display text-[14px] lowercase text-muted transition-colors hover:text-accent-text"
               >
                 {label}
               </a>

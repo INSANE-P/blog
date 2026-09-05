@@ -7,10 +7,11 @@ import { ArrowUpRight, Menu, X } from "@/components/icons";
 import { NAV } from "./nav";
 import { ThemeToggle } from "./ThemeToggle";
 
+/* 링크 이름은 표지에 속하므로 영문 소문자로 둔다(ADR-0029) */
 const SOCIAL = [
-  { label: "GitHub", href: "https://github.com/INSANE-P" },
-  { label: "포트폴리오", href: "https://portfolio.chanbin.dev" },
-  { label: "메일", href: "mailto:chanbin0626@gmail.com" },
+  { label: "github", href: "https://github.com/INSANE-P" },
+  { label: "portfolio", href: "https://portfolio.chanbin.dev" },
+  { label: "mail", href: "mailto:chanbin0626@gmail.com" },
 ];
 
 /**
@@ -20,8 +21,8 @@ const SOCIAL = [
  * 화면 전체를 쓰면 어디를 눌러도 닿는다(피츠의 법칙). 항목이 둘뿐이라 채울 것이 없다는 점이
  * 오히려 이 방식에 맞는다 — 큰 활자 두 개가 화면의 주인이 된다.
  *
- * 열릴 때는 위에서 아래로 펼쳐지고 항목이 차례로 올라온다. 한 번에 나타나면
- * 화면이 갈아 끼워진 것처럼 보이고, 순서가 있으면 "메뉴가 열렸다"로 읽힌다.
+ * 항목이 차례로 올라온다. 한 번에 나타나면 화면이 갈아 끼워진 것처럼 보이고,
+ * 순서가 있으면 "메뉴가 열렸다"로 읽힌다. 배경은 움직이지 않는다 — 아래 주석 참고.
  *
  * 닫는 방법을 셋 둔다 — X, Esc, 항목 선택. 전체 화면을 덮는 것은 빠져나갈 길이 분명해야 한다.
  */
@@ -66,12 +67,14 @@ export function MobileNav({ className }: { className?: string }) {
         <Menu size={24} />
       </button>
 
+      {/*
+        덮개 배경은 처음부터 불투명하다. 여기에 페이드를 걸면 열리는 동안 뒤 페이지가
+        그대로 비친다 — 특히 다크에서는 배경끼리 같은 검정이라 히어로의 흰 글자만 떠올라
+        화면이 깨진 것처럼 보였다. 움직이는 것은 안의 내용뿐이어야 한다.
+      */}
       {open && (
-        <div
-          className="fixed inset-0 z-50 bg-background transition-opacity duration-200"
-          style={{ opacity: shown ? 1 : 0 }}
-        >
-          <div className="flex h-dvh flex-col px-6">
+        <div className="fixed inset-0 z-50 bg-background">
+          <div className="flex h-full flex-col px-6">
             {/* 머리줄 — 열기 전 헤더와 같은 자리에 같은 크기로 둔다 */}
             <div className="flex h-[68px] shrink-0 items-center justify-between">
               <span className="font-display text-[20px] font-black uppercase tracking-tight">
@@ -128,7 +131,7 @@ export function MobileNav({ className }: { className?: string }) {
                       href={s.href}
                       target={external ? "_blank" : undefined}
                       rel={external ? "noopener noreferrer" : undefined}
-                      className="inline-flex items-center gap-0.5 py-2 text-[15px] font-semibold text-muted transition-colors hover:text-accent-text"
+                      className="inline-flex items-center gap-0.5 py-2 font-display text-[15px] font-semibold lowercase text-muted transition-colors hover:text-accent-text"
                     >
                       {s.label}
                       {external && <ArrowUpRight size={14} />}
