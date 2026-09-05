@@ -1,35 +1,22 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "@/components/icons";
 import { Markdown } from "@/lib/content/Markdown";
+import { extractHeadings, readingMinutes } from "@/lib/content/headings";
 import { formatDate } from "@/lib/utils/date";
 import type { Entry } from "../types";
 import { entryHref } from "../types";
+import { ReadingProgress } from "./ReadingProgress";
+import { Toc } from "./Toc";
 import { StokeButton } from "./StokeButton";
 import { Comments } from "./Comments";
 
-/** 글쓴이 아바타 — 직접 그린 공룡 캐릭터. 얼음 톤 배경 위에 캐릭터 전체가 보이게 contain. */
-function DinoAvatar({ size }: { size: number }) {
-  return (
-    <span
-      className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-xl"
-      style={{ width: size, height: size, background: "linear-gradient(150deg,#e8f7fe,#cfeaf6)" }}
-      aria-hidden
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/dino.png"
-        alt=""
-        width={size}
-        height={size}
-        className="h-full w-full object-contain"
-      />
-    </span>
-  );
-}
-
 /**
- * 이야기·기록 공유 상세(에디토리얼). 기록은 type만 다르고 같은 레이아웃을 쓴다(ADR-0005).
- * 본문은 임시로 mock HTML을 렌더 — Supabase 연결 시 Tiptap JSON 렌더로 교체.
+ * 글 상세 (ADR-0025·0027).
+ *
+ * 요약을 다시 보여 주지 않는다. 요약은 목록 카드와 공유 미리보기를 위해 있는 것이고,
+ * 이미 눌러서 들어온 사람에게는 첫 문장까지 가는 길만 길어진다.
+ *
+ * 다 읽은 직후가 이탈이 가장 큰 순간이라, 끝에 다음 글을 권한다(피크엔드 법칙).
  */
 export function PostArticle({
   entry,
@@ -40,107 +27,117 @@ export function PostArticle({
   prev?: Entry | null;
   next?: Entry | null;
 }) {
+  const body = entry.body ?? "";
+  const headings = extractHeadings(body);
+
   return (
-    <article className="mx-auto max-w-3xl px-5 py-12">
-      {/* 뒤로가기 — 상세에선 텍스트 없이 큰 화살표만 */}
-      <Link
-        href="/posts"
-        aria-label="글 목록으로 돌아가기"
-        className="-ml-2 inline-flex size-10 items-center justify-center rounded-full text-muted transition hover:bg-surface hover:text-accent"
-      >
-        <ArrowLeft className="size-6" aria-hidden />
-      </Link>
+    <>
+      <ReadingProgress />
 
-      <h1 className="mt-6 text-[31px] font-bold leading-tight tracking-tight text-foreground">
-        {entry.title}
-      </h1>
-      <p className="mt-4 text-[17px] leading-relaxed text-muted">{entry.excerpt}</p>
-
-      <div className="mt-6 flex items-center gap-3 border-b border-border pb-6">
-        <DinoAvatar size={40} />
-        <div className="text-sm">
-          <div className="font-semibold text-foreground">박찬빈</div>
-          <div className="mt-0.5 font-display text-[13px] text-muted">{formatDate(entry.date)}</div>
-        </div>
-      </div>
-
-      {/* 대표(커버) 이미지 — 명시한 경우 본문 앞 리드 이미지로 */}
-      {entry.coverImage && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={entry.coverImage}
-          alt=""
-          aria-hidden
-          className="mt-9 aspect-[1200/630] w-full rounded-2xl border border-border object-cover"
-        />
-      )}
-
-      <div className="prose mt-9">
-        <Markdown>{entry.body ?? ""}</Markdown>
-      </div>
-
-      {/* 반응 — "불 지피기" */}
-      <div className="mt-12 border-t border-border pt-8 text-center">
-        <p className="mb-4 text-sm text-muted">이 글이 좋았다면, 불을 지펴주세요</p>
-        <StokeButton slug={entry.slug} initial={entry.stokes ?? 0} />
-      </div>
-
-      {/* 댓글 — Giscus(GitHub Discussions) */}
-      <div className="mt-14 border-t border-border pt-8">
-        <Comments />
-      </div>
-
-      {/* 이전 / 다음 — 같은 흐름 안에서 이어 읽기. 두 카드 모두 좌측 정렬로 통일 */}
-      {(prev || next) && (
-        <nav className="mt-12 grid gap-3 sm:grid-cols-2">
-          {prev ? (
-            <Link
-              href={entryHref(prev)}
-              className="frost-rise group flex flex-col rounded-xl border border-border p-4 transition"
-            >
-              <span className="inline-flex items-center gap-1.5 font-display text-xs text-muted">
-                <ArrowLeft
-                  className="size-3.5 transition group-hover:-translate-x-0.5"
-                  aria-hidden
-                />
-                이전 글
-              </span>
-              <span className="mt-2 line-clamp-1 font-semibold text-foreground transition group-hover:text-accent">
-                {prev.title}
-              </span>
-            </Link>
-          ) : (
-            <span className="hidden sm:block" />
-          )}
-          {next ? (
-            <Link
-              href={entryHref(next)}
-              className="frost-rise group flex flex-col rounded-xl border border-border p-4 transition"
-            >
-              <span className="inline-flex items-center gap-1.5 font-display text-xs text-muted">
-                다음 글
-                <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" aria-hidden />
-              </span>
-              <span className="mt-2 line-clamp-1 font-semibold text-foreground transition group-hover:text-accent">
-                {next.title}
-              </span>
-            </Link>
-          ) : (
-            <span className="hidden sm:block" />
-          )}
-        </nav>
-      )}
-
-      {/* 다 읽고 나서 목록으로 */}
-      <div className="mt-10 border-t border-hairline pt-8">
+      <article className="mx-auto w-full max-w-[var(--container-prose)] px-6 pb-4 pt-12 sm:pt-16">
         <Link
           href="/posts"
-          className="group inline-flex items-center gap-2 text-base font-semibold text-foreground transition hover:text-accent"
+          aria-label="글 목록으로 돌아가기"
+          className="-ml-2.5 inline-flex size-10 items-center justify-center rounded-xl text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
         >
-          <ArrowLeft className="size-5 transition group-hover:-translate-x-0.5" aria-hidden />
-          글 목록으로
+          <ArrowLeft size={22} aria-hidden />
         </Link>
-      </div>
-    </article>
+
+        {entry.tags && entry.tags.length > 0 && (
+          <div className="mt-5 flex flex-wrap gap-2">
+            {entry.tags.map((t) => (
+              <Link
+                key={t}
+                href={`/posts?tag=${encodeURIComponent(t)}`}
+                className="rounded-lg bg-tint px-3 py-1.5 text-[13px] font-semibold text-accent"
+              >
+                {t}
+              </Link>
+            ))}
+          </div>
+        )}
+
+        <h1 className="mt-5 text-[32px] font-extrabold leading-[1.28] tracking-[-0.035em] sm:text-[42px]">
+          {entry.title}
+        </h1>
+
+        <div className="mt-5 flex items-center gap-2.5 border-b border-hairline pb-7 text-[14px] text-muted">
+          <span className="font-bold text-foreground">박찬빈</span>
+          <Dot />
+          <time dateTime={entry.date}>{formatDate(entry.date)}</time>
+          <Dot />
+          <span>{readingMinutes(body)}분</span>
+        </div>
+
+        {entry.coverImage && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={entry.coverImage}
+            alt=""
+            aria-hidden
+            className="mt-9 aspect-[16/9] w-full rounded-2xl border border-hairline bg-surface-hover object-cover"
+          />
+        )}
+
+        <Toc headings={headings} />
+
+        <div className="prose mt-11">
+          <Markdown>{body}</Markdown>
+        </div>
+
+        {/* 반응 — "불 지피기" */}
+        <div className="mt-16 border-t border-hairline pt-10 text-center">
+          <p className="mb-4 text-[15px] text-muted">이 글이 좋았다면, 불을 지펴주세요</p>
+          <StokeButton slug={entry.slug} initial={entry.stokes ?? 0} />
+        </div>
+
+        {/* 이어 읽기 */}
+        {(prev || next) && (
+          <nav className="mt-14 grid gap-3 sm:grid-cols-2">
+            <Adjacent entry={prev} direction="prev" />
+            <Adjacent entry={next} direction="next" />
+          </nav>
+        )}
+
+        {/* 댓글 — Giscus(GitHub Discussions) */}
+        <div className="mt-14 border-t border-hairline pt-10">
+          <Comments />
+        </div>
+      </article>
+    </>
+  );
+}
+
+function Dot() {
+  return <span aria-hidden className="size-[3px] rounded-full bg-muted/60" />;
+}
+
+function Adjacent({
+  entry,
+  direction,
+}: {
+  entry?: Entry | null;
+  direction: "prev" | "next";
+}) {
+  if (!entry) return <span className="hidden sm:block" />;
+  const isPrev = direction === "prev";
+  return (
+    <Link
+      href={entryHref(entry)}
+      className="group flex flex-col rounded-2xl border border-hairline p-5 transition-colors hover:border-accent/40 hover:bg-surface-hover"
+    >
+      <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-muted">
+        {isPrev && (
+          <ArrowLeft size={15} className="transition-transform group-hover:-translate-x-0.5" />
+        )}
+        {isPrev ? "이전 글" : "다음 글"}
+        {!isPrev && (
+          <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+        )}
+      </span>
+      <span className="mt-2.5 line-clamp-2 text-[17px] font-bold leading-snug tracking-tight transition-colors group-hover:text-accent">
+        {entry.title}
+      </span>
+    </Link>
   );
 }
