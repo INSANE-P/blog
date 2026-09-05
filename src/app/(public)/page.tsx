@@ -6,6 +6,21 @@ import { PostCard } from "@/features/posts/components/PostCard";
 import { getRecent } from "@/features/posts/queries";
 import { SiteJsonLd } from "@/lib/seo/JsonLd";
 
+/*
+  캐시 주기 (ADR-0045).
+
+  이 값은 신선도를 지키는 주된 수단이 **아니다.** 글이 바뀌는 경로는 노션 동기화 하나뿐이고,
+  동기화가 끝나면 `revalidatePath` 가 즉시 캐시를 버린다. 그래서 이 값이 쓰이는 때는
+  그 호출이 빠졌거나 실패했을 때, DB 를 손으로 고쳤을 때, 배포 직후 첫 요청뿐이다.
+
+  즉 **"어긋났을 때 얼마 만에 스스로 회복하느냐"** 를 정하는 안전망이다.
+
+  1시간으로 둔다. `false`(영구 캐시)는 동기화 쪽 버그 하나가 사이트를 영원히 굳게 만든다.
+  ISR 은 만료돼도 사용자를 기다리게 하지 않고 옛 것을 주면서 뒤에서 다시 만들므로,
+  짧게 잡아도 체감 손해가 없고 비용만 는다. 1시간이면 아무도 눈치채기 전에 회복된다.
+*/
+export const revalidate = 3600;
+
 /**
  * 홈 (ADR-0025·0026).
  *

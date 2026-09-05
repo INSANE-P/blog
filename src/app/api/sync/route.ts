@@ -33,10 +33,23 @@ export async function POST(req: Request) {
   try {
     const result = await syncFromNotion();
 
-    // 바뀐 글의 경로와 목록을 다시 만든다
+    /*
+      캐시를 버린다 (ADR-0045).
+
+      공개 화면은 캐시되므로 여기서 버려 주지 않으면 글을 고쳐도 안전망 주기(1시간)가
+      지날 때까지 옛것이 나간다. 캐시를 켜는 것과 이 호출은 한 몸이다.
+
+      **지워진 글도 버린다.** 안 그러면 노션에서 지운 글이 캐시에 남아 계속 열린다.
+      바뀐 것이 없어 건너뛴 글은 버리지 않는다 — 버릴 이유가 없다.
+
+      사이트맵과 피드도 목록이 바뀌면 같이 바뀐다.
+    */
     revalidatePath("/");
     revalidatePath("/posts");
+    revalidatePath("/sitemap.xml");
+    revalidatePath("/rss.xml");
     for (const slug of result.synced) revalidatePath(`/posts/${slug}`);
+    for (const slug of result.removed) revalidatePath(`/posts/${slug}`);
 
     /*
       한 글이라도 실패했으면 실패로 응답한다.

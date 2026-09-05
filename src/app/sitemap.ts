@@ -4,6 +4,9 @@ import { lastModifiedOf } from "@/lib/seo/feed";
 import { absolute } from "@/lib/site";
 import { entryHref } from "@/features/posts/types";
 
+/** 안전망 주기의 근거는 홈 화면에 적어 두었다 (ADR-0045) */
+export const revalidate = 3600;
+
 /**
  * 사이트맵 (ADR-0044).
  *

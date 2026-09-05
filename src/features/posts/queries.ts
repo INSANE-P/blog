@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { readDb } from "@/lib/supabase/read";
 import type { Entry } from "./types";
 
 /**
@@ -7,6 +7,8 @@ import type { Entry } from "./types";
  *
  * 글의 정본은 노션이지만 화면은 노션을 직접 조회하지 않는다 — 동기화가 채운 DB만 읽는다.
  * 렌더 경로에 외부 서비스가 끼면 그 장애가 곧 사이트 장애가 되기 때문이다.
+ *
+ * 읽기는 쿠키 없는 익명 클라이언트를 쓴다(ADR-0045). 그래야 화면을 캐시할 수 있다.
  */
 
 type Row = {
@@ -41,8 +43,7 @@ function toEntry(r: Row): Entry {
 
 /** 최근 글 n개 — 홈에서 쓴다. */
 export async function getRecent(limit: number): Promise<Entry[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
+  const { data } = await readDb
     .from("posts")
     .select(SELECT)
     .eq("status", "published")
@@ -53,8 +54,7 @@ export async function getRecent(limit: number): Promise<Entry[]> {
 
 /** 전체 목록 — 태그 필터는 걷어냈다(ADR-0034) */
 export async function getList(): Promise<Entry[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
+  const { data } = await readDb
     .from("posts")
     .select(SELECT)
     .eq("status", "published")
@@ -64,8 +64,7 @@ export async function getList(): Promise<Entry[]> {
 
 /** 상세 1건 */
 export async function getBySlug(slug: string): Promise<Entry | null> {
-  const supabase = await createClient();
-  const { data } = await supabase
+  const { data } = await readDb
     .from("posts")
     .select(SELECT)
     .eq("status", "published")
