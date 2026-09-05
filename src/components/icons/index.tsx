@@ -24,8 +24,10 @@ function Svg({
   size = 20,
   className,
   label,
+  /* 기본은 1.5. 본문 글자 옆에 붙는 작은 아이콘만 예외로 굵힌다 */
+  strokeWidth = 1.5,
   children,
-}: IconProps & { children: React.ReactNode }) {
+}: IconProps & { strokeWidth?: number; children: React.ReactNode }) {
   return (
     <svg
       width={size}
@@ -33,7 +35,7 @@ function Svg({
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.5}
+      strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -66,12 +68,19 @@ export function ArrowRight(props: IconProps) {
   );
 }
 
-/** 오른쪽 위 화살표 — 외부 링크 */
-export function ArrowUpRight(props: IconProps) {
+/**
+ * 사슬 — 링크.
+ *
+ * 고리 둘을 떼어 놓고 사이를 대각선으로 잇는다. 두 고리를 실제 사슬처럼 겹쳐 그렸더니
+ * 13px 에서 획이 서로 닿아 덩어리가 됐다. 떼어 놓으면 작은 크기에서도 고리가 둘로 읽힌다.
+ * 본문 글자 옆에 붙는 자리라 획을 1.8 로 조금 굵힌다 — 1.5 는 15px 아래에서 실처럼 흐려진다.
+ */
+export function LinkIcon(props: IconProps) {
   return (
-    <Svg {...props}>
-      <path d="M7 17L17 7" />
-      <path d="M8 7h9v9" />
+    <Svg strokeWidth={1.8} {...props}>
+      <path d="M9.9 14.1l4.2-4.2" />
+      <path d="M11.6 7.7l1.5-1.5a3.9 3.9 0 0 1 5.5 5.5l-1.5 1.5" />
+      <path d="M12.4 16.3l-1.5 1.5a3.9 3.9 0 0 1-5.5-5.5l1.5-1.5" />
     </Svg>
   );
 }

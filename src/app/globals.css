@@ -233,39 +233,29 @@ body {
 }
 
 /*
-  밖으로 나가는 링크에는 화살표를 붙인다.
+  밖으로 나가는 링크에는 사슬을 붙인다.
   이 사이트 안의 링크는 모두 상대 경로(/posts/...)라 http 로 시작하면 바깥이다.
-  누르기 전에 "여기서 나간다"를 알 수 있어야 한다.
-*/
-.prose a[href^="http"]::after {
-  content: "↗";
-  display: inline-block;
-  margin-left: 0.15em;
-  font-size: 0.85em;
-  text-decoration: none;
-  vertical-align: 0.05em;
-}
 
-/*
-  절 링크. 목차가 쓰는 것과 같은 id 를 가리킨다.
-  마우스를 올릴 수 있는 기기에서만 숨긴다 — 호버가 없는 곳에서 호버로만 드러나는 것은
-  아예 없는 것과 같다.
+  전에는 ↗ 를 썼다. "여기서 나간다"까지 말해 주지만 글자 옆에 화살표가 서면
+  글줄이 자꾸 오른쪽 위로 튀어 읽는 결이 끊겼다. 사슬은 방향을 말하지 않는 대신
+  글줄에 얹혀 있어 조용하다. 나가는 것은 새 탭이 열리는 것으로 알 수 있다.
+
+  글자가 아니라 모양이므로 mask 로 넣고 색은 currentColor 로 받는다 —
+  링크 색이 바뀌면 아이콘도 따라간다. 아이콘 세트의 LinkIcon 과 같은 도형이다.
 */
-.prose .heading-anchor {
-  margin-left: 0.3em;
-  color: var(--accent-text);
-  font-weight: 700;
-  text-decoration: none;
-  transition: opacity 0.15s ease;
+:root {
+  --link-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.9 14.1l4.2-4.2'/%3E%3Cpath d='M11.6 7.7l1.5-1.5a3.9 3.9 0 0 1 5.5 5.5l-1.5 1.5'/%3E%3Cpath d='M12.4 16.3l-1.5 1.5a3.9 3.9 0 0 1-5.5-5.5l1.5-1.5'/%3E%3C/svg%3E");
 }
-@media (hover: hover) {
-  .prose .heading-anchor {
-    opacity: 0;
-  }
-  .prose h2:hover .heading-anchor,
-  .prose .heading-anchor:focus-visible {
-    opacity: 1;
-  }
+.prose a[href^="http"]::after {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-left: 0.1em;
+  vertical-align: -0.16em;
+  background-color: currentColor;
+  -webkit-mask: var(--link-glyph) no-repeat center / contain;
+  mask: var(--link-glyph) no-repeat center / contain;
 }
 
 /* 키보드 키 — 단축키를 적을 때 */

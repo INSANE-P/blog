@@ -24,7 +24,7 @@ function textOf(node?: HastNode): string {
  *
  *   - 이미지 → figure + figcaption. 노션 캡션이 마크다운 alt 로 넘어오므로 화면에 보여 준다
  *   - 코드 블록 → 언어 표시와 복사 버튼이 달린 상자
- *   - h2 → 앵커 id. 목차가 여기로 내려간다
+ *   - h2 → 앵커 id(눈에 보이는 # 는 두지 않는다). 목차가 여기로 내려간다
  *   - 표 → 가로로 넘길 수 있는 상자로 감싼다. 칸이 많아도 본문이 밀리지 않는다
  */
 export function Markdown({ children }: { children: string }) {
@@ -44,19 +44,13 @@ export function Markdown({ children }: { children: string }) {
     */
     h2({ children, node }) {
       const id = slugify(plainText(textOf(node as HastNode)), seen);
-      return (
-        <h2 id={id}>
-          {children}
-          {/*
-            절 하나만 골라 공유할 수 있게 앵커를 단다. 목차가 쓰는 것과 같은 id 다.
-            마우스를 올릴 수 있는 기기에서는 평소 숨기고, 손가락으로 쓰는 기기에서는
-            늘 보여 준다 — 호버가 없는 곳에서 호버로만 드러나는 것은 없는 것과 같다.
-          */}
-          <a href={`#${id}`} className="heading-anchor" aria-label={`${plainText(textOf(node as HastNode))} 절 링크`}>
-            #
-          </a>
-        </h2>
-      );
+      /*
+        id 만 달고 눈에 보이는 앵커(#)는 두지 않는다.
+        절 하나를 따로 공유하는 일은 거의 없는데, 그 대가로 제목마다 호버할 때
+        기호가 튀어나와 읽는 흐름을 끊었다. 링크가 필요하면 목차에서 눌러
+        주소창에 남은 것을 복사하면 된다 — 같은 id 라 결과가 같다.
+      */
+      return <h2 id={id}>{children}</h2>;
     },
 
     /*
@@ -80,7 +74,15 @@ export function Markdown({ children }: { children: string }) {
     img({ src, alt }) {
       const size = sizeOf(String(src ?? ""));
       // eslint-disable-next-line @next/next/no-img-element
-      return <img src={String(src ?? "")} alt={alt ?? ""} width={size?.w} height={size?.h} loading="lazy" />;
+      return (
+        <img
+          src={String(src ?? "")}
+          alt={alt ?? ""}
+          width={size?.w}
+          height={size?.h}
+          loading="lazy"
+        />
+      );
     },
 
     table({ children }) {

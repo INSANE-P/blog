@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, Menu, X } from "@/components/icons";
+import { LinkIcon, Menu, X } from "@/components/icons";
 import { NAV } from "./nav";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -86,89 +86,89 @@ export function MobileNav({ className }: { className?: string }) {
         mounted &&
         createPortal(
           <div className="fixed inset-0 z-[60] bg-background">
-          <div className="flex h-full flex-col px-6">
-            {/* 머리줄 — 열기 전 헤더와 같은 자리에 같은 크기로 둔다 */}
-            <div className="flex h-[68px] shrink-0 items-center justify-between">
-              <span className="font-display text-[20px] font-black uppercase tracking-tight">
-                CHANBIN<span className="text-accent">.</span>
-              </span>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label="메뉴 닫기"
-                className="-mr-2 inline-flex size-11 items-center justify-center text-foreground transition-colors hover:text-accent-text"
-              >
-                <X size={24} />
-              </button>
-            </div>
+            <div className="flex h-full flex-col px-6">
+              {/* 머리줄 — 열기 전 헤더와 같은 자리에 같은 크기로 둔다 */}
+              <div className="flex h-[68px] shrink-0 items-center justify-between">
+                <span className="font-display text-[20px] font-black uppercase tracking-tight">
+                  CHANBIN<span className="text-accent">.</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  aria-label="메뉴 닫기"
+                  className="-mr-2 inline-flex size-11 items-center justify-center text-foreground transition-colors hover:text-accent-text"
+                >
+                  <X size={24} />
+                </button>
+              </div>
 
-            <nav className="flex flex-1 flex-col justify-center gap-2 pb-20">
-              {NAV.map((item, i) => {
-                const active = pathname.startsWith(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    aria-current={active ? "page" : undefined}
-                    className="flex items-baseline gap-5 py-2 transition-all duration-300"
-                    style={{
-                      opacity: shown ? 1 : 0,
-                      transform: shown ? "none" : "translateY(16px)",
-                      transitionDelay: `${70 + i * 70}ms`,
-                    }}
-                  >
-                    {/*
+              <nav className="flex flex-1 flex-col justify-center gap-2 pb-20">
+                {NAV.map((item, i) => {
+                  const active = pathname.startsWith(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      aria-current={active ? "page" : undefined}
+                      className="flex items-baseline gap-5 py-2 transition-all duration-300"
+                      style={{
+                        opacity: shown ? 1 : 0,
+                        transform: shown ? "none" : "translateY(16px)",
+                        transitionDelay: `${70 + i * 70}ms`,
+                      }}
+                    >
+                      {/*
                       번호를 붙인다. 항목이 둘뿐이라 목록이라기보다 차례에 가깝고,
                       번호가 있으면 "여기 이것뿐이다"가 빈약함이 아니라 의도로 읽힌다.
                     */}
-                    <span className="font-display text-[14px] font-bold tabular-nums text-accent">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span
-                      data-here={active || undefined}
-                      className={`spark-line spark-line-lg font-display text-[46px] font-extrabold lowercase leading-none tracking-[-0.035em] ${
-                        active ? "text-foreground" : "text-muted"
-                      }`}
-                    >
-                      {item.label}
-                    </span>
-                  </Link>
-                );
-              })}
-            </nav>
-
-            <div
-              className="shrink-0 border-t border-hairline pb-6 pt-5 transition-all duration-300"
-              style={{
-                opacity: shown ? 1 : 0,
-                transform: shown ? "none" : "translateY(10px)",
-                transitionDelay: `${70 + NAV.length * 70}ms`,
-              }}
-            >
-              {/* 목록만 덩그러니 두지 않는다 — 이 사이트가 무엇인지 한 줄로 말한다 */}
-              <p className="text-[15px] text-muted">도전하고, 그 과정을 기록합니다.</p>
-              <div className="mt-4 flex items-center justify-between">
-              <div className="flex flex-wrap gap-x-5 gap-y-1">
-                {SOCIAL.map((s) => {
-                  const external = s.href.startsWith("http");
-                  return (
-                    <a
-                      key={s.label}
-                      href={s.href}
-                      target={external ? "_blank" : undefined}
-                      rel={external ? "noopener noreferrer" : undefined}
-                      className="inline-flex items-center gap-0.5 py-2 font-display text-[15px] font-semibold lowercase text-muted transition-colors hover:text-accent-text"
-                    >
-                      {s.label}
-                      {external && <ArrowUpRight size={14} />}
-                    </a>
+                      <span className="font-display text-[14px] font-bold tabular-nums text-accent">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span
+                        data-here={active || undefined}
+                        className={`spark-line spark-line-lg font-display text-[46px] font-extrabold lowercase leading-none tracking-[-0.035em] ${
+                          active ? "text-foreground" : "text-muted"
+                        }`}
+                      >
+                        {item.label}
+                      </span>
+                    </Link>
                   );
                 })}
+              </nav>
+
+              <div
+                className="shrink-0 border-t border-hairline pb-6 pt-5 transition-all duration-300"
+                style={{
+                  opacity: shown ? 1 : 0,
+                  transform: shown ? "none" : "translateY(10px)",
+                  transitionDelay: `${70 + NAV.length * 70}ms`,
+                }}
+              >
+                {/* 목록만 덩그러니 두지 않는다 — 이 사이트가 무엇인지 한 줄로 말한다 */}
+                <p className="text-[15px] text-muted">도전하고, 그 과정을 기록합니다.</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="flex flex-wrap gap-x-5 gap-y-1">
+                    {SOCIAL.map((s) => {
+                      const external = s.href.startsWith("http");
+                      return (
+                        <a
+                          key={s.label}
+                          href={s.href}
+                          target={external ? "_blank" : undefined}
+                          rel={external ? "noopener noreferrer" : undefined}
+                          className="inline-flex items-center gap-0.5 py-2 font-display text-[15px] font-semibold lowercase text-muted transition-colors hover:text-accent-text"
+                        >
+                          {s.label}
+                          {external && <LinkIcon size={15} />}
+                        </a>
+                      );
+                    })}
+                  </div>
+                  <ThemeToggle className="-mr-2" />
+                </div>
               </div>
-                <ThemeToggle className="-mr-2" />
-              </div>
-            </div>
             </div>
           </div>,
           document.body,
