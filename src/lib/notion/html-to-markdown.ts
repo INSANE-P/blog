@@ -139,22 +139,26 @@ export function htmlToMarkdown(md: string): MarkdownConversion {
     /*
       형광펜 (ADR-0042).
 
-      노션에서 색을 입힌 글자가 어떤 모양으로 넘어오는지 한 가지로 확정할 수 없어
-      셋을 다 받는다 — `<mark>`, `<span color="..._background">`, `<highlight>`.
+      **노션은 `<span color="blue_bg">` 로 낸다.** 실물을 받아 확인했다.
+      처음에는 `_background` 로 짐작해 두었다가 하나도 걸리지 않았고, 그때
+      `span` 을 "다루는 태그" 목록에 넣어 둔 탓에 모르는 태그로 보고되지도 않았다 —
+      **짐작으로 적은 값이 보고까지 막았다.**
+
+      그래서 뒤가 `_bg` 든 `_background` 든 다 받는다. `<mark>` 와 `<highlight>` 도 함께 받는다 —
+      노션이 표기를 바꿔도 한쪽은 걸리게 두는 편이 낫다.
       전부 `==글자==` 로 옮기고, 그 뒤는 remark-highlight 가 `<mark>` 로 되돌린다.
 
-      글자색만 바꾼 것(`color="blue"` 처럼 `_background` 가 아닌 것)은 형광펜이 아니다.
-      껍데기만 벗겨 글자를 남긴다 — 아래의 남은 태그 처리가 그 일을 한다.
-
-      실제로 무엇이 오는지는 동기화 뒤 "모르는 태그" 보고를 보면 알 수 있다.
+      글자색만 바꾼 것(`color="blue"`)은 형광펜이 아니다. 껍데기만 벗겨 글자를 남긴다.
+      배경색 스팬에 `underline="true"` 같은 것이 함께 와도 형광펜으로 본다 —
+      마크다운에 밑줄이 없고, 이 사이트의 밑줄은 다른 뜻으로 쓰고 있다(ADR-0030).
     */
     .replace(/<(?:mark|highlight)[^>]*>([\s\S]*?)<\/(?:mark|highlight)>/gi, (_m, inner: string) =>
       inner.trim() ? `==${inner.trim()}==` : "",
     )
     .replace(/<span([^>]*)>([\s\S]*?)<\/span>/gi, (whole: string, head: string, inner: string) => {
       const color = attr(head, "color") ?? "";
-      const styled = /background/i.test(head);
-      if (!/_background|background/i.test(color) && !styled) return whole;
+      const isHighlight = /_(bg|background)$/i.test(color) || /background/i.test(head);
+      if (!isHighlight) return whole;
       return inner.trim() ? `==${inner.trim()}==` : "";
     })
 

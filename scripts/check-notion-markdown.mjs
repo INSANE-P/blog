@@ -28,7 +28,7 @@ const NOTION_RAW = `# 문서 제목
 콜아웃 내용이다.
 </callout>
 
-형광펜은 세 모양으로 올 수 있다 — <mark>마크 강조</mark>, <span color="yellow_background">스팬 강조</span>, <highlight>하이라이트 강조</highlight>.
+형광펜은 여러 모양으로 온다 — <mark>마크 강조</mark>, <span color="blue_bg">스팬 강조</span>, <span color="yellow_background">옛 표기 강조</span>, <span color="blue_bg" underline="true">속성이 더 붙은 강조</span>, <highlight>하이라이트 강조</highlight>.
 글자색만 바꾼 <span color="blue">파란 글자</span>는 형광펜이 아니라 그냥 글자다.
 
 <details>
@@ -66,7 +66,9 @@ const NOTION_RAW = `# 문서 제목
 const MUST_KEEP = [
   ["콜아웃 내용", "콜아웃 내용이다"],
   ["형광펜(mark 태그)", "==마크 강조=="],
-  ["형광펜(배경색 스팬)", "==스팬 강조=="],
+  ["형광펜(배경색 스팬 _bg — 노션 실물)", "==스팬 강조=="],
+  ["형광펜(옛 표기 _background)", "==옛 표기 강조=="],
+  ["형광펜(속성이 더 붙어도)", "==속성이 더 붙은 강조=="],
   ["형광펜(highlight 태그)", "==하이라이트 강조=="],
   ["글자색만 바꾼 것은 그대로 둔다", "파란 글자"],
   ["콜아웃 아이콘", "💡"],
