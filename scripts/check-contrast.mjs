@@ -19,6 +19,23 @@ function vars(selector) {
   const body = css.slice(css.indexOf("{", i) + 1, css.indexOf("}", i));
   const out = {};
   for (const m of body.matchAll(/(--[\w-]+):\s*([^;]+);/g)) out[m[1]] = m[2].trim();
+
+  /*
+    토큰이 다른 토큰을 가리키는 경우를 푼다 — `--mark-fg: var(--prose-fg)` 처럼.
+    값을 손으로 옮겨 적지 않으려고 둔 참조이므로, 검사기가 따라가 준다.
+    같은 블록 안에서만 찾는다. 다크가 라이트를 가리키는 일은 없다.
+  */
+  for (let round = 0; round < 5; round += 1) {
+    let changed = false;
+    for (const [key, value] of Object.entries(out)) {
+      const ref = value.match(/^var\((--[\w-]+)\)$/);
+      if (ref && out[ref[1]]) {
+        out[key] = out[ref[1]];
+        changed = true;
+      }
+    }
+    if (!changed) break;
+  }
   return out;
 }
 
@@ -61,7 +78,7 @@ const CASES = [
   ["보조 글자(날짜·설명)", "--muted", "--background", 4.5],
   ["악센트 글자(링크)", "--accent-text", "--background", 4.5],
   ["악센트 글자 위 틴트(태그 칩)", "--accent-text", "--tint", 4.5],
-  ["형광펜 위 본문 글자", "--prose-fg", "--mark", 4.5],
+  ["형광펜 위 글자", "--mark-fg", "--mark", 4.5],
   ["브랜드 색(로고 점·진행 바 — 그림 요소)", "--accent", "--background", 3],
   ["체크박스 테두리(UI 경계)", "--muted", "--background", 3],
   ["보조 글자 위 옅은 면(목차·푸터)", "--muted", "--surface-hover", 4.5],

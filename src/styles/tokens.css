@@ -35,8 +35,12 @@
   --accent-text: #277796;
   /* 악센트를 아주 옅게 깐 면 — 인용문 배경, 태그 칩, 강조 밑줄 */
   --tint: rgba(47, 143, 181, 0.07);
-  /* 형광펜 — 글자 아래 절반만 덮는다(ADR-0042). 틴트보다 진해야 표시로 읽힌다 */
+  /*
+    형광펜 (ADR-0042). 라이트는 흰 종이에 옅은 잉크를 얹는다 — 글자색은 그대로 둔다.
+    --mark-fg 는 그 위에 올라갈 글자색이다.
+  */
   --mark: rgba(47, 143, 181, 0.22);
+  --mark-fg: var(--prose-fg);
   /* 코드 블록: 본문과 구분되되 튀지 않는 면 + 파일명 줄 */
   --code-bg: #f6f8f9;
   --code-bar: #eceff1;
@@ -65,7 +69,13 @@
   /* 다크에서는 배경이 어두워 브랜드 색이 그대로 11.45:1 이다. 따로 낮출 필요가 없다. */
   --accent-text: #5fcdee;
   --tint: rgba(95, 205, 238, 0.1);
-  --mark: rgba(95, 205, 238, 0.26);
+  /*
+    다크는 뒤집는다. 검은 화면에서 옅은 띠는 "칠했다"가 아니라 "어둡게 깔았다"로 읽히고,
+    띠를 밝히면 그 위 밝은 글자의 대비가 무너진다(알파 .72 에서 흰 글자 3.46:1).
+    그래서 잉크를 끝까지 밝히고 글자를 검게 뒤집는다 — 11.45:1 로 가장 잘 읽힌다.
+  */
+  --mark: var(--accent);
+  --mark-fg: #000000;
   --code-bg: #0e0f10;
   --code-bar: #17191a;
   /*
@@ -86,6 +96,7 @@
   --color-surface-hover: var(--surface-hover);
   --color-tint: var(--tint);
   --color-mark: var(--mark);
+  --color-mark-fg: var(--mark-fg);
   --color-code-bg: var(--code-bg);
   --color-code-bar: var(--code-bar);
   --color-prose-fg: var(--prose-fg);
