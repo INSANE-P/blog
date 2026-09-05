@@ -52,6 +52,16 @@ const NOTION_RAW = `# 문서 제목
 <page url="https://notion.so/child">하위 페이지</page>
 <unknown url="https://github.com/INSANE-P" alt="북마크" />
 
+날짜 멘션은 속성에만 값이 있다 — <mention-date start="2026-09-05"/> 그리고 기간은 <mention-date start="2026-10-01" end="2026-10-05"/>.
+아이콘이 내용으로 오는 콜아웃도 본다.
+<callout color="blue_bg">
+🍏 아이콘이 내용으로 온 콜아웃
+</callout>
+빈 콜아웃은 찌꺼기를 남기면 안 된다.
+<callout color="blue_bg">
+<empty-block/>
+</callout>
+
 주소 속성 이름이 바뀌어도 버티는지 — <video url="https://example.com/other.mp4">다른 이름의 영상</video>, <page href="https://notion.so/other">다른 이름의 하위 페이지</page>.
 주소가 아예 없으면 보고해야 한다 — <video>주소 없는 영상</video>.
 <table_of_contents />
@@ -74,7 +84,10 @@ const MUST_KEEP = [
   ["형광펜(속성이 더 붙어도)", "==속성이 더 붙은 강조=="],
   ["형광펜(highlight 태그)", "==하이라이트 강조=="],
   ["글자색만 바꾼 것은 그대로 둔다", "파란 글자"],
-  ["콜아웃 아이콘", "💡"],
+  ["콜아웃 아이콘(속성)", "💡"],
+  ["콜아웃 아이콘(내용)", "🍏"],
+  ["날짜 멘션", "2026-09-05"],
+  ["기간 멘션", "2026-10-01 ~ 2026-10-05"],
   ["토글 제목", "토글 제목"],
   ["토글 내용", "토글 안의 내용"],
   ["컬럼 내용(왼쪽)", "왼쪽 칸 내용"],
@@ -103,6 +116,8 @@ const MUST_DROP = [
   ["표 태그", "<table"],
   ["형광펜 태그", "<mark"],
   ["배경색 스팬 태그", "<span"],
+  ["날짜 멘션 태그", "<mention-date"],
+  ["빈 블록 태그", "<empty-block"],
   ["모르는 블록 태그", "<mystery-block"],
 ];
 
@@ -133,6 +148,14 @@ console.log("\n── 다루기로 해 놓고 못 다룬 것 보고 ──");
   형광펜을 잃었을 때 가장 나빴던 것은 잃었다는 사실조차 몰랐던 것이다 —
   `HANDLED` 에 넣으면 보고에서 빠지므로, 다루는 방법이 틀리면 조용히 사라진다.
 */
+console.log("\n── 찌꺼기 ──");
+if (/^>\s*$/m.test(markdown)) {
+  console.log("FAIL 빈 인용문이 남았다 — 내용 없는 콜아웃이 찌꺼기를 만든다");
+  failed += 1;
+} else {
+  console.log("OK   빈 인용문을 남기지 않는다");
+}
+
 if (!unknownTags.some((t) => t.includes("주소 없음"))) {
   console.log("FAIL 주소를 못 찾은 태그를 보고하지 않았다 — 조용히 링크를 잃는 상태다");
   failed += 1;
