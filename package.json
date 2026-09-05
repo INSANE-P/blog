@@ -20,7 +20,6 @@
     "@giscus/react": "^3.1.0",
     "@milkdown/crepe": "^7.21.2",
     "@milkdown/kit": "^7.21.2",
-    "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.4",
     "katex": "^0.17.0",
     "next": "^15.5.19",
