@@ -4,12 +4,6 @@ import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 
 const f = (n: number) => n.toFixed(2);
-/** 중심(12,12)에서 반지름 r, 각 a(도) 지점 */
-const at = (r: number, a: number): [number, number] => [
-  12 + r * Math.cos((a * Math.PI) / 180),
-  12 + r * Math.sin((a * Math.PI) / 180),
-];
-
 /**
  * 네 갈래 스파클 — 변을 오목하게 당겨 끝이 가늘어진다.
  * `waist` 가 작을수록 허리가 잘록해져 갈래가 날카로워진다.
