@@ -97,6 +97,40 @@ function urlOf(head: string): string | undefined {
   return attr(head, "src") ?? attr(head, "url") ?? attr(head, "href");
 }
 
+/**
+ * 독자가 눌러서 갈 수 있는 주소인가 (ADR-0051).
+ *
+ * 노션이 주는 주소 중 상당수는 **노션 안에서만 열린다.**
+ *
+ *   file://%7B%22source%22%3A%22attachment%3A...   업로드한 파일·PDF·동영상
+ *   https://app.notion.com/p/<페이지>#<블록>        북마크·버튼·하위 페이지·인라인 DB
+ *
+ * 앞의 것은 노션 앱 내부 참조라 브라우저에서 아예 열리지 않고,
+ * 뒤의 것은 그 페이지가 공개가 아니면 로그인 요구나 404 다.
+ * 둘 다 **독자에게는 죽은 링크**다.
+ */
+function reachable(url: string | undefined): boolean {
+  if (!url) return false;
+  if (url.startsWith("file://")) return false;
+  return !/^https?:\/\/(app\.)?notion\.(com|so)\//i.test(url);
+}
+
+/**
+ * `file://` 주소에 박혀 있는 파일 이름을 꺼낸다.
+ *
+ * `attachment:<uuid>:<파일이름>` 꼴이라 이름은 살릴 수 있다.
+ * 파일 자체는 못 주지만 "여기 이 파일이 있었다"는 맥락은 남는다 —
+ * 글이 "아래 영상을 보면" 으로 이어지는데 아무것도 없으면 문장이 끊긴다.
+ */
+function fileNameOf(url: string): string | undefined {
+  try {
+    const m = decodeURIComponent(url).match(/attachment:[^:]+:([^"]+)/);
+    return m?.[1];
+  } catch {
+    return undefined;
+  }
+}
+
 function asLink(label: string, url?: string): string {
   const text = label
     .replace(/<[^>]+>/g, "")
@@ -110,6 +144,9 @@ function asLink(label: string, url?: string): string {
  * 우리가 직접 마크다운으로 바꾸는 태그들.
  * 여기에 없는 태그를 만나면 껍데기만 벗기고 이름을 보고한다.
  */
+/** 사람이 붙인 이름이 아니라 블록 종류 이름 — 글자로 남길 값이 없다 */
+const BLOCK_NAMES = new Set(["bookmark", "button", "unknown", "page", "database", "embed"]);
+
 const HANDLED = new Set([
   // 내용이 없는 블록. 버려도 잃을 글자가 없으므로 보고하지 않는다
   "empty-block",
@@ -151,9 +188,54 @@ export function htmlToMarkdown(md: string): MarkdownConversion {
     다루는 방법이 틀렸으면 그대로 조용히 사라진다.
     그래서 다루기로 해 놓고 못 다룬 경우를 따로 알린다.
   */
-  const report = (tag: string): undefined => {
-    unknown.add(`${tag}(주소 없음)`);
-    return undefined;
+  /*
+    다루기로 해 놓았는데 결과를 못 낸 경우를 알린다 (ADR-0046).
+
+    `HANDLED` 에 넣은 태그는 "우리가 다룬다"는 뜻이라 보고에서 빠진다.
+    다루는 방법이 틀렸으면 그대로 조용히 사라지므로, 그런 경우를 따로 남긴다.
+  */
+  const note = (tag: string, why: string) => unknown.add(`${tag}(${why})`);
+
+  /** 글자를 한 문단으로 남긴다. 남길 것이 없으면 아무것도 내지 않는다 */
+  const asText = (text: string): string => (text ? `\n\n${text}\n\n` : "");
+
+  /*
+    파일·PDF·동영상·소리 (ADR-0051).
+
+    노션에 **올린** 것은 `file://%7B...` 라는 내부 참조로 온다 — 독자는 못 연다.
+    그때는 링크를 만들지 않는다. 대신 파일 이름을 글자로 남긴다 —
+    글이 "아래 영상을 보면" 으로 이어지는데 아무것도 없으면 문장이 끊긴다.
+
+    주소가 아예 없는 것과 못 여는 주소인 것을 나눠 보고한다.
+    앞은 우리가 속성 이름을 못 찾은 것이고, 뒤는 노션이 원래 주지 않는 것이다 —
+    고쳐야 할 쪽과 고칠 수 없는 쪽이 다르다.
+  */
+  const media = (tag: string, head: string, label: string): string => {
+    const url = urlOf(head);
+    if (reachable(url)) return asLink(label || tag, url);
+
+    const text = label.replace(/<[^>]+>/g, "").trim();
+    if (!url) {
+      note(tag, "주소 없음");
+      return asText(text);
+    }
+    note(tag, "노션에 올린 것이라 링크를 만들 수 없음");
+    return asText(text || fileNameOf(url) || "");
+  };
+
+  /*
+    하위 페이지·데이터베이스·북마크·버튼.
+
+    전부 `app.notion.com` 주소로 온다. 그 페이지가 공개가 아니면 독자에게는 404 다.
+    라벨이 사람이 붙인 이름이면 글자로 남기고, 블록 종류 이름(`bookmark`·`button`)뿐이면
+    남길 것이 없으므로 버린다.
+  */
+  const notionThing = (tag: string, head: string, label: string): string => {
+    const url = urlOf(head);
+    const text = label.replace(/<[^>]+>/g, "").trim();
+    if (reachable(url)) return asLink(text || tag, url);
+    note(tag, url ? "노션 안에서만 열림" : "주소 없음");
+    return BLOCK_NAMES.has(text.toLowerCase()) ? "" : asText(text);
   };
 
   // 코드는 통째로 빼 두었다가 마지막에 되돌린다.
@@ -228,26 +310,22 @@ export function htmlToMarkdown(md: string): MarkdownConversion {
     // 노션 목차 → 없앤다. 목차는 우리가 h2 에서 직접 만든다(ADR-0027)
     .replace(/<table_of_contents\s*\/?>/gi, "")
 
-    // 미디어·파일 → 링크.
-    // 노션이 주는 주소는 서명이 붙어 만료되므로 언젠가 끊긴다. 그래도
-    // "여기 무언가 있었다"는 사실은 남겨야 한다(ADR-0023 남는 문제).
+    // 미디어·파일 → 독자가 갈 수 있으면 링크, 아니면 이름만 (ADR-0051).
     .replace(
       /<(video|audio|pdf|file)([^>]*)>([\s\S]*?)<\/\1>/gi,
-      (_m, tag: string, head: string, inner: string) => asLink(inner, urlOf(head) ?? report(tag)),
+      (_m, tag: string, head: string, inner: string) => media(tag, head, inner),
     )
     .replace(/<(video|audio|pdf|file)([^>]*)\/>/gi, (_m, tag: string, head: string) =>
-      asLink(attr(head, "alt") ?? tag, urlOf(head) ?? report(tag)),
+      media(tag, head, attr(head, "alt") ?? ""),
     )
 
-    // 하위 페이지·데이터베이스 → 링크
+    // 하위 페이지·데이터베이스·북마크·버튼 — 전부 노션 안을 가리킨다
     .replace(
       /<(page|database)([^>]*)>([\s\S]*?)<\/\1>/gi,
-      (_m, tag: string, head: string, inner: string) => asLink(inner, urlOf(head) ?? report(tag)),
+      (_m, tag: string, head: string, inner: string) => notionThing(tag, head, inner),
     )
-
-    // 북마크·임베드·링크 미리보기 등 노션이 마크다운으로 못 내는 것들
     .replace(/<unknown([^>]*)\/?>/gi, (_m, head: string) =>
-      asLink(attr(head, "alt") ?? "링크", urlOf(head) ?? report("unknown")),
+      notionThing(attr(head, "alt") ?? "unknown", head, ""),
     )
 
     /*

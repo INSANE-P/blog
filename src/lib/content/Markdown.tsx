@@ -1,6 +1,7 @@
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { remarkHighlight } from "./remark-highlight";
+import { YouTube, youTubeId } from "./YouTube";
 import remarkMath from "remark-math";
 import rehypeHighlight from "rehype-highlight";
 import rehypeKatex from "rehype-katex";
@@ -64,6 +65,20 @@ export function Markdown({ children }: { children: string }) {
       if (only && only.type === "element" && only.tagName === "img") {
         const props = only.properties as { src?: string; alt?: string };
         return <Figure src={String(props.src ?? "")} caption={props.alt ?? ""} />;
+      }
+      /*
+        문단이 유튜브 링크 하나뿐이면 영상으로 바꾼다 (ADR-0051).
+
+        변환기는 링크만 내놓는다 — 마크다운은 그대로 읽을 수 있고, 이 화면이 없어도
+        링크로 남는다. "무엇으로 보일지"는 화면이 정하는 편이 낫다.
+
+        글 속에 섞여 들어온 유튜브 링크는 건드리지 않는다. 문장 한가운데 영상 상자를
+        끼우면 문단이 두 동강 난다 — 그림에서 이미 같은 판단을 했다.
+      */
+      if (only && only.type === "element" && only.tagName === "a") {
+        const href = String((only.properties as { href?: string }).href ?? "");
+        const id = youTubeId(href);
+        if (id) return <YouTube id={id} title={textOf(only as HastNode)} />;
       }
       return <p>{children}</p>;
     },
