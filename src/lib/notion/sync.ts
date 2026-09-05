@@ -9,6 +9,8 @@ import { createClient } from "@supabase/supabase-js";
 import { listPages, fetchMarkdown, toPost, type NotionPost } from "./client";
 import { htmlToMarkdown } from "./html-to-markdown";
 import { migrateBodyImages, migrateImage } from "./images";
+import { resolveYouTubeTitles } from "./youtube-titles";
+import { youTubeId } from "@/lib/content/youtube-id";
 
 /**
  * 동기화는 로그인 세션이 아니라 토큰으로 인증된다.
@@ -200,6 +202,14 @@ export async function syncFromNotion(): Promise<SyncResult> {
         result.skipped.push({ slug: post.title, reason: "슬러그가 비어 있음" });
         continue;
       }
+
+      /*
+        유튜브 링크에 진짜 제목을 박는다 (ADR-0054).
+
+        노션은 링크 텍스트를 `video` 로 준다. 여기서 한 번 물어 두면 화면은 묻지 않아도 된다.
+        못 받으면 원래 텍스트가 남을 뿐이라 발행을 막지 않는다.
+      */
+      post.body = await resolveYouTubeTitles(post.body, youTubeId);
 
       // 노션 이미지 URL은 한 시간이면 만료된다. 본문과 커버를 R2로 옮긴다.
       const migrated = await migrateBodyImages(post.body);

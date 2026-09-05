@@ -87,9 +87,17 @@ export function Markdown({ children }: { children: string }) {
         끼우면 문단이 두 동강 난다 — 그림에서 이미 같은 판단을 했다.
       */
       if (only && only.type === "element" && only.tagName === "a") {
-        const href = String((only.properties as { href?: string }).href ?? "");
-        const id = youTubeId(href);
-        if (id) return <YouTube id={id} title={textOf(only as HastNode)} />;
+        const props = only.properties as { href?: string; title?: string };
+        const id = youTubeId(String(props.href ?? ""));
+        /*
+          제목은 링크 텍스트, 채널은 링크의 title 자리에서 온다.
+          둘 다 동기화가 받아 마크다운에 박아 둔 것이다 (ADR-0054).
+        */
+        if (id) {
+          return (
+            <YouTube id={id} title={textOf(only as HastNode)} channel={props.title || undefined} />
+          );
+        }
       }
       return <p>{children}</p>;
     },

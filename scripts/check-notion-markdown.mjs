@@ -12,6 +12,7 @@
  */
 import { htmlToMarkdown } from "../src/lib/notion/html-to-markdown.ts";
 import { youTubeId } from "../src/lib/content/youtube-id.ts";
+import { youTubeLinksIn, withYouTubeTitles } from "../src/lib/notion/youtube-titles.ts";
 
 const NOTION_RAW = `# 문서 제목
 
@@ -192,6 +193,71 @@ for (const [name, url, want] of YT) {
   const ok = got === want;
   if (!ok) failed += 1;
   console.log(`${ok ? "OK  " : "FAIL"} ${name}`);
+}
+
+console.log("");
+console.log("── 유튜브 제목 박기 ──");
+// 소스에 역슬래시를 쓰지 않으려고 한 번만 만들어 둔다
+const BS = String.fromCharCode(92);
+const V = "https://www.youtube.com/watch?v=amy704I2PxQ";
+const INFO = new Map([
+  ["amy704I2PxQ", { title: "미야기의 캡틴은 고개 숙이지 않는다", channel: "동수칸TV" }],
+]);
+const titled = (md, info = INFO) => withYouTubeTitles(md, info, youTubeId);
+
+const TITLE = [
+  [
+    "노션이 준 video 를 진짜 제목으로 바꾼다",
+    titled("[video](" + V + ")"),
+    "[미야기의 캡틴은 고개 숙이지 않는다](" + V + ' "동수칸TV")',
+  ],
+  [
+    "이미 제목이 붙어 있으면 다시 묻지 않는다",
+    titled("[예전 제목](" + V + ' "예전 채널")'),
+    "[예전 제목](" + V + ' "예전 채널")',
+  ],
+  [
+    "받아오지 못한 영상은 그대로 둔다",
+    titled("[video](" + V + ")", new Map()),
+    "[video](" + V + ")",
+  ],
+  [
+    "유튜브가 아닌 링크는 건드리지 않는다",
+    titled("[문서](https://example.com/a)"),
+    "[문서](https://example.com/a)",
+  ],
+  [
+    "제목의 대괄호가 링크를 깨뜨리지 않게 막는다",
+    titled(
+      "[video](" + V + ")",
+      new Map([["amy704I2PxQ", { title: "[속보] 어쩌고", channel: "" }]]),
+    ),
+    "[" + BS + "[속보" + BS + "] 어쩌고](" + V + ")",
+  ],
+  [
+    "채널 이름의 큰따옴표도 막는다",
+    titled("[video](" + V + ")", new Map([["amy704I2PxQ", { title: "제목", channel: '가"나' }]])),
+    "[제목](" + V + ' "가' + BS + '"나")',
+  ],
+];
+for (const [name, got, want] of TITLE) {
+  if (got === want) {
+    console.log("OK   " + name);
+  } else {
+    failed += 1;
+    console.log("FAIL " + name);
+    console.log("     받음: " + got);
+    console.log("     기대: " + want);
+  }
+}
+
+// 링크를 고르는 쪽도 따로 본다 — 이미 제목이 붙은 것은 후보에서 빠져야 한다
+const cands = youTubeLinksIn("[video](" + V + ")  [이미 제목](" + V + ' "채널")', youTubeId);
+if (cands.length === 1) {
+  console.log("OK   이미 제목이 붙은 링크는 후보에서 뺀다");
+} else {
+  console.log("FAIL 다시 물어야 할 링크만 골라내지 못했다 — " + cands.length + "개");
+  failed += 1;
 }
 
 console.log(`\n실패: ${failed}건`);
