@@ -28,6 +28,9 @@ const NOTION_RAW = `# 문서 제목
 콜아웃 내용이다.
 </callout>
 
+형광펜은 세 모양으로 올 수 있다 — <mark>마크 강조</mark>, <span color="yellow_background">스팬 강조</span>, <highlight>하이라이트 강조</highlight>.
+글자색만 바꾼 <span color="blue">파란 글자</span>는 형광펜이 아니라 그냥 글자다.
+
 <details>
 <summary>토글 제목</summary>
 
@@ -62,6 +65,10 @@ const NOTION_RAW = `# 문서 제목
 /** 변환 뒤에도 반드시 남아 있어야 하는 것들 */
 const MUST_KEEP = [
   ["콜아웃 내용", "콜아웃 내용이다"],
+  ["형광펜(mark 태그)", "==마크 강조=="],
+  ["형광펜(배경색 스팬)", "==스팬 강조=="],
+  ["형광펜(highlight 태그)", "==하이라이트 강조=="],
+  ["글자색만 바꾼 것은 그대로 둔다", "파란 글자"],
   ["콜아웃 아이콘", "💡"],
   ["토글 제목", "토글 제목"],
   ["토글 내용", "토글 안의 내용"],
@@ -89,6 +96,8 @@ const MUST_DROP = [
   ["컬럼 태그", "<columns"],
   ["노션 목차", "<table_of_contents"],
   ["표 태그", "<table"],
+  ["형광펜 태그", "<mark"],
+  ["배경색 스팬 태그", "<span"],
   ["모르는 블록 태그", "<mystery-block"],
 ];
 

@@ -258,6 +258,27 @@ body {
   mask: var(--link-glyph) no-repeat center / contain;
 }
 
+/*
+  형광펜 (ADR-0042).
+
+  글자 상자를 통째로 칠하지 않고 아래 절반만 덮는다. 상자를 다 칠하면 줄 사이가 붙어
+  단락이 색 덩어리로 보이고, 문장 안에서 어디까지가 강조인지도 흐려진다.
+  아래만 덮으면 글자는 배경 위에 그대로 앉아 있고 표시만 지나간다 —
+  이 사이트에서 밑줄이 하는 일과 같은 문법이다(ADR-0030).
+
+  기울기가 아니라 딱 끊기는 두 칸짜리 그라데이션이다. 부드럽게 번지면 잉크가 아니라
+  그림자로 보인다.
+
+  색은 배경에 얹히는 반투명이라 라이트·다크 어느 쪽이든 글자색을 바꾸지 않는다.
+  대비는 check:contrast 가 지킨다.
+*/
+.prose mark {
+  background: linear-gradient(to top, var(--mark) 0, var(--mark) 46%, transparent 46%);
+  color: inherit;
+  padding: 0 0.08em;
+  border-radius: 2px;
+}
+
 /* 키보드 키 — 단축키를 적을 때 */
 .prose kbd {
   display: inline-block;

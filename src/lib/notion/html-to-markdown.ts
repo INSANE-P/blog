@@ -100,6 +100,9 @@ function asLink(label: string, url?: string): string {
  * 여기에 없는 태그를 만나면 껍데기만 벗기고 이름을 보고한다.
  */
 const HANDLED = new Set([
+  "mark",
+  "highlight",
+  "span",
   "table",
   "thead",
   "tbody",
@@ -133,6 +136,28 @@ export function htmlToMarkdown(md: string): MarkdownConversion {
   let work = md.replace(/```[\s\S]*?```/g, stash).replace(/`[^`\n]*`/g, stash);
 
   work = work
+    /*
+      형광펜 (ADR-0042).
+
+      노션에서 색을 입힌 글자가 어떤 모양으로 넘어오는지 한 가지로 확정할 수 없어
+      셋을 다 받는다 — `<mark>`, `<span color="..._background">`, `<highlight>`.
+      전부 `==글자==` 로 옮기고, 그 뒤는 remark-highlight 가 `<mark>` 로 되돌린다.
+
+      글자색만 바꾼 것(`color="blue"` 처럼 `_background` 가 아닌 것)은 형광펜이 아니다.
+      껍데기만 벗겨 글자를 남긴다 — 아래의 남은 태그 처리가 그 일을 한다.
+
+      실제로 무엇이 오는지는 동기화 뒤 "모르는 태그" 보고를 보면 알 수 있다.
+    */
+    .replace(/<(?:mark|highlight)[^>]*>([\s\S]*?)<\/(?:mark|highlight)>/gi, (_m, inner: string) =>
+      inner.trim() ? `==${inner.trim()}==` : "",
+    )
+    .replace(/<span([^>]*)>([\s\S]*?)<\/span>/gi, (whole: string, head: string, inner: string) => {
+      const color = attr(head, "color") ?? "";
+      const styled = /background/i.test(head);
+      if (!/_background|background/i.test(color) && !styled) return whole;
+      return inner.trim() ? `==${inner.trim()}==` : "";
+    })
+
     // 표 — 가장 먼저. 안쪽의 <br> 등은 셀 변환이 직접 처리한다
     .replace(/<table[\s\S]*?<\/table>/gi, (t) => `\n\n${tableToMarkdown(t)}\n\n`)
 

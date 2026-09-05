@@ -1,5 +1,6 @@
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { remarkHighlight } from "./remark-highlight";
 import remarkMath from "remark-math";
 import rehypeHighlight from "rehype-highlight";
 import rehypeKatex from "rehype-katex";
@@ -111,7 +112,7 @@ export function Markdown({ children }: { children: string }) {
 
   return (
     <ReactMarkdown
-      remarkPlugins={[remarkGfm, remarkMath]}
+      remarkPlugins={[remarkGfm, remarkMath, remarkHighlight]}
       rehypePlugins={[rehypeKatex, rehypeHighlight]}
       /*
         각주 안내 문구를 우리말로. 기본값은 "Footnotes"·"Back to content" 라

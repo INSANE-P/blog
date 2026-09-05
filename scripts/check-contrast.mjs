@@ -61,6 +61,7 @@ const CASES = [
   ["보조 글자(날짜·설명)", "--muted", "--background", 4.5],
   ["악센트 글자(링크)", "--accent-text", "--background", 4.5],
   ["악센트 글자 위 틴트(태그 칩)", "--accent-text", "--tint", 4.5],
+  ["형광펜 위 본문 글자", "--prose-fg", "--mark", 4.5],
   ["브랜드 색(로고 점·진행 바 — 그림 요소)", "--accent", "--background", 3],
   ["체크박스 테두리(UI 경계)", "--muted", "--background", 3],
   ["보조 글자 위 옅은 면(목차·푸터)", "--muted", "--surface-hover", 4.5],

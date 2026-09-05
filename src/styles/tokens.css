@@ -35,6 +35,8 @@
   --accent-text: #277796;
   /* 악센트를 아주 옅게 깐 면 — 인용문 배경, 태그 칩, 강조 밑줄 */
   --tint: rgba(47, 143, 181, 0.07);
+  /* 형광펜 — 글자 아래 절반만 덮는다(ADR-0042). 틴트보다 진해야 표시로 읽힌다 */
+  --mark: rgba(47, 143, 181, 0.22);
   /* 코드 블록: 본문과 구분되되 튀지 않는 면 + 파일명 줄 */
   --code-bg: #f6f8f9;
   --code-bar: #eceff1;
@@ -63,6 +65,7 @@
   /* 다크에서는 배경이 어두워 브랜드 색이 그대로 11.45:1 이다. 따로 낮출 필요가 없다. */
   --accent-text: #5fcdee;
   --tint: rgba(95, 205, 238, 0.1);
+  --mark: rgba(95, 205, 238, 0.26);
   --code-bg: #0e0f10;
   --code-bar: #17191a;
   /*
@@ -82,6 +85,7 @@
   --color-surface: var(--surface);
   --color-surface-hover: var(--surface-hover);
   --color-tint: var(--tint);
+  --color-mark: var(--mark);
   --color-code-bg: var(--code-bg);
   --color-code-bar: var(--code-bar);
   --color-prose-fg: var(--prose-fg);
@@ -93,7 +97,8 @@
   --color-accent-text: var(--accent-text);
 
   --font-sans: var(--font-pretendard), system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
   --font-display: "Montserrat", var(--font-pretendard), system-ui, sans-serif;
 
   /*
