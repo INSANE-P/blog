@@ -58,6 +58,36 @@ DOM 에서 뽑았다 — `.gsc-comment-box`(form) · `.gsc-comment-box-tabs` · 
 `--color-canvas-overlay` 를 덮지 않고 있던 것도 함께 고쳤다. 반응 팝오버가 이 변수를 쓰는데,
 우리가 덮지 않으면 정상 로드 때도 기본 테마 색이 남아 어긋난다.
 
+## 테마를 바꿔도 댓글이 따라오지 않던 문제
+
+로드된 라이브러리 코드를 직접 읽고 원인을 정했다. 두 가지가 겹쳐 있었다.
+
+```js
+// giscus 웹 컴포넌트
+sendMessage(e) {
+  !this.iframeRef?.contentWindow || !this.hasLoaded || postMessage(...)  // ← 로드 전이면 버린다
+}
+requestUpdate(name) {
+  if (!this.hasUpdated || name === "host") { super.requestUpdate(...); return; }
+  this.updateConfig();   // ← 첫 렌더 뒤에는 iframe 을 다시 그리지 않는다
+}
+```
+
+1. 첫 렌더 이후 속성이 바뀌면 iframe 을 다시 그리지 않고 postMessage 로만 알린다
+2. 그 메시지는 iframe 이 아직 로드되지 않았으면 **조용히 버려진다**
+
+우리는 `loading="lazy"` 를 쓴다. 댓글은 글 맨 아래에 있으므로 글 위쪽에서 테마를 토글하면
+iframe 이 아직 없고, 변경은 사라진다. iframe 의 `src` 에는 처음 테마가 박혀 있어
+나중에 로드돼도 옛 테마로 뜬다.
+
+`key` 에 테마를 넣어 테마가 바뀌면 위젯을 새로 만든다. 새로 만들면 `src` 에 지금 테마가
+담긴 채로 뜨므로 이 경로를 아예 타지 않는다. 대가는 테마를 바꿀 때 댓글이 다시 불러와지는
+것인데, **가끔 안 바뀌는 것보다 매번 확실히 바뀌는 편이 낫다.**
+
+폴백 테마도 `noborder_*` 에서 `light`/`dark` 로 바꿨다. `noborder_dark` 는 상자 배경이
+`#1e1e20` 이라 우리 순수 검정과 거의 붙어 상자가 구분되지 않고 글자도 10.5:1 로 흐리다.
+`dark` 는 글자가 16:1 이고 테두리가 있다 — 폴백에서는 우리 결보다 읽히는 것이 먼저다.
+
 ## 남는 문제
 
 - giscus 테마 CSS 의 색은 `tokens.css` 를 손으로 옮긴 사본이라 토큰이 바뀌면 같이 고쳐야 한다.

@@ -82,7 +82,21 @@ export function Comments() {
       </p>
 
       <div className="mt-7">
+        {/*
+          key 에 테마를 넣어 테마가 바뀌면 위젯을 새로 만든다.
+
+          giscus 는 첫 렌더 이후 속성이 바뀌면 iframe 을 다시 그리지 않고 postMessage 로만
+          알린다(`requestUpdate` → `updateConfig`). 그런데 그 메시지를 보내는 `sendMessage` 는
+          iframe 이 아직 로드되지 않았으면 **조용히 버린다**. 우리는 loading="lazy" 라
+          댓글이 화면 밖일 때 토글하면 그 변경이 그대로 사라진다. iframe 의 src 에는
+          처음 테마가 박혀 있으므로 나중에 로드돼도 옛 테마로 뜬다.
+
+          새로 만들면 src 에 지금 테마가 담긴 채로 뜨므로 이 경로를 아예 타지 않는다.
+          대가는 테마를 바꿀 때 댓글이 다시 불러와지는 것인데,
+          가끔 안 바뀌는 것보다 매번 확실히 바뀌는 편이 낫다.
+        */}
         <Giscus
+          key={theme}
           repo="INSANE-P/frost-log"
           repoId="R_kgDOS4XX0g"
           category="댓글"
