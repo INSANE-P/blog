@@ -41,7 +41,7 @@ export function Comments() {
         */}
         <Giscus
           key={theme}
-          repo="INSANE-P/frost-log"
+          repo="INSANE-P/blog"
           repoId="R_kgDOS4XX0g"
           category="댓글"
           categoryId="DIC_kwDOS4XX0s4C_-zB"
