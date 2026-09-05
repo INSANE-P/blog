@@ -7,7 +7,7 @@
  *
  * 실행: pnpm check:seo
  */
-import { buildRss, lastModifiedOf, xmlEscape } from "../src/lib/seo/feed.ts";
+import { buildRss, lastModifiedOf, publishedAtOf, xmlEscape } from "../src/lib/seo/feed.ts";
 
 const SITE = {
   url: "https://example.test",
@@ -74,6 +74,17 @@ check("앰퍼샌드", xmlEscape("a & b") === "a &amp; b");
 check("여는 꺾쇠", xmlEscape("<script>") === "&lt;script&gt;");
 check("이미 이스케이프된 것을 두 번 하지 않는 실수 방지", xmlEscape("&amp;") === "&amp;amp;");
 
+console.log("\n── 발행 시각 ──");
+check(
+  "화면에 보이는 날짜(entry_date)를 그대로 쓴다",
+  publishedAtOf(ENTRIES[0]).toISOString() === "2026-09-03T00:00:00.000Z",
+);
+check(
+  "published_at 이 화면 날짜와 달라도 화면 날짜가 이긴다",
+  publishedAtOf({ ...ENTRIES[0], publishedAt: "2026-12-25T00:00:00.000Z" }).toISOString() ===
+    "2026-09-03T00:00:00.000Z",
+);
+
 console.log("\n── 마지막 변경 시각 ──");
 check(
   "updatedAt 이 있으면 그것",
@@ -82,6 +93,11 @@ check(
 check(
   "없으면 글 날짜로 물러난다",
   lastModifiedOf(ENTRIES[1]).toISOString() === "2026-01-02T00:00:00.000Z",
+);
+check(
+  "발행보다 앞선 수정 시각은 발행 시각으로 끌어올린다",
+  lastModifiedOf({ ...ENTRIES[0], updatedAt: "2020-01-01T00:00:00.000Z" }).toISOString() ===
+    "2026-09-03T00:00:00.000Z",
 );
 check(
   "망가진 값이면 지금으로",

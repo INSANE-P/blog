@@ -41,16 +41,37 @@ export function xmlEscape(text: string): string {
 }
 
 /**
+ * 글의 발행 시각.
+ *
+ * **화면에 보이는 날짜를 그대로 쓴다.** `entry_date` 는 글쓴이가 적은 날짜이고
+ * 상세 화면의 `<time>` 도 그것을 보여 준다. `published_at` 은 DB 에 처음 들어온 순간이라
+ * 노션에서 옮겨 온 옛 글은 실제로 쓴 날과 몇 달씩 어긋난다.
+ *
+ * 구조화 데이터의 날짜가 화면의 날짜와 다르면 검색엔진이 경고한다.
+ * 어느 쪽이 맞느냐를 따지기 전에, 둘이 같아야 한다.
+ */
+export function publishedAtOf(entry: FeedEntry): Date {
+  const iso = entry.date ? `${entry.date}T00:00:00Z` : (entry.publishedAt ?? "");
+  const d = iso ? new Date(iso) : new Date(NaN);
+  return Number.isNaN(d.getTime()) ? new Date() : d;
+}
+
+/**
  * 글의 마지막 변경 시각.
  *
  * `updatedAt` 은 내용이 실제로 바뀔 때만 움직인다 — 동기화가 안 바뀐 글은 아예 쓰지 않는다.
- * 그것이 없으면 발행 시각, 그것도 없으면 글에 적힌 날짜로 물러난다.
- * 셋 다 읽을 수 없으면 지금으로 둔다. 사이트맵에 `Invalid Date` 가 나가는 것보다 낫다.
+ * 그것이 없으면 발행 시각으로 물러난다.
+ *
+ * **발행 시각보다 앞설 수 없다.** 화면 날짜(`entry_date`)를 발행일로 쓰기 때문에,
+ * 예전에 쓴 글을 오늘 옮겨 오면 "수정이 발행보다 먼저"가 될 수 있다.
+ * 그건 시간이 거꾸로 흐르는 소리라 검색엔진도 사람도 읽지 못한다.
  */
 export function lastModifiedOf(entry: FeedEntry): Date {
-  const iso = entry.updatedAt ?? entry.publishedAt ?? (entry.date ? `${entry.date}T00:00:00Z` : "");
+  const published = publishedAtOf(entry);
+  const iso = entry.updatedAt ?? entry.publishedAt ?? "";
   const d = iso ? new Date(iso) : new Date(NaN);
-  return Number.isNaN(d.getTime()) ? new Date() : d;
+  if (Number.isNaN(d.getTime())) return published;
+  return d < published ? published : d;
 }
 
 /**

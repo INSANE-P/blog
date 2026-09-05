@@ -1,6 +1,6 @@
 import { SITE, absolute } from "@/lib/site";
 import { coverOf, entryHref, type Entry } from "@/features/posts/types";
-import { lastModifiedOf } from "./feed";
+import { lastModifiedOf, publishedAtOf } from "./feed";
 
 /**
  * 구조화 데이터 (ADR-0044).
@@ -31,7 +31,7 @@ export function ArticleJsonLd({ entry }: { entry: Entry }) {
         description: entry.excerpt || SITE.description,
         url,
         mainEntityOfPage: url,
-        datePublished: entry.publishedAt ?? `${entry.date}T00:00:00Z`,
+        datePublished: publishedAtOf(entry).toISOString(),
         dateModified: lastModifiedOf(entry).toISOString(),
         inLanguage: SITE.lang,
         author: { "@type": "Person", name: SITE.author.name, url: SITE.author.url },
