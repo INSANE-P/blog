@@ -25,23 +25,25 @@ export default async function HomePage() {
           Park
           <br />
           <span className="stroke-text stroke-text-thick">Chanbin</span>
-          <span className="text-accent-text">.</span>
+          <span className="text-accent">.</span>
         </h1>
         <p className="mt-7 text-[18px] font-medium tracking-[-0.02em] text-muted sm:text-[21px]">
           도전하고, 그 과정을 기록합니다.
         </p>
       </section>
 
-      {/* 최근 글 */}
+      {/* 최근 글 — 제목은 표지라 영문 소문자다(ADR-0029) */}
       <section className="border-t border-hairline pt-14 sm:pt-16">
         <div className="mb-8 flex items-baseline justify-between sm:mb-9">
-          <h2 className="text-[26px] font-extrabold tracking-[-0.035em] sm:text-[32px]">최근 글</h2>
+          <h2 className="font-display text-[30px] font-extrabold lowercase tracking-[-0.035em] sm:text-[36px]">
+            new
+          </h2>
           <Link
             href="/posts"
-            className="group inline-flex shrink-0 items-center gap-1.5 text-[15px] font-semibold text-muted transition-colors hover:text-accent-text sm:text-[16px]"
+            className="group inline-flex shrink-0 items-center gap-1.5 font-display text-[15px] font-semibold lowercase text-muted transition-colors hover:text-accent-text sm:text-[16px]"
           >
-            전체 보기
-            <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />
+            <span className="spark-line">all posts</span>
+            <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
 

@@ -21,6 +21,9 @@ import { ThemeToggle } from "./ThemeToggle";
  *
  * 항목도 워드마크와 같은 몬세라트로 짠다. 이 줄은 화면에서 유일하게 영문만 있는 자리라
  * 서체까지 맞춰야 한 덩어리로 읽힌다(ADR-0029).
+ *
+ * 밑줄은 번개가 지나가듯 그어진다(ADR-0030). 지금 보고 있는 페이지는 켜 둔다 —
+ * 굵기와 색만으로는 어디에 있는지가 약하게 읽힌다.
  */
 export function Header() {
   const pathname = usePathname();
@@ -29,8 +32,8 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-hairline bg-background/90 backdrop-blur-md">
       <div className="mx-auto flex h-[68px] w-full max-w-[1080px] items-center justify-between px-6 sm:h-[76px] sm:px-10">
         <Link href="/" aria-label="홈으로" className="group">
-          <span className="font-display text-[20px] font-black uppercase tracking-tight transition-colors group-hover:text-accent-text sm:text-[22px]">
-            CHANBIN<span className="text-accent-text">.</span>
+          <span className="spark-line font-display text-[20px] font-black uppercase tracking-tight sm:text-[22px]">
+            CHANBIN<span className="text-accent">.</span>
           </span>
         </Link>
 
@@ -44,11 +47,16 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`px-[15px] py-[11px] font-display text-[17px] tracking-[-0.01em] transition-colors ${
-                  active ? "font-bold text-foreground" : "font-semibold text-muted hover:text-accent-text"
-                }`}
+                className="px-[15px] py-[11px]"
               >
-                {item.label}
+                <span
+                  data-here={active || undefined}
+                  className={`spark-line font-display text-[17px] tracking-[-0.01em] transition-colors ${
+                    active ? "font-bold text-foreground" : "font-semibold text-muted hover:text-accent-text"
+                  }`}
+                >
+                  {item.label}
+                </span>
               </Link>
             );
           })}

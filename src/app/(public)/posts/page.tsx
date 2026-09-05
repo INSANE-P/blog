@@ -4,7 +4,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PostCard } from "@/features/posts/components/PostCard";
 import { getList, getTags } from "@/features/posts/queries";
 
-export const metadata: Metadata = { title: "글" };
+export const metadata: Metadata = { title: "All posts" };
 
 /**
  * 글 목록 (ADR-0025·0026).
@@ -25,7 +25,9 @@ export default async function PostsPage({
 
   return (
     <div className="mx-auto w-full max-w-[1080px] px-6 pb-16 pt-16 sm:px-10 sm:pt-20">
-      <h1 className="text-[36px] font-extrabold tracking-[-0.035em] sm:text-[44px]">글</h1>
+      <h1 className="font-display text-[38px] font-extrabold lowercase tracking-[-0.04em] sm:text-[48px]">
+        all posts
+      </h1>
 
       {tags.length > 0 && (
         <div className="mt-8 flex flex-wrap gap-2">

@@ -24,8 +24,8 @@ export function Footer() {
         <div className="flex flex-col gap-10 sm:flex-row sm:justify-between sm:gap-16">
           <div>
             <Link href="/" className="group inline-block">
-              <span className="font-display text-[18px] font-black uppercase tracking-tight transition-colors group-hover:text-accent-text">
-                CHANBIN<span className="text-accent-text">.</span>
+              <span className="spark-line font-display text-[18px] font-black uppercase tracking-tight">
+                CHANBIN<span className="text-accent">.</span>
               </span>
             </Link>
             <p className="mt-3 text-[14px] text-muted">도전하고, 그 과정을 기록합니다.</p>
@@ -65,7 +65,7 @@ function FooterColumn({
                 rel={external ? "noopener noreferrer" : undefined}
                 className="font-display text-[14px] lowercase text-muted transition-colors hover:text-accent-text"
               >
-                {label}
+                <span className="spark-line">{label}</span>
               </a>
             </li>
           );

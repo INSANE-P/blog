@@ -73,33 +73,51 @@ body {
 }
 
 /*
-  링크에 마우스를 올리면 악센트 선이 왼쪽에서 오른쪽으로 그어진다.
-  히어로의 채움↔비움 대비를 작은 글자에서 쓸 수 없어서(1px 획은 20px 아래에서 뭉갠다)
-  같은 성격의 장치를 선으로 옮긴 것이다 — 없던 것이 그어지며 생겨난다.
-  밑줄을 처음부터 깔아 두고 색만 바꾸면 그 "생겨나는" 느낌이 사라진다.
+  링크 밑줄 — 번개가 지나가듯 왼쪽에서 오른쪽으로 그어진다 (ADR-0030).
+
+  히어로의 채움↔비움 대비를 작은 글자에서는 쓸 수 없어서(1px 아웃라인 획은 20px 아래에서
+  뭉갠다) 같은 성격 — 없던 것이 생겨난다 — 을 선으로 옮겼다.
+
+  곧은 선 대신 잔잔한 기준선에 이따금 스파크가 튀는 모양을 쓴다. 촘촘한 물결로 그렸더니
+  맞춤법 검사 밑줄로 읽혔고, 얕게 흔들리는 선은 손그림에 가까워 전기 느낌이 없었다.
+  대부분 평평하고 가끔 날카롭게 튀는 편이 "불규칙하지만 정돈된" 쪽에 맞는다.
+
+  모양은 mask 로 넣고 색은 background-color 로 준다. 데이터 URI 안에 색을 박으면
+  라이트·다크에 각각 한 벌씩 두어야 하는데, mask 로 분리하면 한 벌로 두 테마를 덮는다.
+  타일을 반복시키므로 글자가 길든 짧든 스파크 간격이 같다.
 */
-.link-wipe {
-  position: relative;
+:root {
+  --spark-line: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='58' height='9' viewBox='0 0 58 9'%3E%3Cpath d='M0 6.5 H11 L14 2.2 L19 6.5 H31 L33.5 4.2 L36.5 6.5 H47 L50 1.8 L55 6.5 H58' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
-.link-wipe::after {
+
+.spark-line {
+  position: relative;
+  display: inline-block;
+}
+.spark-line::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -3px;
-  height: 1.5px;
-  border-radius: 1px;
-  background: var(--accent-text);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  bottom: -7px;
+  height: 9px;
+  background-color: var(--accent-text);
+  -webkit-mask: var(--spark-line) repeat-x left bottom / auto 100%;
+  mask: var(--spark-line) repeat-x left bottom / auto 100%;
+  /* 왼쪽에서 오른쪽으로 드러난다. 커지는 것이 아니라 지나가는 것으로 보여야 한다 */
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.3s cubic-bezier(0.22, 0.8, 0.3, 1);
 }
-.link-wipe:hover::after,
-.link-wipe:focus-visible::after {
-  transform: scaleX(1);
+.spark-line:hover::after,
+.spark-line:focus-visible::after,
+.group:hover .spark-line::after,
+.group:focus-visible .spark-line::after,
+/* 지금 보고 있는 페이지는 밑줄을 켜 둔다 — 굵기와 색만으로는 어디인지 약하게 읽힌다 */
+.spark-line[data-here="true"]::after {
+  clip-path: inset(0 0 0 0);
 }
 @media (prefers-reduced-motion: reduce) {
-  .link-wipe::after {
+  .spark-line::after {
     transition: none;
   }
 }

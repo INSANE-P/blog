@@ -17,13 +17,12 @@ type Row = {
   cover_image: string | null;
   entry_date: string | null;
   published_at: string | null;
-  stokes: number | null;
   /** 태그는 조인이 아니라 배열 컬럼이다(0008_tags_as_array.sql) */
   tags: string[] | null;
 };
 
 const SELECT =
-  "slug, title, excerpt, content, cover_image, entry_date, published_at, stokes, tags";
+  "slug, title, excerpt, content, cover_image, entry_date, published_at, tags";
 
 function toEntry(r: Row): Entry {
   return {
@@ -34,7 +33,6 @@ function toEntry(r: Row): Entry {
     tags: r.tags?.length ? r.tags : undefined,
     coverImage: r.cover_image ?? undefined,
     body: typeof r.content === "string" ? r.content : "",
-    stokes: r.stokes ?? 0,
   };
 }
 

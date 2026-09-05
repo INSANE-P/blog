@@ -7,7 +7,6 @@ import type { Entry } from "../types";
 import { entryHref } from "../types";
 import { ReadingProgress } from "./ReadingProgress";
 import { Toc } from "./Toc";
-import { StokeButton } from "./StokeButton";
 import { Comments } from "./Comments";
 
 /**
@@ -84,20 +83,11 @@ export function PostArticle({
         </div>
 
         {/*
-          반응 — 로그인 없이 남길 수 있는 유일한 자리.
-          선을 긋지 않고 여백만으로 띄운다. 본문이 끝난 자리에 선을 그으면 "끝"이 먼저 읽혀서
-          이어 읽기와 댓글이 덤처럼 보인다.
-        */}
-        <div className="mt-16 text-center">
-          <StokeButton slug={entry.slug} initial={entry.stokes ?? 0} />
-        </div>
-
-        {/*
           아래 두 절은 홈과 같은 문법을 쓴다 — 영문 소문자 제목(ADR-0029).
           화면마다 제목 다는 방식이 다르면 한 사람이 만든 것으로 보이지 않는다.
         */}
         {(prev || next) && (
-          <section className="mt-20 border-t border-hairline pt-12">
+          <section className="mt-16 border-t border-hairline pt-12">
             <h2 className="font-display text-[26px] font-extrabold lowercase tracking-[-0.035em]">
               keep reading
             </h2>
