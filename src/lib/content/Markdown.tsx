@@ -5,7 +5,7 @@ import rehypeHighlight from "rehype-highlight";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { CodeBlock } from "./CodeBlock";
-import { slugify } from "./headings";
+import { plainText, slugify } from "./headings";
 
 /** hast 노드에서 사람이 읽는 글자만 모은다 — 복사 버튼에 넘길 원문 코드 */
 type HastNode = { type?: string; value?: string; children?: HastNode[] };
@@ -36,9 +36,14 @@ export function Markdown({ children }: { children: string }) {
   const seen = new Map<string, number>();
 
   const components: Components = {
-    h2({ children }) {
-      const text = typeof children === "string" ? children : String(children ?? "");
-      return <h2 id={slugify(text, seen)}>{children}</h2>;
+    /*
+      제목의 앵커 id 는 렌더된 글자에서 만든다.
+      React children 을 String() 으로 바꾸면, 굵게·인라인 코드·링크가 든 제목에서
+      배열 안의 React 요소가 "[object Object]" 가 되어 목차가 가리키는 id 와 어긋난다
+      (눌러도 아무 데도 가지 않는다).
+    */
+    h2({ children, node }) {
+      return <h2 id={slugify(plainText(textOf(node as HastNode)), seen)}>{children}</h2>;
     },
 
     /*

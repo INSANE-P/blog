@@ -166,13 +166,14 @@ body {
 }
 
 /*
-  제목. 본문 왼쪽 여백에 악센트 사각형을 하나 둔다.
-  글자만 키워 구분하면 스크롤 중에 절이 어디서 시작하는지 놓치는데,
-  글줄 밖의 표식은 훑어 내려갈 때 눈에 먼저 걸린다.
-  좁은 화면에서는 여백이 없어 표식을 숨긴다.
+  제목.
+
+  글줄 밖 여백에 악센트 사각형을 두었다가 걷어냈다. 훑어 내려갈 때 눈에 걸린다는 이유였는데,
+  여백이 없는 좁은 화면에서는 숨겨야 해서 기기마다 다르게 보였다 — 같은 글이 화면에 따라
+  다른 모양이면 장치가 아니라 사고로 보인다. 27px 굵은 글씨와 넉넉한 위 여백이면
+  절이 바뀐 것은 충분히 읽힌다.
 */
 .prose h2 {
-  position: relative;
   font-size: 27px;
   font-weight: 800;
   line-height: 1.35;
@@ -180,22 +181,10 @@ body {
   margin: 2.5em 0 0.8em;
   color: var(--foreground);
 }
-.prose h2::before {
-  content: "";
-  position: absolute;
-  left: -24px;
-  top: 0.45em;
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  background: var(--accent);
-}
+
 @media (max-width: 820px) {
   .prose h2 {
     font-size: 24px;
-  }
-  .prose h2::before {
-    display: none;
   }
 }
 .prose h1 {

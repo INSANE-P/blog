@@ -11,6 +11,26 @@ function stripFences(md: string): string {
 }
 
 /**
+ * 마크다운 문법을 걷어내고 사람이 읽는 글자만 남긴다.
+ *
+ * 목차와 본문 제목이 **같은 글자에서** id 를 만들어야 서로 맞는다.
+ * 본문 쪽은 렌더된 글자를 쓰므로(링크는 링크 글자만, 코드는 코드 안 글자만 남는다),
+ * 목차 쪽도 원문에서 같은 결과가 나오게 걷어내야 한다.
+ * 이걸 맞추지 않으면 굵게·인라인 코드·링크가 든 제목에서 목차를 눌러도 아무 데도 가지 않는다.
+ */
+export function plainText(md: string): string {
+  return md
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1") // 그림 → 대체 글자
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1") // 링크 → 링크 글자
+    .replace(/`([^`]*)`/g, "$1") // 인라인 코드 → 안의 글자
+    .replace(/(\*\*|__)(.*?)\1/g, "$2") // 굵게
+    .replace(/(\*|_)(.*?)\1/g, "$2") // 기울임
+    .replace(/~~(.*?)~~/g, "$1") // 취소선
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
  * 제목 문자열 → 앵커 id.
  * 한글을 그대로 두면 주소창에서 %EA%B0%99은 식으로 길어지므로 공백만 하이픈으로 바꾸고
  * 링크로 쓸 수 없는 문자를 턴다. 같은 제목이 여러 번 나오면 뒤에 번호를 붙인다.
@@ -36,7 +56,7 @@ export function extractHeadings(md: string): Heading[] {
   const seen = new Map<string, number>();
   const out: Heading[] = [];
   for (const m of stripFences(md).matchAll(/^##\s+(.+?)\s*#*\s*$/gm)) {
-    const text = m[1].replace(/[*_`]/g, "").trim();
+    const text = plainText(m[1]);
     if (text) out.push({ id: slugify(text, seen), text });
   }
   return out;
