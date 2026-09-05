@@ -74,8 +74,9 @@ export function Markdown({ children }: { children: string }) {
     */
     img({ src, alt }) {
       const size = sizeOf(String(src ?? ""));
-      // eslint-disable-next-line @next/next/no-img-element
       return (
+        // 그림은 R2 에서 오고 치수를 이미 안다. next/image 의 최적화가 할 일이 없다
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={String(src ?? "")}
           alt={alt ?? ""}
