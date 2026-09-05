@@ -1,208 +1,112 @@
 import type { Metadata } from "next";
-import { ArrowUpRight, Mail } from "@/components/icons";
-import { GithubIcon } from "@/components/ui/GithubIcon";
-import { AWARDS, PROJECTS, STACK } from "./data";
+import { ArrowUpRight } from "@/components/icons";
+import { SectionTitle } from "@/components/ui/SectionTitle";
+import { COLOPHON, IDENTITY, INTRO, NOW, WRITING } from "./data";
 
-export const metadata: Metadata = { title: "소개" };
+export const metadata: Metadata = { title: "About" };
 
-/** 칩 — 목록 카드의 태그와 같은 언어로 맞춘다. 누를 수 없는 것에는 악센트를 쓰지 않는다. */
-function Tag({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="rounded-[9px] border border-hairline px-3 py-1.5 text-[13px] font-semibold text-muted">
-      {children}
-    </span>
-  );
-}
-
-/** 외부 링크 칩 — 라벨 + 살짝 떠오르는 화살표. 모두 새 탭. */
-function LinkChip({ label, href }: { label: string; href: string }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group inline-flex items-center gap-1 text-[14px] font-semibold text-muted transition-colors hover:text-accent-text"
-    >
-      {label}
-      <ArrowUpRight
-        className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-        aria-hidden
-      />
-    </a>
-  );
-}
-
+/**
+ * 소개 (ADR-0038).
+ *
+ * 읽는 화면이라 본문과 같은 폭을 쓴다. 이전에는 1080px 에 칩과 카드를 늘어놓은
+ * 훑는 화면이었는데, 그건 포트폴리오가 하는 일이었다.
+ *
+ * 기술 스택·프로젝트·수상을 걷어내고 사람 이야기만 남겼다.
+ * "지금" 절이 이 페이지의 핵심이다 — 포트폴리오는 완결된 성과를 보여주는 곳이라
+ * 시간이 멈춰 있지만, 여기서는 지금 무엇을 하는 사람인지 말할 수 있다.
+ */
 export default function AboutPage() {
   return (
-    <div className="mx-auto w-full max-w-[1080px] px-6 pb-4 pt-16 sm:px-10 sm:pt-20">
-      {/* 인트로 — 이름 + 한 문단 + 마스코트(사진 대신) */}
-      <section className="flex flex-col-reverse items-start gap-7 sm:flex-row sm:items-center sm:gap-9">
-        <div className="min-w-0 flex-1">
-          <h1 className="text-[32px] font-extrabold tracking-[-0.035em] sm:text-[40px]">
-            안녕하세요, <span className="text-accent-text">박찬빈</span>이에요
-          </h1>
-          <p className="mt-3 text-[16px] text-muted">
-            프론트엔드 개발자 · 세종대학교 컴퓨터공학과
-          </p>
-          <p className="mt-6 max-w-[42rem] text-[17px] leading-[1.75] text-prose-fg">
-            팀에서 <span className="font-semibold text-accent-text">같이 만들어가는 과정</span>을 좋아하는
-            프론트엔드 개발자예요. 더 나은 방법이 보이면 먼저 제안하고, 필요하면 새로운 것도 마다하지
-            않고 시도해요. 재밌어 보이는 걸 만들고, 생각이 향하는 대로 움직여요.
-          </p>
-        </div>
+    <div className="mx-auto w-full max-w-[var(--container-prose)] px-6 pb-8 pt-16 sm:pt-20">
+      <SectionTitle as="h1">about</SectionTitle>
 
-      </section>
+      {/*
+        명함. 이름과 갈 곳을 한 상자에 모은다.
+        흩어 두면 "연락처" 절을 따로 만들어야 하는데, 위에 모으면 처음 온 사람이
+        누구이고 어디로 가면 되는지를 먼저 안다.
+      */}
+      <section className="mt-10 rounded-[18px] bg-surface-hover px-6 py-6 sm:px-7">
+        <p className="text-[20px] font-bold tracking-[-0.02em]">
+          {IDENTITY.name}
+          <span className="ml-2.5 font-display text-[13px] font-bold uppercase tracking-[0.12em] text-muted">
+            {IDENTITY.nameEn}
+          </span>
+        </p>
+        <p className="mt-1.5 text-[15px] text-muted">
+          {IDENTITY.role} · {IDENTITY.affiliation}
+        </p>
 
-      {/* 기술 */}
-      <section className="mt-20 border-t border-hairline pt-12">
-        <h2 className="text-[26px] font-extrabold tracking-[-0.035em] sm:text-[30px]">기술</h2>
-        <dl className="mt-7 flex flex-col gap-5">
-          {STACK.map(({ label, items }) => (
-            <div key={label} className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:gap-5">
-              <dt className="w-24 shrink-0 pt-1.5 text-[15px] font-semibold text-muted">
+        <ul className="mt-5 flex flex-col gap-2.5 border-t border-hairline pt-5">
+          {IDENTITY.links.map(({ label, value, href }) => (
+            <li key={label} className="flex items-baseline gap-4">
+              <span className="w-[74px] shrink-0 font-display text-[12px] font-bold uppercase tracking-[0.11em] text-muted">
                 {label}
-              </dt>
-              <dd className="flex flex-wrap gap-1.5">
-                {items.map((it) => (
-                  <Tag key={it}>{it}</Tag>
-                ))}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      {/* 프로젝트 */}
-      <section className="mt-20 border-t border-hairline pt-12">
-        <h2 className="text-[26px] font-extrabold tracking-[-0.035em] sm:text-[30px]">프로젝트</h2>
-        <div className="mt-7 flex flex-col gap-10">
-          {PROJECTS.map((p) => (
-            <article key={p.name}>
-              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                <h3 className="text-[21px] font-bold tracking-[-0.02em]">{p.name}</h3>
-                {p.status && (
-                  <span className="inline-flex items-center gap-1.5 text-[14px] text-muted">
-                    <span className="size-1.5 rounded-full bg-accent" aria-hidden />
-                    {p.status}
-                  </span>
-                )}
-              </div>
-              <p className="mt-2 text-[16px] text-muted">{p.tagline}</p>
-              <p className="mt-1.5 text-[14px] text-muted">
-                {p.period} · {p.role}
-              </p>
-
-              <ul className="mt-4 flex flex-col gap-2">
-                {p.points.map((pt) => (
-                  <li
-                    key={pt}
-                    className="flex gap-3 text-[16px] leading-[1.75] text-prose-fg"
-                  >
-                    <span
-                      className="mt-[0.65em] size-1.5 shrink-0 rounded-full"
-                      style={{ background: "var(--accent)", opacity: 0.65 }}
-                      aria-hidden
-                    />
-                    {pt}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-4 flex flex-wrap gap-1.5">
-                {p.tech.map((t) => (
-                  <Tag key={t}>{t}</Tag>
-                ))}
-              </div>
-
-              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-                {p.links.map((l) => (
-                  <LinkChip key={l.label} label={l.label} href={l.href} />
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {/* 활동 */}
-      <section className="mt-20 border-t border-hairline pt-12">
-        <h2 className="text-[26px] font-extrabold tracking-[-0.035em] sm:text-[30px]">활동</h2>
-        <article className="mt-7">
-          <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-            <h3 className="text-[21px] font-bold tracking-[-0.02em]">그리디 (Greedy)</h3>
-            <span className="text-[14px] text-muted">2025.03 ~ 현재</span>
-          </div>
-          <p className="mt-2 text-[16px] text-muted">
-            세종대학교 SW 학술 동아리 · 2기 멘티 → 3기 스터디 리드 → 4기 메인테이너
-          </p>
-          <ul className="mt-4 flex flex-col gap-2">
-            {[
-              "스터디 리드로 상태관리 미션을 Zustand·TanStack Query 기반으로 재설계 (3기)",
-              "메인테이너로 새 미션 설계 및 학습 자료 제작 (4기)",
-            ].map((pt) => (
-              <li key={pt} className="flex gap-3 text-[16px] leading-[1.75] text-prose-fg">
-                <span
-                  className="mt-[0.65em] size-1.5 shrink-0 rounded-full"
-                  style={{ background: "var(--accent)", opacity: 0.65 }}
-                  aria-hidden
-                />
-                {pt}
-              </li>
-            ))}
-          </ul>
-          <div className="mt-4">
-            <LinkChip
-              label="스터디 소개 발표 자료"
-              href="https://insane-p.github.io/greedy-frontend-study/"
-            />
-          </div>
-        </article>
-      </section>
-
-      {/* 수상 */}
-      <section className="mt-20 border-t border-hairline pt-12">
-        <h2 className="text-[26px] font-extrabold tracking-[-0.035em] sm:text-[30px]">수상</h2>
-        <ul className="mt-7 flex flex-col gap-7">
-          {AWARDS.map((a) => (
-            <li key={a.title}>
-              <div className="text-[17px] font-bold">{a.title}</div>
-              <div className="mt-1.5 text-[15px] text-muted">{a.by}</div>
-              <div className="mt-1 text-[15px] text-muted">{a.note}</div>
+              </span>
+              <a
+                href={href}
+                target={href.startsWith("http") ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                className="group inline-flex min-w-0 items-center gap-1 text-[15px] transition-colors hover:text-accent-text"
+              >
+                <span className="spark-line truncate">{value}</span>
+                {href.startsWith("http") && <ArrowUpRight size={14} className="shrink-0" />}
+              </a>
             </li>
           ))}
         </ul>
       </section>
 
-      {/* 연락처 */}
-      <section className="mt-20 border-t border-hairline pt-12">
-        <h2 className="text-[26px] font-extrabold tracking-[-0.035em] sm:text-[30px]">연락처</h2>
-        <div className="mt-7 flex flex-wrap items-center gap-3">
-          <a
-            href="https://github.com/INSANE-P"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl border border-hairline px-5 py-3 text-[15px] font-semibold transition-colors hover:border-accent hover:text-accent-text"
-          >
-            <GithubIcon className="size-[17px]" />
-            GitHub
-          </a>
-          <a
-            href="mailto:chanbin0626@gmail.com"
-            className="inline-flex items-center gap-2 rounded-xl border border-hairline px-5 py-3 text-[15px] font-semibold transition-colors hover:border-accent hover:text-accent-text"
-          >
-            <Mail className="size-[17px]" />
-            메일
-          </a>
-          <a
-            href="https://portfolio.chanbin.dev"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl border border-hairline px-5 py-3 text-[15px] font-semibold transition-colors hover:border-accent hover:text-accent-text"
-          >
-            포트폴리오
-            <ArrowUpRight className="size-4" aria-hidden />
-          </a>
+      <div className="prose mt-12">
+        {INTRO.map((p) => (
+          <p key={p}>{p}</p>
+        ))}
+      </div>
+
+      <section className="mt-20">
+        <div className="flex items-baseline justify-between gap-5">
+          <SectionTitle>now</SectionTitle>
+          {/* 시간이 지나면 바뀌는 절이라 기준 시점을 밝힌다 — 갱신을 깜빡해도 정직하다 */}
+          <span className="shrink-0 text-[14px] text-muted">{NOW.asOf} 기준</span>
         </div>
+
+        <dl className="mt-9 flex flex-col gap-8">
+          {NOW.items.map(({ label, body }) => (
+            <div key={label}>
+              <dt className="text-[15px] font-bold text-accent-text">{label}</dt>
+              <dd className="mt-2 text-[17px] leading-[1.75] text-prose-fg">{body}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section className="mt-20">
+        <SectionTitle>writing</SectionTitle>
+        <div className="prose mt-9">
+          {WRITING.map((p) => (
+            <p key={p}>{p}</p>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-20">
+        <SectionTitle>colophon</SectionTitle>
+        <ul className="mt-9 flex flex-col gap-3.5">
+          {COLOPHON.lines.map((line) => (
+            <li key={line} className="flex gap-3 text-[17px] leading-[1.75] text-prose-fg">
+              <span aria-hidden className="mt-[0.7em] size-1.5 shrink-0 rounded-full bg-accent" />
+              {line}
+            </li>
+          ))}
+        </ul>
+        <a
+          href={COLOPHON.repo.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group mt-7 inline-flex items-center gap-1.5 font-display text-[15px] font-semibold lowercase text-muted transition-colors hover:text-accent-text"
+        >
+          <span className="spark-line">{COLOPHON.repo.label}</span>
+          <ArrowUpRight size={15} className="transition-transform group-hover:-translate-y-0.5" />
+        </a>
       </section>
     </div>
   );
