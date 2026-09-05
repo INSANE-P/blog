@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { syncFromNotion } from "@/lib/notion/sync";
+import { SITE, absolute } from "@/lib/site";
 
 /**
  * 노션 → DB 동기화 트리거 (ADR-0022).
@@ -14,6 +15,33 @@ import { syncFromNotion } from "@/lib/notion/sync";
 
 // 이미지까지 붙으면 시간이 늘어난다. Hobby 플랜 상한이 300초다.
 export const maxDuration = 300;
+
+/**
+ * 버린 캐시를 미리 데운다 (ADR-0048).
+ *
+ * `revalidatePath` 는 캐시를 **"낡음"으로 표시만** 한다. 다시 만드는 일은 다음 요청이 한다.
+ * 그래서 동기화 직후 처음 들어온 사람은 **옛 화면을 받고**, 그 사람의 요청이
+ * 뒤에서 재생성을 시작한다. 두 번째 사람부터 새 화면이다.
+ *
+ * 글을 쓰고 동기화한 뒤 바로 확인하는 사람이 늘 그 "첫 사람"이라,
+ * "발행했는데 안 보인다"로 느껴진다. 실제로 그렇게 겪었다.
+ *
+ * 그래서 여기서 한 번씩 불러 둔다. 재생성이 방문자의 요청이 아니라 이 요청 안에서 끝난다.
+ *
+ * 실패해도 그냥 둔다 — 데우지 못하면 예전처럼 첫 방문자가 재생성을 시작할 뿐,
+ * 잘못된 화면이 나가지는 않는다. 동기화 자체를 실패로 만들 일이 아니다.
+ */
+async function warm(paths: string[]): Promise<void> {
+  await Promise.allSettled(
+    paths.map((path) =>
+      fetch(absolute(path), {
+        // 캐시를 데우는 것이 목적이므로 응답 내용은 쓰지 않는다
+        headers: { "user-agent": `${SITE.name} sync warmer` },
+        cache: "no-store",
+      }),
+    ),
+  );
+}
 
 function authorized(req: Request): boolean {
   const secret = process.env.SYNC_SECRET;
@@ -44,12 +72,18 @@ export async function POST(req: Request) {
 
       사이트맵과 피드도 목록이 바뀌면 같이 바뀐다.
     */
-    revalidatePath("/");
-    revalidatePath("/posts");
-    revalidatePath("/sitemap.xml");
-    revalidatePath("/rss.xml");
-    for (const slug of result.synced) revalidatePath(`/posts/${slug}`);
-    for (const slug of result.removed) revalidatePath(`/posts/${slug}`);
+    const paths = [
+      "/",
+      "/posts",
+      "/sitemap.xml",
+      "/rss.xml",
+      ...result.synced.map((slug) => `/posts/${slug}`),
+      ...result.removed.map((slug) => `/posts/${slug}`),
+    ];
+    for (const path of paths) revalidatePath(path);
+
+    // 버리기만 하면 첫 방문자가 옛것을 받는다. 여기서 미리 데운다(ADR-0048).
+    await warm(paths);
 
     /*
       한 글이라도 실패했으면 실패로 응답한다.
