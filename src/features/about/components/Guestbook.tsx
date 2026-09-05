@@ -30,7 +30,7 @@ export function Guestbook() {
         {/* 테마가 바뀌면 위젯을 새로 만든다 — 이유는 Comments 쪽에 적어 뒀다 */}
         <Giscus
           key={theme}
-          repo="INSANE-P/frost-log"
+          repo="INSANE-P/blog"
           repoId="R_kgDOS4XX0g"
           category="댓글"
           categoryId="DIC_kwDOS4XX0s4C_-zB"

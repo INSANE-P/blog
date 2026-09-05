@@ -84,7 +84,7 @@ DB 도 네트워크도 필요 없다.
 
 ## 남는 것
 
-**`NEXT_PUBLIC_SITE_URL` 이 실제 배포 도메인과 같아야 한다.** 기본값은 `frost-log.vercel.app` 이다.
+**`NEXT_PUBLIC_SITE_URL` 이 실제 배포 도메인과 같아야 한다.** 기본값은 `chanbin.dev` 이다.
 다르면 canonical·OG 절대경로·사이트맵·RSS 의 주소가 **전부** 어긋난다.
 커스텀 도메인을 붙이면 이 값부터 바꾼다.
 
