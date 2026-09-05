@@ -86,18 +86,6 @@ export function Mail(props: IconProps) {
   );
 }
 
-/** 문서 — 이력서, 글 */
-export function FileText(props: IconProps) {
-  return (
-    <Svg {...props}>
-      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-      <path d="M14 3v5h5" />
-      <path d="M9 13h6" />
-      <path d="M9 17h4" />
-    </Svg>
-  );
-}
-
 /**
  * 메뉴 열기.
  *
@@ -119,32 +107,6 @@ export function X(props: IconProps) {
     <Svg {...props}>
       <path d="M6 6l12 12" />
       <path d="M18 6L6 18" />
-    </Svg>
-  );
-}
-
-/** 해 — 라이트 모드 */
-export function Sun(props: IconProps) {
-  return (
-    <Svg {...props}>
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 3v2" />
-      <path d="M12 19v2" />
-      <path d="M3 12h2" />
-      <path d="M19 12h2" />
-      <path d="M5.6 5.6l1.4 1.4" />
-      <path d="M17 17l1.4 1.4" />
-      <path d="M18.4 5.6L17 7" />
-      <path d="M7 17l-1.4 1.4" />
-    </Svg>
-  );
-}
-
-/** 달 — 다크 모드 */
-export function Moon(props: IconProps) {
-  return (
-    <Svg {...props}>
-      <path d="M20 13.5A8 8 0 0 1 10.5 4a7 7 0 1 0 9.5 9.5z" />
     </Svg>
   );
 }

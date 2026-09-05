@@ -9,39 +9,51 @@ const at = (r: number, a: number): [number, number] => [
   12 + r * Math.sin((a * Math.PI) / 180),
 ];
 
-/** 뾰족한 광선 하나 — 밑변은 r0에서 폭 w, 꼭짓점은 r1 */
-function ray(a: number, r0: number, r1: number, w: number): string {
-  const d = (Math.atan2(w / 2, r0) * 180) / Math.PI;
-  const [ax, ay] = at(r0, a - d);
-  const [bx, by] = at(r1, a);
-  const [cx, cy] = at(r0, a + d);
-  return `M ${f(ax)},${f(ay)} L ${f(bx)},${f(by)} L ${f(cx)},${f(cy)} Z`;
-}
-
 /**
- * 광선 열둘. 길고 짧은 것을 번갈아 둔다 —
- * 길이가 모두 같으면 톱니바퀴로 보이고, 엇갈리면 빛이 뻗는 것으로 보인다.
+ * 네 갈래 스파클 — 변을 오목하게 당겨 끝이 가늘어진다.
+ * `waist` 가 작을수록 허리가 잘록해져 갈래가 날카로워진다.
+ * 해와 별이 같은 함수를 쓴다 — 서로 다른 도형이면 한 장치의 두 상태로 읽히지 않는다.
  */
-const RAYS = Array.from({ length: 12 }, (_, k) => {
-  const long = k % 2 === 0;
-  return {
-    d: ray(k * 30 - 90, 5.6, long ? 10.6 : 8.6, long ? 2.4 : 1.9),
-    opacity: long ? 0.85 : 0.55,
-  };
-});
-
-/** 네 갈래 스파클 — 변을 오목하게 당겨 끝이 가늘어진다 */
-function sparkle(cx: number, cy: number, R: number, waist = 0.17): string {
+function sparkle(cx: number, cy: number, R: number, waist = 0.17, rot = 0): string {
   const w = R * waist;
+  const pts: [number, number][] = [
+    [0, -R],
+    [w, -w],
+    [R, 0],
+    [w, w],
+    [0, R],
+    [-w, w],
+    [-R, 0],
+    [-w, -w],
+  ];
+  const r = (rot * Math.PI) / 180;
+  const P = pts.map(([x, y]): [number, number] => [
+    cx + x * Math.cos(r) - y * Math.sin(r),
+    cy + x * Math.sin(r) + y * Math.cos(r),
+  ]);
+  const at = (i: number) => `${f(P[i][0])},${f(P[i][1])}`;
   return [
-    `M ${f(cx)},${f(cy - R)}`,
-    `Q ${f(cx + w)},${f(cy - w)} ${f(cx + R)},${f(cy)}`,
-    `Q ${f(cx + w)},${f(cy + w)} ${f(cx)},${f(cy + R)}`,
-    `Q ${f(cx - w)},${f(cy + w)} ${f(cx - R)},${f(cy)}`,
-    `Q ${f(cx - w)},${f(cy - w)} ${f(cx)},${f(cy - R)}`,
+    `M ${at(0)}`,
+    `Q ${at(1)} ${at(2)}`,
+    `Q ${at(3)} ${at(4)}`,
+    `Q ${at(5)} ${at(6)}`,
+    `Q ${at(7)} ${at(0)}`,
     "Z",
   ].join(" ");
 }
+
+/*
+  해 — 같은 스파클을 45° 돌려 겹쳐 갈래 여덟을 만든다.
+
+  직선 삼각형 광선 열둘로 그렸다가 바꿨다. 별은 변이 오목한데 해는 곧은 삼각형이라
+  둘이 서로 다른 문법을 썼고, 24px 에서는 광선이 뭉쳐 회색 덩어리가 됐다.
+  같은 함수로 그리면 "별이 자라 해가 된다"로 읽히고, 허리를 잘록하게(0.07) 당기면
+  작아져도 갈래가 살아 있다.
+
+  갈래는 여덟이다. 넷이면 다크의 별과 구분되지 않는다 — 같은 자리에 번갈아 나오는 둘은
+  한눈에 달라야 한다.
+*/
+const SUN_RAYS = [sparkle(12, 12, 11, 0.07), sparkle(12, 12, 11, 0.07, 45)];
 
 const STAR_MAIN = sparkle(12, 12, 9.4);
 const STAR_SUB = [
@@ -58,9 +70,9 @@ const STAR_SUB = [
  * 반차 원(◐)은 21px에서 회색 덩어리였고, "타원 궤도 + 가운데 점"은 눈알로 보였다.
  * 별자리 안은 규칙적으로 두면 꺾은선 그래프로 읽혔다.
  *
- * 해는 일부러 단순한 기하 도형을 피했다. 광선 열둘을 길고 짧게 엇갈리게 두면
- * 톱니바퀴가 아니라 빛이 뻗는 모양이 된다. 별도 정다각형이 아니라 변을 오목하게 당겨,
- * 끝이 가늘어지며 반짝이는 형태로 그렸다. 작은 스파클 둘이 균형과 깊이를 준다.
+ * 해와 별이 같은 도형 함수를 쓴다 — 별은 갈래 넷, 해는 같은 갈래를 45° 돌려 겹친 여덟이다.
+ * 서로 다른 문법으로 그리면 한 장치의 두 상태가 아니라 아이콘 두 개로 읽힌다.
+ * 정다각형이 아니라 변을 오목하게 당겨 끝이 가늘어지게 했다 — 작아져도 갈래가 살아 있다.
  *
  * 색은 악센트 하나뿐 — 해의 몸통과 큰 별. 헤더에서 색을 가진 유일한 요소라
  * 시선이 정확히 여기에 온다(폰 레스토프 효과).
@@ -147,10 +159,10 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
             ...swap,
           }}
         >
-          {RAYS.map((r, i) => (
-            <path key={i} d={r.d} fill="currentColor" opacity={r.opacity} />
+          {SUN_RAYS.map((d, i) => (
+            <path key={i} d={d} fill="currentColor" opacity={0.8} />
           ))}
-          <circle cx="12" cy="12" r="4.1" fill="var(--accent)" />
+          <circle cx="12" cy="12" r="4.5" fill="var(--accent)" />
         </g>
 
         {/* 별 — 반대 방향으로 돌며 피어난다 */}
