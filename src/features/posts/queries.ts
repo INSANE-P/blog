@@ -17,12 +17,13 @@ type Row = {
   cover_image: string | null;
   entry_date: string | null;
   published_at: string | null;
+  updated_at: string | null;
   /** 태그는 조인이 아니라 배열 컬럼이다(0008_tags_as_array.sql) */
   tags: string[] | null;
 };
 
 const SELECT =
-  "slug, title, excerpt, content, cover_image, entry_date, published_at, tags";
+  "slug, title, excerpt, content, cover_image, entry_date, published_at, updated_at, tags";
 
 function toEntry(r: Row): Entry {
   return {
@@ -30,6 +31,8 @@ function toEntry(r: Row): Entry {
     title: r.title,
     excerpt: r.excerpt ?? "",
     date: r.entry_date ?? (r.published_at ? r.published_at.slice(0, 10) : ""),
+    publishedAt: r.published_at ?? undefined,
+    updatedAt: r.updated_at ?? undefined,
     tags: r.tags?.length ? r.tags : undefined,
     coverImage: r.cover_image ?? undefined,
     body: typeof r.content === "string" ? r.content : "",

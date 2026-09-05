@@ -37,12 +37,66 @@ export type SyncResult = {
 };
 
 /** 글 하나를 DB에 반영한다. 태그는 배열 컬럼이라 덮어쓰면 끝난다(멱등). */
-async function upsertPost(
-  supabase: ReturnType<typeof db>,
-  post: NotionPost,
-): Promise<void> {
-  const row = {
-    notion_page_id: post.pageId,
+/*
+  글 하나를 반영한다 (ADR-0044).
+
+  **바뀐 것이 없으면 쓰지 않는다.** 예전에는 동기화할 때마다 모든 글을 덮었는데,
+  그러면 `updated_at` 트리거가 매번 돌아 "모든 글이 방금 수정됐다"가 된다.
+  사이트맵의 갱신 시각과 구조화 데이터의 `dateModified` 가 그 값을 쓰므로,
+  크롤러에게 매 동기화마다 전부 바뀌었다고 거짓말하게 된다.
+
+  `synced_at` 은 이 경우 갱신되지 않는다. 읽는 곳이 없는 참고용 값이고,
+  그것 하나를 위해 `updated_at` 을 망치는 것이 더 큰 손해다.
+
+  **발행 시각도 한 번만 찍는다.** 예전에는 `published_at` 에 매번 `now()` 를 넣어
+  발행일이 동기화할 때마다 앞으로 밀렸다. 처음 발행된 순간을 남기고 그 뒤로는 지킨다.
+*/
+type ExistingRow = {
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  content: string | null;
+  cover_image: string | null;
+  entry_date: string | null;
+  tags: string[] | null;
+  status: string;
+  published_at: string | null;
+};
+
+const CONTENT_FIELDS = [
+  "slug",
+  "title",
+  "excerpt",
+  "content",
+  "cover_image",
+  "entry_date",
+  "tags",
+  "status",
+] as const;
+
+/** 두 행의 내용이 같은가 — 태그는 순서까지 본다(노션이 순서를 지킨다) */
+function sameContent(a: ExistingRow, b: Record<string, unknown>): boolean {
+  return CONTENT_FIELDS.every((k) => {
+    const x = a[k];
+    const y = b[k];
+    if (Array.isArray(x) || Array.isArray(y)) {
+      return JSON.stringify(x ?? []) === JSON.stringify(y ?? []);
+    }
+    return (x ?? null) === (y ?? null);
+  });
+}
+
+/** @returns 실제로 썼으면 true, 바뀐 것이 없어 건너뛰었으면 false */
+async function upsertPost(supabase: ReturnType<typeof db>, post: NotionPost): Promise<boolean> {
+  const { data: existing } = await supabase
+    .from("posts")
+    .select("slug, title, excerpt, content, cover_image, entry_date, tags, status, published_at")
+    .eq("notion_page_id", post.pageId)
+    .maybeSingle();
+
+  const prev = (existing as ExistingRow | null) ?? null;
+
+  const content = {
     slug: post.slug,
     title: post.title,
     excerpt: post.summary,
@@ -52,14 +106,21 @@ async function upsertPost(
     tags: post.tags,
     // 발행 체크가 꺼지면 draft — "지운다"가 아니라 "감춘다"는 의도다
     status: post.published ? "published" : "draft",
-    published_at: post.published ? new Date().toISOString() : null,
+  };
+
+  if (prev && sameContent(prev, content)) return false;
+
+  const row = {
+    notion_page_id: post.pageId,
+    ...content,
+    // 이미 발행된 글은 처음 찍힌 시각을 지킨다
+    published_at: post.published ? (prev?.published_at ?? new Date().toISOString()) : null,
     synced_at: new Date().toISOString(),
   };
 
-  const { error } = await supabase
-    .from("posts")
-    .upsert(row, { onConflict: "notion_page_id" });
+  const { error } = await supabase.from("posts").upsert(row, { onConflict: "notion_page_id" });
   if (error) throw new Error(error.message);
+  return true;
 }
 
 /**
@@ -143,8 +204,9 @@ export async function syncFromNotion(): Promise<SyncResult> {
         result.unknownTags.push({ slug: post.slug, tags: converted.unknownTags });
       }
 
-      await upsertPost(supabase, post);
-      result.synced.push(post.slug);
+      const written = await upsertPost(supabase, post);
+      if (written) result.synced.push(post.slug);
+      else result.skipped.push({ slug: post.slug, reason: "바뀐 것이 없음" });
     } catch (e) {
       result.failed.push({ slug, error: e instanceof Error ? e.message : String(e) });
     }

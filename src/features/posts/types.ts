@@ -8,8 +8,12 @@ export type Entry = {
   slug: string;
   title: string;
   excerpt: string;
-  /** "YYYY-MM-DD" */
+  /** "YYYY-MM-DD" — 글에 적힌 날짜. 화면에 보이는 것 */
   date: string;
+  /** 처음 발행된 시각(ISO). 구조화 데이터의 datePublished (ADR-0044) */
+  publishedAt?: string;
+  /** 마지막으로 내용이 바뀐 시각(ISO). 사이트맵과 dateModified 가 쓴다 */
+  updatedAt?: string;
   tags?: string[];
   /** 목록 썸네일. 노션 페이지 커버 → 본문 첫 이미지 순으로 채워진다. */
   coverImage?: string;
