@@ -20,6 +20,16 @@
   /* 호버·칩 배경 — 선을 하나 더 긋지 않고 면으로만 눌린 느낌을 준다 */
   --surface-hover: #f4f6f7;
   --accent: #2f8fb5;
+  /* 악센트를 아주 옅게 깐 면 — 인용문 배경, 태그 칩, 강조 밑줄 */
+  --tint: rgba(47, 143, 181, 0.07);
+  /* 코드 블록: 본문과 구분되되 튀지 않는 면 + 파일명 줄 */
+  --code-bg: #f6f8f9;
+  --code-bar: #eceff1;
+  /*
+    본문 글자색. UI 텍스트(--foreground)와 따로 둔다.
+    라이트에서는 순검정보다 살짝 낮춰 긴 글에서 눈이 덜 피로하게 한다.
+  */
+  --prose-fg: #17181a;
 }
 
 .dark {
@@ -31,6 +41,18 @@
   --hairline: rgba(255, 255, 255, 0.09);
   --surface-hover: #161616;
   --accent: #5fcdee;
+  --tint: rgba(95, 205, 238, 0.1);
+  --code-bg: #0e0f10;
+  --code-bar: #17191a;
+  /*
+    다크의 본문은 순수 흰색을 쓰지 않는다. 검은 배경 위 흰 글자는 OLED에서
+    빛이 번져(헤일레이션) 긴 글을 읽기 어렵게 만든다. 제목·UI 는 흰색을 유지하고
+    본문만 한 단계 낮춰 대비를 18:1 로 두었다(순수 흰색은 21:1, WCAG AA 기준은 4.5:1).
+
+    라이트 값을 그대로 뒤집지 않는 이유이기도 하다 — 같은 토큰이라도 어두운 배경에서는
+    체감 대비가 달라서, 두 모드는 각자의 명도 기준을 가져야 한다(토스 TDS 컬러 개편과 같은 결론).
+  */
+  --prose-fg: #dfe2e5;
 }
 
 /* CSS 변수를 Tailwind 유틸리티로 매핑 (bg-background, text-foreground 등) */
@@ -38,6 +60,10 @@
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-hover: var(--surface-hover);
+  --color-tint: var(--tint);
+  --color-code-bg: var(--code-bg);
+  --color-code-bar: var(--code-bar);
+  --color-prose-fg: var(--prose-fg);
   --color-border: var(--border);
   --color-hairline: var(--hairline);
   --color-foreground: var(--foreground);
@@ -52,5 +78,10 @@
     본문 폭. WCAG 1.4.8은 한중일 문자에 한 줄 40자 이하를 명시한다(영문은 80자).
     한글은 글자당 정보 밀도가 높아 같은 자수라도 물리적으로 훨씬 길다.
   */
-  --container-prose: 34rem;
+  /*
+    본문 폭. WCAG 1.4.8은 한중일 문자에 한 줄 40자 이하를 권한다.
+    18px 한글에서 42rem(672px)이 약 37자로, 상한 안쪽이면서 줄이 너무 짧아
+    끊기지 않는 지점이다. 34rem은 30자밖에 안 돼 문단이 잘게 쪼개져 보였다.
+  */
+  --container-prose: 42rem;
 }

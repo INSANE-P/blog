@@ -58,14 +58,20 @@ body {
 }
 
 /*
-  글 본문 (ADR-0025).
-  18px / 행간 1.8 — 행간은 WCAG 최소 1.5에 한글 보정을 더한 값이다.
+  글 본문 (ADR-0025·0027).
+
+  노션에서 쓴 글이지만 노션처럼 보이면 안 된다. 노션의 기본값은 "어떤 글이든 담기는 그릇"이라
+  성격이 없는데, 블로그는 읽는 경험 자체가 그 사람의 것이어야 한다. 그래서 제목·인용·목록·코드에
+  각각 다른 장치를 두되, 강조 색은 악센트 하나로 묶는다.
+
+  18px / 행간 1.85 — 행간은 WCAG 최소 1.5에 한글 보정을 더한 값이다.
   한글은 알파벳보다 베이스라인이 낮아 같은 행간에서도 빽빽해 보인다.
 */
 .prose {
   font-size: 18px;
-  line-height: 1.8;
-  color: var(--foreground);
+  line-height: 1.85;
+  letter-spacing: -0.003em;
+  color: var(--prose-fg);
   /* 양끝맞춤은 한글에서 어간을 벌려 놓아 읽기를 방해한다 */
   text-align: left;
 }
@@ -73,116 +79,214 @@ body {
 @media (max-width: 640px) {
   .prose {
     font-size: 17px;
+    line-height: 1.8;
   }
 }
+
 .prose p {
-  margin: 0 0 1.1em;
+  margin: 0 0 1.4em;
 }
 .prose p:last-child {
   margin-bottom: 0;
 }
+
+/*
+  제목. 본문 왼쪽 여백에 악센트 사각형을 하나 둔다.
+  글자만 키워 구분하면 스크롤 중에 절이 어디서 시작하는지 놓치는데,
+  글줄 밖의 표식은 훑어 내려갈 때 눈에 먼저 걸린다.
+  좁은 화면에서는 여백이 없어 표식을 숨긴다.
+*/
 .prose h2 {
-  font-size: 1.45rem;
+  position: relative;
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.032em;
+  margin: 2.5em 0 0.8em;
+  color: var(--foreground);
+}
+.prose h2::before {
+  content: "";
+  position: absolute;
+  left: -24px;
+  top: 0.45em;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+@media (max-width: 820px) {
+  .prose h2 {
+    font-size: 24px;
+  }
+  .prose h2::before {
+    display: none;
+  }
+}
+.prose h1 {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.032em;
+  margin: 2.2em 0 0.7em;
+  color: var(--foreground);
+}
+.prose h3 {
+  font-size: 20px;
   font-weight: 700;
-  letter-spacing: -0.01em;
-  margin: 1.9em 0 0.7em;
+  letter-spacing: -0.02em;
+  margin: 2em 0 0.6em;
   color: var(--foreground);
 }
-.prose strong {
-  font-weight: 600;
-}
-.prose blockquote {
-  margin: 1.5em 0;
-  padding-left: 1rem;
-  border-left: 3px solid var(--accent);
-  font-size: 1.15rem;
-  font-weight: 500;
-  color: var(--foreground);
-}
+
 .prose a {
   color: var(--accent);
   text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
 }
-.prose img {
-  display: block;
-  max-width: 100%;
-  max-height: 80vh;
-  height: auto;
-  width: auto;
-  margin: 1.7em auto;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-}
-.prose h1 {
-  font-size: 1.7rem;
+
+/* 굵게 — 형광펜처럼 밑동만 옅게 깐다. 색을 바꾸면 링크로 오해받는다 */
+.prose strong {
   font-weight: 700;
-  letter-spacing: -0.015em;
-  margin: 1.6em 0 0.6em;
+  background: linear-gradient(transparent 62%, var(--tint) 62%);
 }
-.prose h3 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin: 1.6em 0 0.5em;
-}
+
+/* 목록 — 브라우저 기본 마커 대신 악센트 점과 번호를 직접 그린다 */
 .prose ul,
 .prose ol {
-  margin: 1.1em 0;
-  padding-left: 1.3em;
-}
-.prose ul {
-  list-style: disc;
-}
-.prose ol {
-  list-style: decimal;
+  margin: 1.4em 0;
+  padding-left: 0;
+  list-style: none;
 }
 .prose li {
-  margin: 0.35em 0;
+  position: relative;
+  padding-left: 22px;
+  margin: 0.5em 0;
 }
-.prose hr {
+.prose ul li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.72em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.65;
+}
+.prose ol {
+  counter-reset: prose-ol;
+}
+.prose ol li {
+  counter-increment: prose-ol;
+}
+.prose ol li::before {
+  content: counter(prose-ol);
+  position: absolute;
+  left: 1px;
+  top: 0.06em;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.prose li > ul,
+.prose li > ol {
+  margin: 0.4em 0;
+}
+
+/* 인용 — 세로줄 대신 면. 줄 하나는 노션·깃허브의 기본값이라 눈에 남지 않는다 */
+.prose blockquote {
   margin: 2em 0;
-  border: 0;
-  border-top: 1px solid var(--border);
+  padding: 22px 24px;
+  border-radius: 14px;
+  background: var(--tint);
+  font-size: 19px;
+  line-height: 1.7;
+  font-weight: 500;
+  color: var(--foreground);
 }
+.prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+
 .prose code {
   font-family: var(--font-mono);
-  font-size: 0.88em;
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-  padding: 0.15em 0.4em;
-  border-radius: 5px;
+  font-size: 0.87em;
+  background: var(--surface-hover);
+  border: 1px solid var(--hairline);
+  padding: 0.12em 0.38em;
+  border-radius: 6px;
 }
-.prose pre {
-  margin: 1.5em 0;
-  padding: 1em 1.15em;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  overflow-x: auto;
-  font-size: 0.9em;
-  line-height: 1.7;
+
+/*
+  이미지는 언제나 본문 폭을 채운다. 원본 크기대로 두면 그림마다 왼쪽 끝이 달라져
+  글이 정돈돼 보이지 않는다. 세로가 긴 그림만 좁혀, 휴대폰 화면 캡처 한 장이
+  화면을 독차지하지 않게 한다(.prose figure[data-tall]).
+*/
+.prose figure {
+  margin: 2.2em 0;
 }
-.prose pre code {
-  background: none;
-  padding: 0;
-  font-size: inherit;
+.prose figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-hover);
 }
+.prose figure[data-tall="true"] {
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.prose figcaption {
+  margin-top: 11px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* 구분선 — 가로줄 대신 가운뎃점 셋. 절 사이의 쉼이지 단절이 아니다 */
+.prose hr {
+  margin: 3em 0;
+  border: 0;
+  text-align: center;
+}
+.prose hr::after {
+  content: "· · ·";
+  color: var(--muted);
+  letter-spacing: 0.5em;
+  font-size: 14px;
+}
+
 .prose table {
   width: 100%;
-  margin: 1.5em 0;
+  margin: 2em 0;
   border-collapse: collapse;
-  font-size: 0.95em;
+  font-size: 15.5px;
 }
 .prose th,
 .prose td {
-  border: 1px solid var(--border);
-  padding: 0.5em 0.8em;
+  padding: 11px 14px;
   text-align: left;
+  border-bottom: 1px solid var(--hairline);
 }
 .prose th {
-  background: color-mix(in srgb, var(--accent) 7%, transparent);
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  border-bottom: 1.5px solid var(--border);
 }
 
-/* 코드 하이라이트(highlight.js 토큰) — frost 톤 */
+/*
+  코드 하이라이트(highlight.js 토큰).
+  색을 네 갈래로만 쓴다 — 주석·키워드·문자열·숫자. 토큰마다 색을 주면
+  코드가 알록달록해져서 정작 눈이 가야 할 곳을 잃는다.
+  문자열·숫자는 라이트와 다크에서 값을 따로 잡는다. 어두운 배경에서는 같은 색이 탁해 보인다.
+*/
 .hljs-comment,
 .hljs-quote {
   color: var(--muted);
@@ -196,7 +300,7 @@ body {
 .hljs-title,
 .hljs-name,
 .hljs-section {
-  color: var(--accent-bright);
+  color: var(--accent);
 }
 .hljs-string,
 .hljs-attr {
