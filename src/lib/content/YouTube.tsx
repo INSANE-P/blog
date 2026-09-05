@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { youTubeId } from "./youtube-id";
 
 /**
  * 유튜브 (ADR-0051).
@@ -20,8 +19,6 @@ import { youTubeId } from "./youtube-id";
  * 유튜브 주소를 따라다니며 그림을 굽는 일까지 해야 한다 — 영상 하나 붙이자고
  * 동기화에 새 실패 지점을 만들 이유가 없다.
  */
-export { youTubeId };
-
 export function YouTube({ id, title }: { id: string; title?: string }) {
   const [playing, setPlaying] = useState(false);
   const label = title || "유튜브 영상";

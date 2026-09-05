@@ -1,7 +1,18 @@
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { remarkHighlight } from "./remark-highlight";
-import { YouTube, youTubeId } from "./YouTube";
+import { YouTube } from "./YouTube";
+/*
+  파서는 `YouTube.tsx` 가 아니라 여기서 직접 가져온다 (ADR-0051).
+
+  `YouTube.tsx` 는 `"use client"` 다. 거기서 다시 내보낸 함수를 서버가 가져오면
+  **함수가 아니라 클라이언트 참조**가 넘어와, 서버에서 부르는 순간 터진다.
+
+    Attempted to call youTubeId() from the server but youTubeId is on the client.
+
+  타입 검사는 이 경계를 보지 못한다. `pnpm build` 만 잡는다.
+*/
+import { youTubeId } from "./youtube-id";
 import remarkMath from "remark-math";
 import rehypeHighlight from "rehype-highlight";
 import rehypeKatex from "rehype-katex";
