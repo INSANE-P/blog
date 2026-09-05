@@ -13,6 +13,7 @@ main {
   --color-canvas-default: #ffffff; /* background */
   --color-canvas-subtle: #f4f6f7; /* surface-hover */
   --color-canvas-inset: #f4f6f7;
+  --color-canvas-overlay: #ffffff;
   --color-fg-default: #17181a; /* prose-fg */
   --color-fg-muted: #6b6b6b; /* muted */
   --color-fg-subtle: #6b6b6b;
@@ -37,6 +38,8 @@ main {
   --ours-accent: #2f8fb5;
   --ours-accent-soft: rgba(47, 143, 181, 0.45);
   --ours-muted: #6b6b6b;
+  --ours-overlay: #ffffff;
+  --ours-shadow: rgba(0, 0, 0, 0.14);
 }
 
 /* 우리 화면에는 상자 위에 이미 제목과 안내 한 줄이 있다 — giscus 자체 머리말은 지운다 */
@@ -144,4 +147,32 @@ main img[class*="avatar"] {
 }
 main .gsc-comment-content pre {
   border-radius: 12px;
+}
+
+/*
+  반응 고르는 팝오버.
+
+  giscus 는 이 상자의 배경을 `--color-canvas-overlay` 로 칠하는데, 우리가 그 변수를
+  덮지 않으면 기본 테마 값이 그대로 남아 우리 색과 어긋난다.
+  테마 CSS 자체가 안 실린 상황에서는 아예 투명해져 뒤 내용이 비쳐 보인다 — 실제로 그랬다.
+  변수도 덮고, 상자도 직접 칠해 둔다.
+
+  `reactionsEnabled="0"` 은 글 전체 반응만 끄고 댓글 하나하나의 반응은 남으므로
+  이 팝오버는 계속 나온다.
+*/
+main .gsc-reactions-popover,
+main .gsc-reactions-menu {
+  background: var(--ours-overlay);
+  border: 1px solid var(--ours-hairline);
+  border-radius: 14px;
+  box-shadow: 0 8px 28px var(--ours-shadow);
+}
+main .gsc-emoji-button {
+  border-radius: 8px;
+}
+main .gsc-emoji-button:hover {
+  background: var(--ours-surface);
+}
+main .gsc-social-reaction-summary-item {
+  border-radius: 999px;
 }

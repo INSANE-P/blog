@@ -18,26 +18,49 @@ import { SectionTitle } from "@/components/ui/SectionTitle";
  * 제목을 다는 것이 "직접 만든 것처럼" 보이지 않게 하는 가장 큰 원인이다.
  *
  * 테마는 우리 .dark 클래스를 감시해 맞춘다.
- * - https(배포): 우리 색으로 덮은 커스텀 테마 CSS. giscus 는 테마 CSS 를 https 로만 불러온다
- * - http(로컬): mixed-content 로 막히므로 내장 noborder 테마로 폴백
+ *
+ * 커스텀 테마 CSS 를 giscus 가 불러오지 못하면 색 변수가 하나도 적용되지 않아
+ * 글자색이 기본값인 검정이 된다. 흰 배경에서는 우연히 읽히지만 검은 배경에서는
+ * 댓글이 통째로 보이지 않는다. 실제로 그 상태가 한 번 나왔다.
+ *
+ * 그래서 주소를 넘기기 전에 파일이 실제로 있는지 먼저 확인한다. 같은 출처라 CORS 문제가 없고,
+ * 한 번 받아 두면 브라우저가 캐시한다. 없으면 내장 테마로 물러난다 —
+ * 우리 색은 잃더라도 댓글이 안 보이는 것보다는 낫다.
+ *
+ * http(로컬)에서는 애초에 mixed-content 로 막히므로 확인 없이 내장 테마를 쓴다.
  */
 export function Comments() {
   // 초기엔 내장 테마(SSR/하이드레이션 안전), 마운트 후 실제 환경에 맞춰 갱신
   const [theme, setTheme] = useState("noborder_light");
 
   useEffect(() => {
-    const compute = () => {
+    let alive = true;
+
+    const compute = async () => {
       const dark = document.documentElement.classList.contains("dark");
-      if (window.location.protocol === "https:") {
-        setTheme(`${window.location.origin}/giscus-${dark ? "dark" : "light"}.css`);
-      } else {
-        setTheme(dark ? "noborder_dark" : "noborder_light");
+      const builtin = dark ? "noborder_dark" : "noborder_light";
+
+      if (window.location.protocol !== "https:") {
+        setTheme(builtin);
+        return;
+      }
+
+      const url = `${window.location.origin}/giscus-${dark ? "dark" : "light"}.css`;
+      try {
+        const res = await fetch(url, { method: "HEAD" });
+        if (alive) setTheme(res.ok ? url : builtin);
+      } catch {
+        if (alive) setTheme(builtin);
       }
     };
+
     compute();
-    const observer = new MutationObserver(compute);
+    const observer = new MutationObserver(() => void compute());
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
+    return () => {
+      alive = false;
+      observer.disconnect();
+    };
   }, []);
 
   return (
