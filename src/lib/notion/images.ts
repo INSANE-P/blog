@@ -22,27 +22,18 @@ function isNotionHosted(url: string): boolean {
 }
 
 /**
- * R2 키를 내용 해시로 만든다.
+ * R2 키를 내용 해시 + 치수로 만든다 — `images/<해시>-<가로>x<세로>.webp`
  *
  * 노션 URL은 서명이 매번 바뀌므로 URL로 키를 만들면 같은 이미지를 계속 다시 올리게 된다.
  * 내용을 해시하면 같은 그림은 항상 같은 키가 되어, 재동기화해도 업로드가 일어나지 않는다.
- */
-function keyOf(buf: Buffer, ext: string): string {
-  return `images/${createHash("sha256").update(buf).digest("hex").slice(0, 32)}.${ext}`;
-}
-
-/**
- * 새 URL 뒤에 실제 치수를 조각(#w=..&h=..)으로 붙인다.
  *
- * 조각은 요청에 실리지 않으므로 R2 캐시와 키에 아무 영향이 없다.
- * 화면은 이 값으로 그림 자리를 미리 잡아 두어, 그림이 늦게 와도 글이 밀리지 않는다.
- *
- * 치수로 "표시 크기"를 정하지는 않는다 — 그림은 언제나 본문 폭을 채운다.
- * 원본 크기대로 두면 그림마다 왼쪽 끝이 달라져 글이 정돈돼 보이지 않는다.
- * 세로가 긴 그림만 화면에서 좁히는데, 그 판단에도 이 비율을 쓴다.
+ * 치수를 이름에 넣는 이유는 화면이 그림 자리를 미리 잡기 위해서다(ADR-0027).
+ * 본문 마크다운이나 URL 조각이 아니라 파일 이름에 두는 이유는, 본문은 노션 글의 사본이어야 하고
+ * 주소는 복사하든 RSS로 나가든 온전해야 하기 때문이다. 이름에 있으면 벗겨낼 규칙이 없다.
  */
-function withSize(url: string, w?: number, h?: number): string {
-  return w && h ? `${url}#w=${w}&h=${h}` : url;
+function keyOf(buf: Buffer, ext: string, w?: number, h?: number): string {
+  const hash = createHash("sha256").update(buf).digest("hex").slice(0, 32);
+  return w && h ? `images/${hash}-${w}x${h}.${ext}` : `images/${hash}.${ext}`;
 }
 
 /**
@@ -82,15 +73,12 @@ export async function migrateImage(url: string): Promise<string> {
   // 변환 뒤 실제 치수. 리사이즈·EXIF 회전이 반영된 값이라 원본 메타데이터와 다를 수 있다.
   const out = keepAsIs ? meta : await sharp(body).metadata();
 
-  const key = keyOf(body, ext);
+  const key = keyOf(body, ext, out.width, out.height);
   const publicBase = process.env.R2_PUBLIC_BASE!;
 
   // 이미 올라가 있으면 업로드를 건너뛴다(내용 해시라 같은 그림은 같은 키)
-  const publicUrl = (await exists(key))
-    ? `${publicBase}/${key}`
-    : await put(key, body, contentType);
-
-  return withSize(publicUrl, out.width, out.height);
+  if (await exists(key)) return `${publicBase}/${key}`;
+  return put(key, body, contentType);
 }
 
 /** 마크다운 본문의 `![](url)` 이미지를 모두 R2로 옮긴다. */

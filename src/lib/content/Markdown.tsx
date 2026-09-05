@@ -97,14 +97,15 @@ export function Markdown({ children }: { children: string }) {
  * 폭은 언제나 본문에 맞춘다 — 원본 크기대로 두면 그림마다 왼쪽 끝이 달라져
  * 글이 정돈돼 보이지 않는다. 세로가 긴 그림(휴대폰 화면 캡처)만 좁힌다.
  *
- * 치수는 동기화가 URL 조각(#w=..&h=..)에 붙여 둔다. 조각은 요청에 실리지 않아
- * R2 캐시에 영향이 없고, width/height 를 심어 두면 그림이 늦게 와도 글이 밀리지 않는다.
+ * 치수는 동기화가 파일 이름에 넣어 둔다(`<해시>-1600x900.webp`). width/height 를 심어 두면
+ * 그림이 늦게 와도 글이 밀리지 않는다. 치수를 모르는 그림(노션 밖에서 링크로 넣은 것)은
+ * 자리를 잡을 수 없으므로 폭을 채우는 대신 원래 크기를 지키게 둔다.
  */
 function Figure({ src, caption }: { src: string; caption: string }) {
   const size = sizeOf(src);
   const tall = size ? size.h > size.w * 1.15 : false;
   return (
-    <figure data-tall={tall || undefined}>
+    <figure data-fit={size ? (tall ? "tall" : "wide") : "unknown"}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={caption} width={size?.w} height={size?.h} loading="lazy" />
       {caption && <figcaption>{caption}</figcaption>}
@@ -112,7 +113,8 @@ function Figure({ src, caption }: { src: string; caption: string }) {
   );
 }
 
+/** `images/<해시>-1600x900.webp` 에서 치수를 읽는다 */
 function sizeOf(src: string): { w: number; h: number } | undefined {
-  const m = src.match(/#w=(\d+)&h=(\d+)$/);
+  const m = src.match(/-(\d+)x(\d+)\.[a-z0-9]+$/i);
   return m ? { w: Number(m[1]), h: Number(m[2]) } : undefined;
 }

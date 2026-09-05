@@ -221,24 +221,39 @@ body {
 
 /*
   이미지는 언제나 본문 폭을 채운다. 원본 크기대로 두면 그림마다 왼쪽 끝이 달라져
-  글이 정돈돼 보이지 않는다. 세로가 긴 그림만 좁혀, 휴대폰 화면 캡처 한 장이
-  화면을 독차지하지 않게 한다(.prose figure[data-tall]).
+  글이 정돈돼 보이지 않는다 — 읽는 칸에서는 세로 정렬선이 맞는 것이 정돈돼 보이게 하는
+  거의 전부다. 예외는 세로가 긴 그림(휴대폰 화면 캡처) 하나로, 좁혀서 한 장이
+  화면을 독차지하지 않게 한다.
+
+  치수를 모르는 그림(노션 밖에서 링크로 넣어 변환을 거치지 않은 것)은 자리를 미리 잡을 수
+  없으므로 폭을 늘리지 않고 원래 크기를 지키되, 화면 높이만 넘지 않게 한다.
 */
 .prose figure {
   margin: 2.2em 0;
 }
 .prose figure img {
   display: block;
-  width: 100%;
   height: auto;
   border-radius: 14px;
   border: 1px solid var(--hairline);
   background: var(--surface-hover);
 }
-.prose figure[data-tall="true"] {
+.prose figure[data-fit="wide"] img {
+  width: 100%;
+}
+.prose figure[data-fit="tall"] {
   max-width: 360px;
   margin-left: auto;
   margin-right: auto;
+}
+.prose figure[data-fit="tall"] img {
+  width: 100%;
+}
+.prose figure[data-fit="unknown"] img {
+  max-width: 100%;
+  max-height: 70vh;
+  width: auto;
+  margin-inline: auto;
 }
 .prose figcaption {
   margin-top: 11px;
