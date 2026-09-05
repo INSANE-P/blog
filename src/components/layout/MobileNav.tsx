@@ -96,7 +96,7 @@ export function MobileNav({ className }: { className?: string }) {
                     href={item.href}
                     onClick={() => setOpen(false)}
                     aria-current={active ? "page" : undefined}
-                    className={`py-3 text-[44px] font-extrabold leading-tight tracking-[-0.04em] transition-all duration-300 ${
+                    className={`py-3 font-display text-[46px] font-extrabold lowercase leading-tight tracking-[-0.035em] transition-all duration-300 ${
                       active ? "text-accent-text" : "text-foreground"
                     }`}
                     style={{

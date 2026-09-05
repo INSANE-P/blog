@@ -18,6 +18,9 @@ import { ThemeToggle } from "./ThemeToggle";
  *
  * 호버는 배경을 깔지 않고 글자색만 악센트로 바꾼다. 워드마크가 이미 그렇게 반응하는데
  * 메뉴만 회색 판이 깔리면 같은 화면에서 서로 다른 말을 하는 셈이 된다.
+ *
+ * 항목도 워드마크와 같은 몬세라트로 짠다. 이 줄은 화면에서 유일하게 영문만 있는 자리라
+ * 서체까지 맞춰야 한 덩어리로 읽힌다(ADR-0029).
  */
 export function Header() {
   const pathname = usePathname();
@@ -41,7 +44,7 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`px-[18px] py-[11px] text-[17px] transition-colors ${
+                className={`px-[15px] py-[11px] font-display text-[17px] tracking-[-0.01em] transition-colors ${
                   active ? "font-bold text-foreground" : "font-semibold text-muted hover:text-accent-text"
                 }`}
               >

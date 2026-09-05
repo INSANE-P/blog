@@ -36,20 +36,13 @@ export function PostArticle({
 
       <article className="mx-auto w-full max-w-[var(--container-prose)] px-6 pb-4 pt-12 sm:pt-16">
         {/*
-          돌아가기는 아이콘 버튼이 아니라 글줄에 맞춘 텍스트로 둔다.
-          40px 짜리 동그란 버튼이 본문 바로 위에 떠 있으면 어느 선에도 맞지 않아
-          혼자 얹혀 있는 것처럼 보인다. 글자로 두면 아래 제목·태그와 왼쪽 선이 맞는다.
+          돌아가기 링크를 두지 않는다.
+          깊이가 목록 → 글 두 단계뿐이라 되돌아갈 길은 붙박이 헤더의 posts 하나로 충분하고,
+          글 맨 위에 있어 봐야 읽기 시작하기 전에 나가는 문부터 보게 만든다.
+          다 읽은 뒤의 갈 곳은 아래 이어 읽기가 맡는다.
         */}
-        <Link
-          href="/posts"
-          className="group inline-flex items-center gap-1.5 text-[14px] font-semibold text-muted transition-colors hover:text-accent-text"
-        >
-          <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
-          목록으로
-        </Link>
-
         {entry.tags && entry.tags.length > 0 && (
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             {entry.tags.map((t) => (
               <Link
                 key={t}
@@ -62,7 +55,7 @@ export function PostArticle({
           </div>
         )}
 
-        <h1 className="mt-5 text-[32px] font-extrabold leading-[1.28] tracking-[-0.035em] sm:text-[42px]">
+        <h1 className="mt-6 text-[32px] font-extrabold leading-[1.28] tracking-[-0.035em] sm:text-[42px]">
           {entry.title}
         </h1>
 
