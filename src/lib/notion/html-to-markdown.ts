@@ -111,6 +111,9 @@ function asLink(label: string, url?: string): string {
  * 여기에 없는 태그를 만나면 껍데기만 벗기고 이름을 보고한다.
  */
 const HANDLED = new Set([
+  // 내용이 없는 블록. 버려도 잃을 글자가 없으므로 보고하지 않는다
+  "empty-block",
+  "mention-date",
   "mark",
   "highlight",
   "span",
@@ -189,10 +192,24 @@ export function htmlToMarkdown(md: string): MarkdownConversion {
     // 표 — 가장 먼저. 안쪽의 <br> 등은 셀 변환이 직접 처리한다
     .replace(/<table[\s\S]*?<\/table>/gi, (t) => `\n\n${tableToMarkdown(t)}\n\n`)
 
-    // 콜아웃 → 인용문. 화면의 인용문이 옅은 면이라 콜아웃과 같은 생김새다
+    /*
+      콜아웃 → 인용문. 화면의 인용문이 옅은 면이라 콜아웃과 같은 생김새다.
+
+      아이콘은 실물에서 **내용 안에** 이모지로 온다(`<callout color="blue_bg">🍏</callout>`).
+      그래서 내용을 그대로 옮기면 이모지도 같이 온다.
+
+      `icon` 속성 경로도 남겨 둔다. 노션이 그 모양으로 낼 가능성을 버릴 이유가 없고,
+      하나만 믿었다가 형광펜을 통째로 잃은 적이 있다.
+      속성이 있으면 앞에 붙이고, 없으면 내용만 쓴다.
+
+      내용이 비면 통째로 버린다. 노션에서 콜아웃을 만들고 글을 안 쓰면
+      `<empty-block/>` 하나만 들어오는데, 그대로 두면 화면에 빈 인용문 찌꺼기가 남는다.
+    */
     .replace(/<callout([^>]*)>([\s\S]*?)<\/callout>/gi, (_m, head: string, inner: string) => {
+      const body = inner.replace(/<empty-block\s*\/?>/gi, "").trim();
+      if (!body) return "";
       const icon = attr(head, "icon");
-      return asBlockquote(icon ? `${icon} ${inner.trim()}` : inner);
+      return asBlockquote(icon ? `${icon} ${body}` : body);
     })
 
     // 토글 → 요약 줄을 굵게, 내용은 펼친 채로.
@@ -232,6 +249,25 @@ export function htmlToMarkdown(md: string): MarkdownConversion {
     .replace(/<unknown([^>]*)\/?>/gi, (_m, head: string) =>
       asLink(attr(head, "alt") ?? "링크", urlOf(head) ?? report("unknown")),
     )
+
+    /*
+      날짜 멘션 (ADR-0047).
+
+      `<mention-date start="2026-09-05"/>` — 자기 닫는 태그이고 **날짜가 속성에만 있다.**
+      껍데기를 벗기면 아무것도 남지 않아 "2026-09-05에 있었던 일" 같은 문장이 통째로 깨진다.
+      실물을 받아 확인했고, "다루기로 해 놓고 못 다룬 것" 보고가 이걸 잡아 줬다.
+
+      기간이면 `end` 가 붙는다. 물결로 잇는다 — 화면의 날짜 표기와 같은 결이다.
+
+      다른 멘션(사람·페이지)은 손대지 않는다. 실물을 못 봤고, 짐작으로 적으면
+      형광펜 때와 같은 일이 벌어진다. 보고에 이름이 뜨면 그때 실물을 보고 정한다.
+    */
+    .replace(/<mention-date([^>]*)\/?>/gi, (_m, head: string) => {
+      const start = attr(head, "start");
+      const end = attr(head, "end");
+      if (!start) return "";
+      return end ? `${start} ~ ${end}` : start;
+    })
 
     // 문단 안 줄바꿈. 마크다운에서 줄바꿈은 "공백 두 개 + 개행"이다
     .replace(/<br\s*\/?>/gi, "  \n")
