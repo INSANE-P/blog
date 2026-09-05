@@ -11,6 +11,7 @@
  * 실행: pnpm check:notion
  */
 import { htmlToMarkdown } from "../src/lib/notion/html-to-markdown.ts";
+import { youTubeId } from "../src/lib/content/youtube-id.ts";
 
 const NOTION_RAW = `# 문서 제목
 
@@ -50,6 +51,8 @@ const NOTION_RAW = `# 문서 제목
 <video src="https://example.com/clip.mp4">데모 영상</video>
 <file src="https://example.com/doc.pdf">설계 문서</file>
 <page url="https://notion.so/child">하위 페이지</page>
+<file src="file://%7B%22source%22%3A%22attachment%3Aabc%3A%EA%B3%84%ED%9A%8D%EC%84%9C.pdf%22%7D"></file>
+<unknown url="https://app.notion.com/p/aaaa#bbbb" alt="bookmark"/>
 <unknown url="https://github.com/INSANE-P" alt="북마크" />
 
 날짜 멘션은 속성에만 값이 있다 — <mention-date start="2026-09-05"/> 그리고 기간은 <mention-date start="2026-10-01" end="2026-10-05"/>.
@@ -97,7 +100,8 @@ const MUST_KEEP = [
   ["표 셀 안 줄바꿈", "초과 시 차단"],
   ["동영상 링크", "[데모 영상](https://example.com/clip.mp4)"],
   ["파일 링크", "[설계 문서](https://example.com/doc.pdf)"],
-  ["하위 페이지 링크", "[하위 페이지](https://notion.so/child)"],
+  ["하위 페이지는 이름만 남는다", "하위 페이지"],
+  ["올린 파일은 이름만 남는다", "계획서.pdf"],
   ["북마크 링크", "[북마크](https://github.com/INSANE-P)"],
   ["모르는 블록의 글자", "모르는 블록의 글자"],
   ["인라인 코드 속 태그", '`<div class="x">`'],
@@ -116,6 +120,10 @@ const MUST_DROP = [
   ["표 태그", "<table"],
   ["형광펜 태그", "<mark"],
   ["배경색 스팬 태그", "<span"],
+  ["노션 안쪽 주소는 링크로 내보내지 않는다", "notion.so/child"],
+  ["노션 앱 주소도 마찬가지", "app.notion.com"],
+  ["올린 파일의 내부 참조", "file://"],
+  ["블록 종류 이름은 글자로도 안 남긴다", "bookmark"],
   ["날짜 멘션 태그", "<mention-date"],
   ["빈 블록 태그", "<empty-block"],
   ["모르는 블록 태그", "<mystery-block"],
@@ -166,6 +174,24 @@ if (!unknownTags.some((t) => t.includes("주소 없음"))) {
 if (!unknownTags.includes("mystery-block")) {
   console.log("FAIL 모르는 태그를 보고하지 않았다 — 조용히 버리는 상태로 되돌아갔다");
   failed += 1;
+}
+
+console.log("\n── 유튜브 주소 읽기 ──");
+const YT = [
+  ["주소창 모양", "https://www.youtube.com/watch?v=amy704I2PxQ", "amy704I2PxQ"],
+  ["공유 단추 모양", "https://youtu.be/amy704I2PxQ", "amy704I2PxQ"],
+  ["임베드 모양", "https://www.youtube.com/embed/amy704I2PxQ", "amy704I2PxQ"],
+  ["쇼츠", "https://www.youtube.com/shorts/amy704I2PxQ", "amy704I2PxQ"],
+  ["다른 값이 붙어 있어도", "https://www.youtube.com/watch?v=amy704I2PxQ&t=30s", "amy704I2PxQ"],
+  ["유튜브가 아니면", "https://vimeo.com/12345", undefined],
+  ["주소가 아니면", "그냥 글자", undefined],
+  ["노션 내부 참조", "file://%7B%22source%22%3A%22x%22%7D", undefined],
+];
+for (const [name, url, want] of YT) {
+  const got = youTubeId(url);
+  const ok = got === want;
+  if (!ok) failed += 1;
+  console.log(`${ok ? "OK  " : "FAIL"} ${name}`);
 }
 
 console.log(`\n실패: ${failed}건`);
