@@ -32,6 +32,20 @@ function keyOf(buf: Buffer, ext: string): string {
 }
 
 /**
+ * 새 URL 뒤에 실제 치수를 조각(#w=..&h=..)으로 붙인다.
+ *
+ * 조각은 요청에 실리지 않으므로 R2 캐시와 키에 아무 영향이 없다.
+ * 화면은 이 값으로 그림 자리를 미리 잡아 두어, 그림이 늦게 와도 글이 밀리지 않는다.
+ *
+ * 치수로 "표시 크기"를 정하지는 않는다 — 그림은 언제나 본문 폭을 채운다.
+ * 원본 크기대로 두면 그림마다 왼쪽 끝이 달라져 글이 정돈돼 보이지 않는다.
+ * 세로가 긴 그림만 화면에서 좁히는데, 그 판단에도 이 비율을 쓴다.
+ */
+function withSize(url: string, w?: number, h?: number): string {
+  return w && h ? `${url}#w=${w}&h=${h}` : url;
+}
+
+/**
  * 이미지 하나를 R2로 옮기고 새 URL을 돌려준다.
  * 실패하면 원본 URL을 그대로 돌려준다 — 한 장 때문에 글 전체가 막히면 안 된다.
  */
@@ -65,12 +79,18 @@ export async function migrateImage(url: string): Promise<string> {
     contentType = "image/webp";
   }
 
-  const key = keyOf(body, ext);
-  const { publicBase } = { publicBase: process.env.R2_PUBLIC_BASE! };
+  // 변환 뒤 실제 치수. 리사이즈·EXIF 회전이 반영된 값이라 원본 메타데이터와 다를 수 있다.
+  const out = keepAsIs ? meta : await sharp(body).metadata();
 
-  // 이미 올라가 있으면 건너뛴다
-  if (await exists(key)) return `${publicBase}/${key}`;
-  return put(key, body, contentType);
+  const key = keyOf(body, ext);
+  const publicBase = process.env.R2_PUBLIC_BASE!;
+
+  // 이미 올라가 있으면 업로드를 건너뛴다(내용 해시라 같은 그림은 같은 키)
+  const publicUrl = (await exists(key))
+    ? `${publicBase}/${key}`
+    : await put(key, body, contentType);
+
+  return withSize(publicUrl, out.width, out.height);
 }
 
 /** 마크다운 본문의 `![](url)` 이미지를 모두 R2로 옮긴다. */
