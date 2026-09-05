@@ -41,11 +41,14 @@ export async function renderOg({
   eyebrow,
   title,
   footnote,
+  meta,
   titleSize,
 }: {
   eyebrow?: string;
   title: string;
   footnote?: string;
+  /** 아래 줄 오른쪽 — 글이면 날짜가 온다 */
+  meta?: string;
   titleSize?: number;
 }) {
   const fonts = await loadFonts();
@@ -87,10 +90,29 @@ export async function renderOg({
           ) : null}
         </div>
 
-        {/* 아래 한 줄 — 누구의 글인지. 워드마크와 같은 형태로 둔다 */}
-        <div style={{ display: "flex", alignItems: "center", fontSize: 34, fontWeight: 700 }}>
-          <span style={{ color: "#ffffff", letterSpacing: "0.02em" }}>CHANBIN</span>
-          <span style={{ color: "#5fcdee" }}>.</span>
+        {/*
+          아래 한 줄 — 왼쪽에 누구의 글인지, 오른쪽에 언제인지.
+
+          워드마크는 화면 헤더와 같은 형태다. 카드가 타임라인에서 손톱만 해져도
+          점 하나가 악센트라 어느 사이트인지 알아본다.
+
+          날짜는 오른쪽 끝에 흐리게 둔다. 제목 위에 얹어 보려다 뒀다 —
+          위쪽은 제목이 화면을 다 쓰라고 비워 둔 자리이고, 날짜는 먼저 읽을 것이 아니다.
+        */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", fontSize: 34, fontWeight: 700 }}>
+            <span style={{ color: "#ffffff", letterSpacing: "0.02em" }}>CHANBIN</span>
+            <span style={{ color: "#5fcdee" }}>.</span>
+          </div>
+          {meta ? (
+            <div style={{ fontSize: 28, fontWeight: 400, color: "#8b9095" }}>{meta}</div>
+          ) : null}
         </div>
       </div>
     ),
