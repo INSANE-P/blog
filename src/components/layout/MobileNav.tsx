@@ -102,7 +102,7 @@ export function MobileNav({ className }: { className?: string }) {
               </button>
             </div>
 
-            <nav className="flex flex-1 flex-col justify-center gap-1 pb-16">
+            <nav className="flex flex-1 flex-col justify-center gap-2 pb-20">
               {NAV.map((item, i) => {
                 const active = pathname.startsWith(item.href);
                 return (
@@ -111,29 +111,44 @@ export function MobileNav({ className }: { className?: string }) {
                     href={item.href}
                     onClick={() => setOpen(false)}
                     aria-current={active ? "page" : undefined}
-                    className={`py-3 font-display text-[46px] font-extrabold lowercase leading-tight tracking-[-0.035em] transition-all duration-300 ${
-                      active ? "text-accent-text" : "text-foreground"
-                    }`}
+                    className="flex items-baseline gap-5 py-2 transition-all duration-300"
                     style={{
                       opacity: shown ? 1 : 0,
-                      transform: shown ? "none" : "translateY(14px)",
-                      transitionDelay: `${60 + i * 60}ms`,
+                      transform: shown ? "none" : "translateY(16px)",
+                      transitionDelay: `${70 + i * 70}ms`,
                     }}
                   >
-                    {item.label}
+                    {/*
+                      번호를 붙인다. 항목이 둘뿐이라 목록이라기보다 차례에 가깝고,
+                      번호가 있으면 "여기 이것뿐이다"가 빈약함이 아니라 의도로 읽힌다.
+                    */}
+                    <span className="font-display text-[14px] font-bold tabular-nums text-accent">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      data-here={active || undefined}
+                      className={`spark-line spark-line-lg font-display text-[46px] font-extrabold lowercase leading-none tracking-[-0.035em] ${
+                        active ? "text-foreground" : "text-muted"
+                      }`}
+                    >
+                      {item.label}
+                    </span>
                   </Link>
                 );
               })}
             </nav>
 
             <div
-              className="flex shrink-0 items-center justify-between border-t border-hairline py-5 transition-all duration-300"
+              className="shrink-0 border-t border-hairline pb-6 pt-5 transition-all duration-300"
               style={{
                 opacity: shown ? 1 : 0,
                 transform: shown ? "none" : "translateY(10px)",
-                transitionDelay: `${60 + NAV.length * 60}ms`,
+                transitionDelay: `${70 + NAV.length * 70}ms`,
               }}
             >
+              {/* 목록만 덩그러니 두지 않는다 — 이 사이트가 무엇인지 한 줄로 말한다 */}
+              <p className="text-[15px] text-muted">도전하고, 그 과정을 기록합니다.</p>
+              <div className="mt-4 flex items-center justify-between">
               <div className="flex flex-wrap gap-x-5 gap-y-1">
                 {SOCIAL.map((s) => {
                   const external = s.href.startsWith("http");
@@ -151,7 +166,8 @@ export function MobileNav({ className }: { className?: string }) {
                   );
                 })}
               </div>
-              <ThemeToggle className="-mr-2" />
+                <ThemeToggle className="-mr-2" />
+              </div>
             </div>
             </div>
           </div>,

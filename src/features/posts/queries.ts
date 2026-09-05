@@ -48,13 +48,14 @@ export async function getRecent(limit: number): Promise<Entry[]> {
   return ((data ?? []) as Row[]).map(toEntry);
 }
 
-/** 전체 목록 (선택적으로 태그 필터) */
-export async function getList(tag?: string): Promise<Entry[]> {
+/** 전체 목록 — 태그 필터는 걷어냈다(ADR-0034) */
+export async function getList(): Promise<Entry[]> {
   const supabase = await createClient();
-  let query = supabase.from("posts").select(SELECT).eq("status", "published");
-  // 배열 컬럼은 contains 로 거른다 (GIN 인덱스가 받쳐 준다)
-  if (tag) query = query.contains("tags", [tag]);
-  const { data } = await query.order("entry_date", { ascending: false });
+  const { data } = await supabase
+    .from("posts")
+    .select(SELECT)
+    .eq("status", "published")
+    .order("entry_date", { ascending: false });
   return ((data ?? []) as Row[]).map(toEntry);
 }
 
@@ -84,13 +85,4 @@ export async function getAdjacent(
     prev: list[i + 1] ?? null,
     next: list[i - 1] ?? null,
   };
-}
-
-/** 쓰인 태그 목록 */
-export async function getTags(): Promise<string[]> {
-  const supabase = await createClient();
-  const { data } = await supabase.from("posts").select("tags").eq("status", "published");
-  const set = new Set<string>();
-  ((data ?? []) as Pick<Row, "tags">[]).forEach((r) => r.tags?.forEach((n) => set.add(n)));
-  return [...set];
 }

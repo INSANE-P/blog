@@ -34,7 +34,7 @@ export default async function HomePage() {
       </section>
 
       {/* 최근 글 — 제목은 표지라 영문 소문자다(ADR-0029) */}
-      <section className="pt-20 sm:pt-24">
+      <section className="border-t border-hairline pt-16 sm:pt-20">
         <div className="mb-9 flex items-end justify-between gap-6 sm:mb-10">
           <SectionTitle>new</SectionTitle>
           <Link

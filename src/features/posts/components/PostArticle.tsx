@@ -42,14 +42,14 @@ export function PostArticle({
         */}
         {entry.tags && entry.tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
+            {/* 태그는 누를 수 없다 — 필터를 걷어냈으므로 갈 곳이 없다(ADR-0034) */}
             {entry.tags.map((t) => (
-              <Link
+              <span
                 key={t}
-                href={`/posts?tag=${encodeURIComponent(t)}`}
                 className="rounded-lg bg-tint px-3 py-1.5 text-[13px] font-semibold text-accent-text"
               >
                 {t}
-              </Link>
+              </span>
             ))}
           </div>
         )}

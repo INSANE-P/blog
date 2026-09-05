@@ -116,6 +116,16 @@ body {
 .spark-line[data-here="true"]::after {
   clip-path: inset(0 0 0 0);
 }
+/*
+  큰 활자용. 상자를 키우면 mask-size: auto 100% 때문에 타일도 함께 커져서,
+  스파크가 굵고 드문드문해진다. 상자를 그대로 두고 46px 글자 아래에 깔면
+  스파크가 촘촘해져 번개가 아니라 물결로 보인다.
+*/
+.spark-line-lg::after {
+  bottom: -13px;
+  height: 15px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .spark-line::after {
     transition: none;

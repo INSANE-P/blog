@@ -98,13 +98,17 @@ export function FileText(props: IconProps) {
   );
 }
 
-/** 햄버거 — 모바일 메뉴 열기 */
+/**
+ * 메뉴 열기.
+ *
+ * 줄이 둘이다. 셋은 관습일 뿐 뜻이 없는데, 이 사이트의 내비는 항목이 정확히 둘이라
+ * 아이콘이 그 사실을 그대로 말한다. 길이를 다르게 둔 것은 두 줄이 같으면 등호로 읽혀서다.
+ */
 export function Menu(props: IconProps) {
   return (
     <Svg {...props}>
-      <path d="M4 7h16" />
-      <path d="M4 12h16" />
-      <path d="M4 17h10" />
+      <path d="M4 9h16" />
+      <path d="M4 15h10" />
     </Svg>
   );
 }
