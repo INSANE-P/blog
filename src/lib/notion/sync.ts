@@ -92,6 +92,11 @@ const CONTENT_FIELDS = [
   "status",
 ] as const;
 
+/** 본문에서 처음 나오는 그림. 마크다운 이미지 문법만 본다 */
+function firstImageOf(body: string): string | undefined {
+  return body.match(/!\[[^\]]*\]\(([^)\s]+)/)?.[1];
+}
+
 /** 두 행의 내용이 같은가 — 태그는 순서까지 본다(노션이 순서를 지킨다) */
 function sameContent(a: ExistingRow, b: Record<string, unknown>): boolean {
   return CONTENT_FIELDS.every((k) => {
@@ -124,7 +129,16 @@ async function upsertPost(
     title: post.title,
     excerpt: post.summary,
     content: post.body,
-    cover_image: post.coverUrl ?? null,
+    /*
+      대표 이미지를 여기서 정한다 (ADR-0058).
+
+      예전에는 커버가 없으면 화면이 본문에서 첫 그림을 찾아 썼다. 그러려면
+      목록 조회가 본문까지 읽어야 했고, 글 수의 제곱으로 전송량이 늘었다.
+      한 번 정해 두면 읽는 쪽은 컬럼 하나만 보면 된다.
+
+      이 시점의 본문은 이미 R2 주소로 바뀌어 있다 — 이미지 이관이 먼저 돈다.
+    */
+    cover_image: post.coverUrl ?? firstImageOf(post.body) ?? null,
     entry_date: post.date || null,
     tags: post.tags,
     // 발행 체크가 꺼지면 draft — "지운다"가 아니라 "감춘다"는 의도다
