@@ -55,7 +55,8 @@ export function SiteJsonLd() {
       data={{
         "@context": "https://schema.org",
         "@type": "Blog",
-        name: SITE.name,
+        name: SITE.title,
+        alternateName: SITE.name,
         description: SITE.description,
         url: SITE.url,
         inLanguage: SITE.lang,
