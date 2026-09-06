@@ -93,7 +93,12 @@ export async function POST(req: Request) {
   }
 
   try {
-    const result = await syncFromNotion();
+    /*
+      노션이 빈 목록을 줘도 지우려면 `?force=1` 을 붙인다 (ADR-0057).
+      북마크에는 넣지 않는다 — 늘 켜져 있으면 장치가 없는 것과 같다.
+    */
+    const force = new URL(req.url).searchParams.get("force") === "1";
+    const result = await syncFromNotion({ allowEmpty: force });
 
     /*
       캐시를 버린다 (ADR-0045).
@@ -127,6 +132,9 @@ export async function POST(req: Request) {
       한 글이라도 실패했으면 실패로 응답한다.
       이미지 이관 실패도 같이 본다 — 남은 노션 URL은 곧 만료돼 그림이 깨진다.
 
+      **지우기를 멈춘 것도 실패다.** 노션이 빈 목록을 줬다는 뜻이고,
+      그것을 200 으로 돌리면 "왜 안 지워졌지"를 아무도 묻지 않는다.
+
       **아직 열려 있는 초안도 실패다.** 내려간 글이 계속 읽히는 것은
       화면이 조금 낡은 것과 다른 종류의 문제라, 조용히 넘기지 않는다.
 
@@ -135,7 +143,10 @@ export async function POST(req: Request) {
       발행이 통째로 서 버린다. 대신 응답에 담아 눈에 띄게 한다.
     */
     const ok =
-      result.failed.length === 0 && result.imageFailures.length === 0 && stillPublic.length === 0;
+      result.failed.length === 0 &&
+      result.imageFailures.length === 0 &&
+      stillPublic.length === 0 &&
+      !result.removalBlocked;
     return NextResponse.json({ ...result, stillPublic }, { status: ok ? 200 : 500 });
   } catch (e) {
     return NextResponse.json(

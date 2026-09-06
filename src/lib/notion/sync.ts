@@ -40,6 +40,14 @@ export type SyncResult = {
   /** 이미지 이관에 실패한 글. 글은 반영되지만 그 이미지는 곧 만료돼 깨진다. */
   imageFailures: { slug: string; count: number }[];
   /**
+   * 지우기를 멈춘 이유 (ADR-0057).
+   *
+   * 노션이 글을 하나도 주지 않았는데 DB 에는 남아 있을 때 채워진다.
+   * 이 값이 있으면 호출자가 응답을 실패로 돌린다 - 조용히 넘어가면
+   * 사이트가 통째로 빈 것을 아무도 모른 채 지나간다.
+   */
+  removalBlocked?: string;
+  /**
    * 노션이 내보냈지만 우리가 뜻을 모르는 태그. 글자는 살렸지만 모양은 잃었다.
    * 조용히 두면 노션이 블록을 새로 추가했을 때 글이 깨진 채로 몇 달을 간다.
    */
@@ -175,7 +183,12 @@ async function removeGone(
  * 한 글이 실패해도 나머지는 반영한다 — 글 하나 때문에 전부 막히면 안 된다.
  * 대신 실패가 하나라도 있으면 호출자가 5xx로 응답한다(조용한 실패가 가장 나쁘다).
  */
-export async function syncFromNotion(): Promise<SyncResult> {
+export async function syncFromNotion(
+  options: {
+    /** 노션이 빈 목록을 줘도 지우기를 진행한다. 정말로 다 비울 때만 쓴다. */
+    allowEmpty?: boolean;
+  } = {},
+): Promise<SyncResult> {
   const supabase = db();
   const result: SyncResult = {
     synced: [],
@@ -237,6 +250,27 @@ export async function syncFromNotion(): Promise<SyncResult> {
       else result.skipped.push({ slug: post.slug, reason: "바뀐 것이 없음" });
     } catch (e) {
       result.failed.push({ slug, error: e instanceof Error ? e.message : String(e) });
+    }
+  }
+
+  /*
+    지우기의 바닥 (ADR-0057).
+
+    노션이 빈 목록을 주는 데는 두 가지 이유가 있고, 응답만으로는 구분되지 않는다.
+    정말로 글을 다 지웠거나, 노션이 잠깐 제대로 답하지 못했거나.
+    앞은 드물고 뒤는 흔하다. 그래서 **0 이면 지우지 않는다.**
+
+    지울 것이 애초에 없으면(첫 배포 등) 막을 것도 없으므로 조용히 지나간다.
+    정말로 비울 때는 `allowEmpty` 로 한 번 더 누른다.
+  */
+  if (pages.length === 0 && !options.allowEmpty) {
+    const { count } = await supabase
+      .from("posts")
+      .select("id", { count: "exact", head: true })
+      .not("notion_page_id", "is", null);
+    if (count && count > 0) {
+      result.removalBlocked = `노션이 글을 하나도 주지 않았다 — ${count}개를 지우지 않고 멈춘다`;
+      return result;
     }
   }
 
