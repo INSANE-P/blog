@@ -73,6 +73,12 @@ export async function renderOg({
   titleSize?: number;
 }) {
   const fonts = await loadFonts();
+  /*
+    끊는 자리를 준 제목만 줄로 나눠 그린다.
+    한 줄짜리(글 제목)는 예전 그대로 한 덩이로 넘겨 알아서 접히게 둔다 —
+    이미 잘 되던 것을 새 구조에 끌어들일 이유가 없다.
+  */
+  const lines = linesOf(title);
   return new ImageResponse(
     <div
       style={{
@@ -94,8 +100,7 @@ export async function renderOg({
         ) : null}
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
+            ...(lines.length > 1 ? { display: "flex", flexDirection: "column" } : {}),
             fontSize: titleSize ?? titleSizeFor(title),
             fontWeight: 700,
             color: "#ffffff",
@@ -103,11 +108,13 @@ export async function renderOg({
             lineHeight: 1.2,
           }}
         >
-          {linesOf(title).map((line, i) => (
-            <div key={i} style={{ display: "flex" }}>
-              {line}
-            </div>
-          ))}
+          {lines.length > 1
+            ? lines.map((line, i) => (
+                <div key={i} style={{ display: "flex" }}>
+                  {line}
+                </div>
+              ))
+            : title}
         </div>
         {footnote ? (
           <div style={{ fontSize: 32, fontWeight: 400, color: "#a3a7ac", marginTop: 28 }}>
