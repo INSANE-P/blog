@@ -14,18 +14,35 @@ import type { Entry } from "./types";
 type Row = {
   slug: string;
   title: string;
-  excerpt: string | null;
-  content: string | null;
-  cover_image: string | null;
+  /** 조회에 따라 없을 수 있다 — 카드는 본문을, 앞뒤 글은 요약까지 빼고 읽는다 */
+  excerpt?: string | null;
+  content?: string | null;
+  cover_image?: string | null;
   entry_date: string | null;
-  published_at: string | null;
-  updated_at: string | null;
+  published_at?: string | null;
+  updated_at?: string | null;
   /** 태그는 조인이 아니라 배열 컬럼이다(0008_tags_as_array.sql) */
-  tags: string[] | null;
+  tags?: string[] | null;
 };
 
-const SELECT =
+/*
+  읽어 올 컬럼을 세 갈래로 나눈다 (ADR-0058).
+
+  예전에는 어디서나 본문까지 가져왔다. 그래서 **글 하나를 열 때마다 모든 글의 본문**을
+  읽고 있었다 — 앞뒤 글 링크 하나를 만들자고. 전송량이 글 수의 제곱으로 늘어난다.
+
+  본문이 실제로 필요한 곳은 글 상세 하나뿐이고, 거기서는 한 행만 읽는다.
+*/
+
+/** 글 상세 — 본문까지 */
+const FULL =
   "slug, title, excerpt, content, cover_image, entry_date, published_at, updated_at, tags";
+
+/** 목록 카드 — 본문 없이. 대표 이미지는 동기화가 미리 정해 둔 값을 쓴다 */
+const CARD = "slug, title, excerpt, cover_image, entry_date, published_at, updated_at, tags";
+
+/** 앞뒤 글 — 링크에 필요한 것만 */
+const NAV = "slug, title, entry_date";
 
 function toEntry(r: Row): Entry {
   return {
@@ -37,7 +54,8 @@ function toEntry(r: Row): Entry {
     updatedAt: r.updated_at ?? undefined,
     tags: r.tags?.length ? r.tags : undefined,
     coverImage: r.cover_image ?? undefined,
-    body: typeof r.content === "string" ? r.content : "",
+    /* 안 읽어 온 조회에서는 아예 없다. 빈 문자열로 두면 "본문이 빈 글"과 구분되지 않는다 */
+    body: typeof r.content === "string" ? r.content : undefined,
   };
 }
 
@@ -45,7 +63,7 @@ function toEntry(r: Row): Entry {
 export async function getRecent(limit: number): Promise<Entry[]> {
   const { data } = await readDb
     .from("posts")
-    .select(SELECT)
+    .select(CARD)
     .eq("status", "published")
     .order("entry_date", { ascending: false })
     .limit(limit);
@@ -56,7 +74,7 @@ export async function getRecent(limit: number): Promise<Entry[]> {
 export async function getList(): Promise<Entry[]> {
   const { data } = await readDb
     .from("posts")
-    .select(SELECT)
+    .select(CARD)
     .eq("status", "published")
     .order("entry_date", { ascending: false });
   return ((data ?? []) as Row[]).map(toEntry);
@@ -66,7 +84,7 @@ export async function getList(): Promise<Entry[]> {
 export async function getBySlug(slug: string): Promise<Entry | null> {
   const { data } = await readDb
     .from("posts")
-    .select(SELECT)
+    .select(FULL)
     .eq("status", "published")
     .eq("slug", slug)
     .maybeSingle();
@@ -80,7 +98,13 @@ export async function getBySlug(slug: string): Promise<Entry | null> {
 export async function getAdjacent(
   slug: string,
 ): Promise<{ prev: Entry | null; next: Entry | null }> {
-  const list = await getList();
+  // 링크 두 개를 만들자고 전체 본문을 읽지 않는다 (ADR-0058)
+  const { data } = await readDb
+    .from("posts")
+    .select(NAV)
+    .eq("status", "published")
+    .order("entry_date", { ascending: false });
+  const list = ((data ?? []) as Row[]).map(toEntry);
   const i = list.findIndex((e) => e.slug === slug);
   if (i < 0) return { prev: null, next: null };
   return {
