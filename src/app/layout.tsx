@@ -22,6 +22,19 @@ export const metadata: Metadata = {
   },
   description: SITE.description,
   icons: { icon: "/favicon.svg" },
+  /*
+    검색엔진에 소유를 확인시키는 토큰 (ADR-0060).
+
+    파일을 올리는 방법도 있지만 메타 태그로 둔다. 파일 방식은 루트에 정체를 알 수 없는
+    파일 하나가 남고, 이 값이 메타데이터라는 사실이 어디에도 적히지 않는다.
+    여기 두면 사이트가 스스로를 설명하는 것들과 한자리에 모인다.
+
+    비밀이 아니다. 어느 방식이든 공개된 자리에서 읽히도록 설계된 값이라
+    공개 저장소에 그대로 둔다 — 숨기는 시늉을 하면 다음 사람이 비밀인 줄 안다.
+  */
+  verification: {
+    other: { "naver-site-verification": "8b9c53bf417d46a359cd857d0b5dcf062dedc984" },
+  },
   // 쿼리스트링이 붙은 주소가 중복 페이지로 잡히지 않게 정본을 밝힌다 (ADR-0044)
   alternates: {
     canonical: "/",
