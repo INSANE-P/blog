@@ -11,6 +11,7 @@ import { htmlToMarkdown } from "./html-to-markdown";
 import { migrateBodyImages, migrateImage } from "./images";
 import { resolveYouTubeTitles } from "./youtube-titles";
 import { youTubeId } from "@/lib/content/youtube-id";
+import { firstImageOf } from "@/lib/content/first-image";
 
 /**
  * 동기화는 로그인 세션이 아니라 토큰으로 인증된다.
@@ -91,11 +92,6 @@ const CONTENT_FIELDS = [
   "tags",
   "status",
 ] as const;
-
-/** 본문에서 처음 나오는 그림. 마크다운 이미지 문법만 본다 */
-function firstImageOf(body: string): string | undefined {
-  return body.match(/!\[[^\]]*\]\(([^)\s]+)/)?.[1];
-}
 
 /** 두 행의 내용이 같은가 — 태그는 순서까지 본다(노션이 순서를 지킨다) */
 function sameContent(a: ExistingRow, b: Record<string, unknown>): boolean {
