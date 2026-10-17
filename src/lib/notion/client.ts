@@ -75,8 +75,12 @@ type NotionProp = {
   multi_select?: { name: string }[];
 };
 
-type NotionPage = {
+export type NotionPage = {
   id: string;
+  /** 페이지가 어디에 속하는가. 미리보기가 블로그 데이터베이스의 글인지 확인할 때 본다 */
+  parent?: { type: string; database_id?: string };
+  /** 마지막으로 고친 시각(ISO). 미리보기 목록의 순서에 쓴다 */
+  last_edited_time?: string;
   properties: Record<string, NotionProp>;
   cover?:
     | { type: "external"; external: { url: string } }
@@ -114,6 +118,25 @@ export async function listPages(): Promise<NotionPage[]> {
   } while (cursor);
 
   return pages;
+}
+
+/** 페이지 하나를 읽는다(본문 제외). 미리보기가 글 하나만 열 때 쓴다 (ADR-0061). */
+export async function fetchPage(pageId: string): Promise<NotionPage> {
+  return call<NotionPage>(`/pages/${pageId}`, V_DATA);
+}
+
+/**
+ * 이 페이지가 블로그 데이터베이스의 글인가 (ADR-0061).
+ *
+ * 연동 토큰은 블로그 데이터베이스 밖의 페이지도 읽을 수 있다. 미리보기 주소에
+ * 아무 페이지 id 나 넣어서 다른 문서를 그리게 하면 안 되므로, 부모를 보고 거른다.
+ * id 는 하이픈이 있게도 없게도 오므로 빼고 견준다.
+ */
+export function belongsToBlog(page: NotionPage): boolean {
+  const dbId = process.env.NOTION_DATABASE_ID;
+  const parent = page.parent?.type === "database_id" ? page.parent.database_id : undefined;
+  if (!dbId || !parent) return false;
+  return parent.replace(/-/g, "") === dbId.replace(/-/g, "");
 }
 
 /** 페이지 본문을 마크다운으로 받는다. 변환기를 직접 만들지 않는 이유는 ADR-0022 참고. */
