@@ -177,6 +177,82 @@ const HANDLED = new Set([
   "unknown",
 ]);
 
+/**
+ * 노션 블록 사이에 빈 줄을 넣는다 (ADR-0063).
+ *
+ * 노션 마크다운 엔드포인트는 블록 하나를 한 줄로 내고, 블록 사이에 빈 줄을 두지 않는다.
+ * 마크다운에서 문단을 나누는 것은 빈 줄이라, 그대로 렌더하면 이어진 문단이 전부 한 문단으로 붙는다.
+ * 줄바꿈은 띄어쓰기로 바뀌어 화면에서는 문단 경계가 사라진다. 발행한 글 아홉 편에서
+ * 문단 대부분이 이렇게 붙어 있었다.
+ *
+ * 더 나쁜 경우도 있었다. 문단 바로 다음 줄에 `---` 가 오면 마크다운은 그 문단을
+ * h2 로 읽는다(setext 제목). 끝맺음 구분선 위의 문단들이 통째로 굵은 제목이 됐고,
+ * 목차에도 문단 전체가 제목으로 올라갔다.
+ *
+ * 그래서 블록 사이마다 빈 줄을 넣는다. 다만 붙어 있어야 뜻이 사는 줄은 그대로 둔다.
+ *
+ *   - 표 줄끼리: 빈 줄이 끼면 표가 끊긴다
+ *   - 목록 항목끼리: 빈 줄이 끼면 목록 전체가 느슨해져 항목 사이가 벌어진다
+ *   - 인용문 줄끼리: 한 인용문이다
+ *   - 줄 끝이 공백 두 개인 줄과 그다음 줄: `<br>` 로 이은 한 문단이다
+ *   - 수식 블록(`$$`) 안
+ *
+ * 목록 밖에서 들여쓴 줄은 들여쓰기를 걷어 낸다. 토글이나 컬럼 안의 내용이 탭으로 들여써서 오는데,
+ * 앞에 빈 줄이 생기면 마크다운은 네 칸 들여쓴 줄을 코드 블록으로 읽는다.
+ *
+ * 코드 블록은 이 함수에 들어오기 전에 자리표 한 줄로 빠져 있어야 한다(`htmlToMarkdown`).
+ */
+
+const isRow = (l: string) => /^\s*\|/.test(l);
+const isQuote = (l: string) => /^\s*>/.test(l);
+const isItem = (l: string) => /^\s*(?:[-*+]|\d+[.)])\s/.test(l);
+const isIndented = (l: string) => /^(?:\t| {2,})\S/.test(l);
+const hardBreak = (l: string) => / {2}$/.test(l);
+
+function keepTogether(a: string, b: string): boolean {
+  if (hardBreak(a)) return true;
+  if (isRow(a) && isRow(b)) return true;
+  if (isQuote(a) && isQuote(b)) return true;
+  if (isItem(a) && isItem(b)) return true;
+  return false;
+}
+
+export function separateBlocks(md: string): string {
+  const out: string[] = [];
+  let inMath = false;
+  // 들여쓴 줄이 목록 항목의 자식인지 보려고, 마지막으로 본 들여쓰지 않은 줄이 목록 항목인지 기억한다
+  let inList = false;
+
+  for (const raw of md.split("\n")) {
+    let line = raw;
+    const prev = out.length > 0 ? out[out.length - 1] : "";
+
+    if (inMath) {
+      out.push(line);
+      if (line.trim() === "$$") inMath = false;
+      continue;
+    }
+
+    if (line.trim() === "") {
+      out.push(line);
+      continue;
+    }
+
+    if (isIndented(line)) {
+      if (!inList) line = line.replace(/^\s+/, "");
+    } else {
+      inList = isItem(line);
+    }
+
+    if (prev.trim() !== "" && !keepTogether(prev, line)) out.push("");
+    out.push(line);
+
+    if (line.trim() === "$$") inMath = true;
+  }
+
+  return out.join("\n");
+}
+
 export function htmlToMarkdown(md: string): MarkdownConversion {
   const unknown = new Set<string>();
 
@@ -356,6 +432,9 @@ export function htmlToMarkdown(md: string): MarkdownConversion {
       if (!HANDLED.has(tag)) unknown.add(tag);
       return "";
     });
+
+  // 블록 사이에 빈 줄을 넣는다 (ADR-0063). 코드가 자리표 한 줄로 빠져 있을 때 해야 코드 안을 건드리지 않는다.
+  work = separateBlocks(work);
 
   // 코드를 되돌린다. 펜스 코드 안에 인라인 코드가 들어 있을 수 있어 자리표가 없어질 때까지 돈다.
   const holder = new RegExp(`${MARK}(\\d+)${MARK}`, "g");

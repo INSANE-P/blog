@@ -177,6 +177,66 @@ if (!unknownTags.includes("mystery-block")) {
   failed += 1;
 }
 
+console.log("\n── 블록 사이 빈 줄 (ADR-0063) ──");
+/*
+  실제 노션 출력은 블록 사이에 빈 줄이 없다. 위의 예시는 빈 줄이 다 들어 있는 모양이라
+  이 차이를 잡지 못했고, 그 사이 발행한 글의 문단이 전부 한 문단으로 붙어 있었다.
+  그래서 실물과 같은 모양을 따로 넣는다.
+*/
+const TAB = String.fromCharCode(9);
+const NL = String.fromCharCode(10);
+const FENCE = "`".repeat(3);
+const REAL = [
+  "## 첫 절",
+  "문단 하나.",
+  "문단 둘.",
+  "- 항목 하나",
+  "- 항목 둘",
+  "목록 뒤 문단.",
+  "1. 따라 하기 첫째",
+  TAB + "![그림](https://example.com/a.png)",
+  TAB + "들여쓴 설명 문단.",
+  "2. 따라 하기 둘째",
+  '<table header-row="true">',
+  "<tr><td>칸</td><td>값</td></tr>",
+  "<tr><td>가</td><td>1</td></tr>",
+  "</table>",
+  "줄바꿈이 있는 문단<br>둘째 줄",
+  "> 인용 한 줄",
+  FENCE,
+  "x = 1",
+  "y = 2",
+  FENCE,
+  "<details>",
+  "<summary>토글</summary>",
+  TAB + "토글 안 문단.",
+  "</details>",
+  "마지막 문단.",
+  "---",
+  "끝맺음.",
+].join(NL);
+const real = htmlToMarkdown(REAL).markdown;
+const lines = (...xs) => xs.join(NL);
+const BLOCK = [
+  ["문단끼리 빈 줄로 나뉜다", lines("문단 하나.", "", "문단 둘.")],
+  ["구분선 위 문단이 제목이 되지 않는다", lines("마지막 문단.", "", "---")],
+  ["목록 항목끼리는 붙어 있다", lines("- 항목 하나", "- 항목 둘")],
+  ["목록 뒤 문단이 마지막 항목에 붙지 않는다", lines("- 항목 둘", "", "목록 뒤 문단.")],
+  ["항목 아래 그림은 들여쓴 채 남는다", TAB + "![그림](https://example.com/a.png)"],
+  ["표 줄은 붙어 있다", lines("| 칸 | 값 |", "| --- | --- |", "| 가 | 1 |")],
+  ["br 로 이은 줄은 한 문단이다", lines("줄바꿈이 있는 문단  ", "둘째 줄")],
+  ["코드 안은 그대로다", lines(FENCE, "x = 1", "y = 2", FENCE)],
+];
+for (const [name, needle] of BLOCK) {
+  const ok = real.includes(needle);
+  if (!ok) failed += 1;
+  console.log(`${ok ? "OK  " : "FAIL"} ${name}`);
+}
+// 목록 밖 들여쓴 줄은 코드 블록이 되면 안 된다
+const indentedCode = real.split(NL).some((l, i, a) => /^(\t| {4})토글 안 문단/.test(l) && a[i - 1] === "");
+if (indentedCode) failed += 1;
+console.log(`${indentedCode ? "FAIL" : "OK  "} 토글 안 문단이 코드 블록이 되지 않는다`);
+
 console.log("\n── 유튜브 주소 읽기 ──");
 const YT = [
   ["주소창 모양", "https://www.youtube.com/watch?v=amy704I2PxQ", "amy704I2PxQ"],
