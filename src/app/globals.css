@@ -442,6 +442,44 @@ body {
 }
 
 /*
+  코드 블록 안쪽 (ADR-0062).
+
+  위의 `.prose code` 는 문장 속 짧은 코드를 위한 모양인데, 블록 안의 code 에도 걸려서
+  줄이 바뀔 때마다 그 줄만 한 상자가 따로 생겼다. 여백도 code 가 갖고 pre 는 0이라
+  글자가 상자 왼쪽 끝에 붙었다. 블록에서는 code 가 모양을 벗고 여백은 pre 가 맡는다.
+
+  글자는 본문(18px)보다 작게, 줄 간격은 본문보다 좁게 둔다. 코드는 한 줄씩 훑어 읽고
+  들여쓰기로 구조를 보므로, 줄 사이가 벌어지면 위아래 줄의 관계가 끊겨 보인다.
+  긴 줄은 접지 않고 가로로 넘긴다. 접으면 들여쓰기가 어디서 시작했는지 흐려진다.
+*/
+.prose .codeblock pre {
+  margin: 0;
+  padding: 16px 20px 18px;
+  overflow-x: auto;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--prose-fg);
+  tab-size: 2;
+  scrollbar-width: thin;
+}
+.prose .codeblock pre code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  font-size: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+}
+@media (max-width: 640px) {
+  .prose .codeblock pre {
+    padding: 14px 16px 16px;
+    font-size: 13.5px;
+  }
+}
+
+/*
   이미지는 언제나 본문 폭을 채운다. 원본 크기대로 두면 그림마다 왼쪽 끝이 달라져
   글이 정돈돼 보이지 않는다 — 읽는 칸에서는 세로 정렬선이 맞는 것이 정돈돼 보이게 하는
   거의 전부다. 예외는 세로가 긴 그림(휴대폰 화면 캡처) 하나로, 좁혀서 한 장이
