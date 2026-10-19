@@ -12,7 +12,41 @@ import { Check, Copy } from "@/components/icons";
  *
  * 복사 결과는 아이콘과 글자를 함께 바꿔서 알린다. 색만 바꾸면 색을 구분하기 어려운 사람에게는
  * 아무 일도 일어나지 않은 것과 같다.
+ *
+ * 언어 이름은 읽는 사람이 아는 이름으로 보인다 (ADR-0062). 노션이 붙이는 `plain` 같은
+ * 내부 이름은 "이게 무슨 언어지"에 답하지 못해서, 일반 글자 블록은 이름을 비운다.
  */
+const LANG_NAMES: Record<string, string> = {
+  ts: "TypeScript",
+  typescript: "TypeScript",
+  tsx: "TSX",
+  js: "JavaScript",
+  javascript: "JavaScript",
+  jsx: "JSX",
+  json: "JSON",
+  bash: "Shell",
+  sh: "Shell",
+  shell: "Shell",
+  zsh: "Shell",
+  powershell: "PowerShell",
+  sql: "SQL",
+  python: "Python",
+  py: "Python",
+  yaml: "YAML",
+  yml: "YAML",
+  html: "HTML",
+  css: "CSS",
+  http: "HTTP",
+  markdown: "Markdown",
+  md: "Markdown",
+};
+const PLAIN = new Set(["plain", "plaintext", "text", "txt"]);
+
+function langLabel(lang?: string): string {
+  if (!lang || PLAIN.has(lang)) return "";
+  return LANG_NAMES[lang] ?? lang;
+}
+
 export function CodeBlock({ lang, code, children }: { lang?: string; code: string; children: React.ReactNode }) {
   const [copied, setCopied] = useState(false);
 
@@ -28,10 +62,8 @@ export function CodeBlock({ lang, code, children }: { lang?: string; code: strin
 
   return (
     <div className="codeblock my-8 overflow-hidden rounded-[14px] border border-hairline bg-code-bg">
-      <div className="flex items-center justify-between border-b border-hairline bg-code-bar py-2.5 pl-4 pr-2.5">
-        <span className="font-mono text-[12px] font-semibold tracking-wide text-muted">
-          {lang ?? "code"}
-        </span>
+      <div className="flex items-center justify-between border-b border-hairline bg-code-bar py-1.5 pl-5 pr-2.5">
+        <span className="text-[12.5px] font-semibold text-muted">{langLabel(lang)}</span>
         <button
           type="button"
           onClick={copy}
