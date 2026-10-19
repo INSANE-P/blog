@@ -111,7 +111,8 @@
 
   --font-sans: var(--font-pretendard), system-ui, sans-serif;
   --font-mono:
-    ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+    ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo,
+    var(--font-pretendard), monospace;
   --font-display: "Montserrat", var(--font-pretendard), system-ui, sans-serif;
 
   /*
