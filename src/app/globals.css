@@ -599,6 +599,17 @@ body {
   margin-right: 0;
   transform: translateX(-50%);
 }
+/*
+  목록 안 그림은 넓히지 않는다 (ADR-0065).
+  넓힐 때 기준이 "부모 칸의 가운데"라, 들여쓴 목록 칸 안에서는 기준이 오른쪽으로 밀려
+  그림이 오른쪽으로만 튀어나갔다. 따라 하기 단계의 그림은 그 단계 글과 같은 줄에서
+  시작해야 어느 단계의 그림인지 읽히므로, 목록 칸 폭에 맞춘다.
+*/
+.prose li figure[data-fit="wide"] {
+  width: auto;
+  margin-left: 0;
+  transform: none;
+}
 .prose th,
 .prose td {
   padding: 11px 14px;
