@@ -253,6 +253,37 @@ export function separateBlocks(md: string): string {
   return out.join("\n");
 }
 
+/**
+ * 노션이 이스케이프하지 않아 마크다운 문법으로 읽히는 본문 글자를 막는다 (ADR-0064).
+ *
+ * 노션 마크다운 엔드포인트가 이스케이프하는 글자는 물결표(`~`) 하나뿐이다(실물 아홉 편 기준).
+ * 나머지는 본문 그대로 와서, 렌더러가 다른 뜻으로 읽는다.
+ *
+ *   - `https://example.com에서` → GFM 은 주소가 한글에서 끝나는 줄 몰라 "에서"까지 링크로 만든다.
+ *     주소를 꺾쇠로 감싸 끝을 정해 준다
+ *   - `$5에서 $10으로` → 수식 확장이 두 `$` 사이를 수식으로 읽는다. 숫자 앞의 `$` 는 돈이라 이스케이프한다.
+ *     노션 수식(`$x^2$`)은 숫자로 시작하지 않으므로 그대로 둔다
+ *   - `1) 첫째 이유` → 목록이 된다. 노션은 번호 목록을 `1.` 로만 내므로 `1)` 은 언제나 본문이다
+ *   - `2026. 10. 20 에` → 목록이 된다. 세 자리 넘는 번호 목록은 없다고 보고 본문으로 둔다
+ *
+ * 코드는 이 함수에 들어오기 전에 자리표로 빠져 있어야 한다.
+ */
+export function guardProse(md: string): string {
+  return md
+    .split("\n")
+    .map((line) =>
+      line
+        .replace(/^(\s*)(\d+)\)(\s)/, "$1$2\\)$3")
+        .replace(/^(\s*)(\d{3,})\.(\s)/, "$1$2\\.$3")
+        .replace(/(?<![\\$])\$(?=\d)/g, "\\$")
+        .replace(
+          /(^|[^(<[\w/])(https?:\/\/[^\s<>()[\]가-힣]+)(?=[가-힣])/g,
+          (_m, before: string, url: string) => `${before}<${url}>`,
+        ),
+    )
+    .join("\n");
+}
+
 export function htmlToMarkdown(md: string): MarkdownConversion {
   const unknown = new Set<string>();
 
@@ -424,14 +455,31 @@ export function htmlToMarkdown(md: string): MarkdownConversion {
     })
 
     // 문단 안 줄바꿈. 마크다운에서 줄바꿈은 "공백 두 개 + 개행"이다
-    .replace(/<br\s*\/?>/gi, "  \n")
+    .replace(/<br\s*\/?>/gi, "  \n");
 
-    // 남은 태그 — 껍데기만 벗기고 글자는 남긴다. 무엇이었는지는 보고한다.
-    .replace(/<\/?([a-zA-Z0-9_-]+)[^>]*>/g, (_m, name: string) => {
-      const tag = name.toLowerCase();
-      if (!HANDLED.has(tag)) unknown.add(tag);
+  /*
+    남은 태그 — 껍데기만 벗기고 글자는 남긴다. 무엇이었는지는 보고한다.
+
+    다만 본문에 쓴 꺾쇠 글자(`Array<string>`)는 태그가 아니다 (ADR-0064).
+    노션은 꺾쇠를 이스케이프하지 않아서, 그대로 두면 태그로 지워졌다.
+    노션 블록 태그는 닫는 짝이 있거나, 스스로 닫거나, 속성이 붙어서 온다.
+    셋 다 아니면 글자로 보고 꺾쇠를 이스케이프한다.
+  */
+  const closed = new Set(
+    [...work.matchAll(/<\/([a-zA-Z0-9_-]+)\s*>/g)].map((m) => m[1].toLowerCase()),
+  );
+  work = work.replace(/<\/?([a-zA-Z0-9_-]+)[^>]*>/g, (whole: string, name: string) => {
+    const tag = name.toLowerCase();
+    if (HANDLED.has(tag)) return "";
+    if (closed.has(tag) || /\/\s*>$/.test(whole) || whole.includes("=")) {
+      unknown.add(tag);
       return "";
-    });
+    }
+    return `\\${whole}`;
+  });
+
+  // 노션이 이스케이프하지 않아 마크다운 문법으로 읽히는 본문 글자를 막는다 (ADR-0064).
+  work = guardProse(work);
 
   // 블록 사이에 빈 줄을 넣는다 (ADR-0063). 코드가 자리표 한 줄로 빠져 있을 때 해야 코드 안을 건드리지 않는다.
   work = separateBlocks(work);
