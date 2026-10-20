@@ -237,6 +237,30 @@ const indentedCode = real.split(NL).some((l, i, a) => /^(\t| {4})토글 안 문�
 if (indentedCode) failed += 1;
 console.log(`${indentedCode ? "FAIL" : "OK  "} 토글 안 문단이 코드 블록이 되지 않는다`);
 
+console.log("\n── 노션이 이스케이프하지 않는 본문 글자 (ADR-0064) ──");
+/*
+  노션은 물결표만 이스케이프한다. 나머지 글자는 그대로 와서 렌더러가 다른 뜻으로 읽는다.
+  기대값은 렌더러가 글자로 읽게 바뀐 모양이다.
+*/
+const ESC = String.fromCharCode(92);
+const PROSE = [
+  ["주소 뒤 한글 조사가 링크에 붙지 않는다", "자세한 건 https://example.com에서 본다.", "<https://example.com>에서"],
+  ["링크 안의 주소는 건드리지 않는다", "[문서](https://example.com)에서 본다.", "[문서](https://example.com)에서"],
+  ["본문의 꺾쇠 글자가 지워지지 않는다", "타입은 Array<string> 으로 받는다.", "Array" + ESC + "<string>"],
+  ["숫자 앞 달러는 수식이 되지 않는다", "요금은 $5에서 $10으로 올랐다.", ESC + "$5에서 " + ESC + "$10"],
+  ["노션 수식 모양은 그대로 둔다", "넓이는 $x^2$ 이다.", "$x^2$"],
+  ["1) 로 시작하는 줄은 목록이 아니다", "1) 첫째 이유는 비용이다.", "1" + ESC + ") 첫째"],
+  ["연도로 시작하는 줄은 목록이 아니다", "2026. 10. 20 에 바꿨다.", "2026" + ESC + ". 10. 20"],
+  ["진짜 번호 목록은 그대로다", "1. 첫째 단계", "1. 첫째 단계"],
+];
+for (const [name, input, want] of PROSE) {
+  const got = htmlToMarkdown(input).markdown;
+  const ok = got.includes(want);
+  if (!ok) failed += 1;
+  console.log(`${ok ? "OK  " : "FAIL"} ${name}`);
+  if (!ok) console.log(`     받음: ${got}`);
+}
+
 console.log("\n── 유튜브 주소 읽기 ──");
 const YT = [
   ["주소창 모양", "https://www.youtube.com/watch?v=amy704I2PxQ", "amy704I2PxQ"],
