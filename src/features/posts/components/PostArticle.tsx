@@ -22,10 +22,16 @@ export function PostArticle({
   entry,
   prev,
   next,
+  preview = false,
 }: {
   entry: Entry;
   prev?: Entry | null;
   next?: Entry | null;
+  /**
+   * 발행 전 미리보기 (ADR-0061). 본문까지는 그대로 그리고, 댓글은 그리지 않는다.
+   * 댓글은 주소로 묶이므로 미리보기 주소로 댓글 자리가 만들어지면 안 된다.
+   */
+  preview?: boolean;
 }) {
   const body = entry.body ?? "";
   const headings = extractHeadings(body);
@@ -92,7 +98,11 @@ export function PostArticle({
         )}
 
         <div className="mt-20 border-t border-hairline pt-12">
-          <Comments />
+          {preview ? (
+            <p className="text-[14px] text-muted">댓글은 발행한 뒤에 이 자리에 붙어요.</p>
+          ) : (
+            <Comments />
+          )}
         </div>
       </article>
     </>
